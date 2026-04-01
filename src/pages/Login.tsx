@@ -1,0 +1,139 @@
+import { useState , useEffect } from "react";
+import {
+  CContainer,
+  CRow,
+  CCol,
+  CCard,
+  CCardBody,
+  CForm,
+  CInputGroup,
+  CFormInput,
+  CButton,
+  CAlert,
+} from "@coreui/react";
+import { useNavigate } from "react-router-dom";
+import axiosInstance from "../api/axiosInstance";
+import axios from "axios";
+
+
+
+export default function Login() {
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<string>("");
+
+  console.log("API URL:", import.meta.env.VITE_API_URL);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+
+    if (token) {
+      navigate("/");
+    }
+  }, [navigate]);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+
+      const res = await axiosInstance.post("/auth/login",
+        {
+          username,
+          password,
+        }
+      );
+
+      localStorage.setItem("accessToken", res.data.accessToken);
+      localStorage.setItem("refreshToken", res.data.refreshToken);
+      localStorage.setItem("username", username);
+
+      navigate("/");
+    }
+    //  catch {
+    //   setError("Usuario o contraseña incorrectos");
+    // }
+    catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || "Error del servidor");
+      } else {
+        setError("Error inesperado");
+      }
+    }
+    
+  };
+  
+ 
+  return (
+    <div className="min-vh-100 d-flex align-items-center justify-content-center">
+      <CContainer>
+        <CRow className="justify-content-center">
+          <CCol md={4}>
+            <CCard>
+              <CCardBody>
+                <CForm onSubmit={handleLogin}>
+                  
+                    <div className="mb-4 d-flex align-items-center">
+                      <img
+                        src="/logo.png"
+                        alt="SIPAC"
+                        style={{ width: 70, marginRight: 10 }}
+                      />
+
+                      <div>
+                        <h3 className="mb-0">SIPAC</h3>
+                        <small className="text-muted">
+                          Sistema Integral de Pacientes
+                        </small>
+                      </div>
+                    </div>
+
+                  {error && (
+                      <CAlert color="primary" className="sipac-alert">
+                        {error}
+                      </CAlert>
+                    )}
+
+                  <CInputGroup className="mb-3">
+                    {/* <CInputGroupText>👤</CInputGroupText> */}
+                    <CFormInput
+                      placeholder="Usuario"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                    />
+                  </CInputGroup>
+
+                  <CInputGroup className="mb-3">
+                    {/* <CInputGroupText>🔒</CInputGroupText> */}
+                    <CFormInput
+                      type="password"
+                      placeholder="Contraseña"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                  </CInputGroup>
+
+                  {/* <CButton type="submit" color="primary" className="w-100">
+                    Ingresar
+                  </CButton> */}
+
+                  <CButton
+                    type="submit"
+                    color="primary"
+                    className="w-100"
+                    disabled={!username || !password}>
+                    Ingresar
+                  </CButton>
+
+                </CForm>
+              </CCardBody>
+            </CCard>
+          </CCol>
+        </CRow>
+      </CContainer>
+    </div>
+  );
+}
