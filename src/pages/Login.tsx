@@ -10,10 +10,12 @@ import {
   CFormInput,
   CButton,
   CAlert,
+  CInputGroupText,
 } from "@coreui/react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
 import axios from "axios";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 
 
@@ -21,22 +23,28 @@ export default function Login() {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
 
   console.log("API URL:", import.meta.env.VITE_API_URL);
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const token = localStorage.getItem("accessToken");
+ useEffect(() => {
+  const token = localStorage.getItem("accessToken");
 
-    if (token) {
-      navigate("/");
-    }
-  }, [navigate]);
+  // solo redirigir si realmente estás logueado
+  if (token && token !== "undefined") {
+    navigate("/", { replace: true });
+  }
+});
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    // setError("");
+
+      //  limpiar tokens previos
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
 
     try {
 
@@ -56,13 +64,25 @@ export default function Login() {
     //  catch {
     //   setError("Usuario o contraseña incorrectos");
     // }
-    catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message || "Error del servidor");
-      } else {
-        setError("Error inesperado");
-      }
+catch (err: unknown) {
+  console.log("ERROR LOGIN:", err);
+
+  if (axios.isAxiosError(err)) {
+    const status = err.response?.status;
+
+   if (status === 401) {
+      setError("Usuario o contraseña incorrectos");
+    } else {
+      setError(
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        "Error del servidor"
+      );
     }
+  } else {
+    setError("Error inesperado");
+  }
+}
     
   };
   
@@ -74,7 +94,7 @@ export default function Login() {
           <CCol md={4}>
             <CCard>
               <CCardBody>
-                <CForm onSubmit={handleLogin}>
+                <CForm onSubmit={handleLogin} autoComplete="off">
                   
                     <div className="mb-4 d-flex align-items-center">
                       <img
@@ -102,6 +122,7 @@ export default function Login() {
                     <CFormInput
                       placeholder="Usuario"
                       value={username}
+                      autoComplete="off"
                       onChange={(e) => setUsername(e.target.value)}
                     />
                   </CInputGroup>
@@ -109,11 +130,18 @@ export default function Login() {
                   <CInputGroup className="mb-3">
                     {/* <CInputGroupText>🔒</CInputGroupText> */}
                     <CFormInput
-                      type="password"
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="new-password" 
                       placeholder="Contraseña"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                     />
+                    <CInputGroupText 
+                    style={{ cursor: "pointer" }}
+                    onClick={() => setShowPassword(!showPassword)}
+                    >
+                        {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </CInputGroupText>
                   </CInputGroup>
 
                   {/* <CButton type="submit" color="primary" className="w-100">

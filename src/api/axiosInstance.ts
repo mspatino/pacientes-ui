@@ -26,6 +26,11 @@ axiosInstance.interceptors.response.use(
     
     const originalRequest = error.config as CustomAxiosRequestConfig;
 
+      // NO interceptar login
+    if (originalRequest.url?.includes("/auth/login")) {
+      return Promise.reject(error);
+    }
+
     // Token expirado
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
@@ -44,10 +49,12 @@ axiosInstance.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${res.data.accessToken}`;
 
         return axiosInstance(originalRequest);
-      } catch {
-        // refresh falló → logout
-        localStorage.clear();
-        window.location.href = "/login";
+      }  catch {
+        // SOLO logout si NO estás en login
+        if (!window.location.pathname.includes("/login")) {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
       }
     }
 
