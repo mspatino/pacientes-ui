@@ -5,6 +5,7 @@ import PrivateRoute from "./PrivateRoute";
 import DashboardLayout from "../layout/DashboardLayout";
 import PacientesPage from "../pages/PacientesPage";
 import PacientePage from "../pages/Paciente";
+import EditarPacientePage from "../pages/EditarPaciente";
 
 export default function AppRoutes() {
   return (
@@ -23,6 +24,7 @@ export default function AppRoutes() {
                     {/* default */}
             <Route path="/" element={<PacientesPage />} />
             <Route path="/pacientes/:id" element={<PacientePage />} />
+            <Route path="/pacientes/:id/editar" element={<EditarPacientePage />} />
 
             {/* futuras rutas */}
             {/* <Route path="/patients" element={<PatientsPage />} /> */}

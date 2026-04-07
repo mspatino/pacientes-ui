@@ -1,7 +1,4 @@
-import CIcon from "@coreui/icons-react";
-import { cilList } from "@coreui/icons";
 import {
-  CButton,
   CCard,
   CCardBody,
   CCollapse,
@@ -19,7 +16,6 @@ export type SexoFilter = "" | "Masculino" | "Femenino" | "Otro";
 
 interface PacientesFiltersCollapseProps {
   showFilters: boolean;
-  onToggleFilters: () => void;
   searchTerm: string;
   onSearchTermChange: (value: string) => void;
   diagnosticoTerm: string;
@@ -30,7 +26,6 @@ interface PacientesFiltersCollapseProps {
 
 export default function PacientesFiltersCollapse({
   showFilters,
-  onToggleFilters,
   searchTerm,
   onSearchTermChange,
   diagnosticoTerm,
@@ -39,69 +34,76 @@ export default function PacientesFiltersCollapse({
   onSexoFilterChange,
 }: PacientesFiltersCollapseProps) {
   return (
-    <>
-      <CButton
-        color="primary"
-        variant="outline"
-        className="mb-3 d-inline-flex align-items-center gap-2"
-        onClick={onToggleFilters}
-      >
-        <CIcon icon={cilList} size="sm" />
-        Filtro
-      </CButton>
-
-      <CCollapse visible={showFilters}>
-        <CCard className="mb-3">
-          <CCardBody>
-            <CRow className="g-3">
-              <CCol xs={12} md={4}>
+    <CCollapse visible={showFilters}>
+      <CCard className="mb-2">
+        <CCardBody className="py-2 px-3">
+          <CRow className="g-2 align-items-end">
+            <CCol xs={12} md="auto">
+              <div className="d-flex flex-column">
+                <CFormLabel htmlFor="search-paciente" className="small mb-1">
+                  Apellido/ Nombres, DNI
+                </CFormLabel>
                 <CFormInput
-                  label="Apellido/ Nombres, DNI"
+                  id="search-paciente"
+                  size="sm"
+                  className="py-1"
+                  style={{ width: "100%", minWidth: "220px", maxWidth: "280px" }}
                   placeholder="Ej: 30123456 o Perez Juan"
                   value={searchTerm}
                   onChange={(e) => onSearchTermChange(e.target.value)}
                 />
-              </CCol>
-              <CCol xs={12} md={4}>
+              </div>
+            </CCol>
+            <CCol xs={12} md="auto">
+              <div className="d-flex flex-column">
+                <CFormLabel htmlFor="search-diagnostico" className="small mb-1">
+                  Buscar por diagnóstico
+                </CFormLabel>
                 <CFormInput
-                  label="Buscar por diagnóstico"
+                  id="search-diagnostico"
+                  size="sm"
+                  className="py-1"
+                  style={{ width: "100%", minWidth: "200px", maxWidth: "260px" }}
                   placeholder="Ej: diabetes"
                   value={diagnosticoTerm}
                   onChange={(e) => onDiagnosticoTermChange(e.target.value)}
                 />
-              </CCol>
-              <CCol xs={12} md={4}>
-                <div className="d-flex flex-column">
-                  <CFormLabel htmlFor="sexo-dropdown">Sexo</CFormLabel>
-                  <CDropdown>
-                    <CDropdownToggle
-                      id="sexo-dropdown"
-                      color="light"
-                      className="w-100 text-start d-flex align-items-center"
-                    >
-                      {sexoFilter || "Seleccione..."}
-                    </CDropdownToggle>
-                    <CDropdownMenu className="w-100">
-                      <CDropdownItem onClick={() => onSexoFilterChange("")}>
-                        Seleccione...
-                      </CDropdownItem>
-                      <CDropdownItem onClick={() => onSexoFilterChange("Masculino")}>
-                        Masculino
-                      </CDropdownItem>
-                      <CDropdownItem onClick={() => onSexoFilterChange("Femenino")}>
-                        Femenino
-                      </CDropdownItem>
-                      <CDropdownItem onClick={() => onSexoFilterChange("Otro")}>
-                        Otro
-                      </CDropdownItem>
-                    </CDropdownMenu>
-                  </CDropdown>
-                </div>
-              </CCol>
-            </CRow>
-          </CCardBody>
-        </CCard>
-      </CCollapse>
-    </>
+              </div>
+            </CCol>
+            <CCol xs={12} md="auto">
+              <div className="d-flex flex-column">
+                <CFormLabel htmlFor="sexo-dropdown" className="small mb-1">
+                  Sexo
+                </CFormLabel>
+                <CDropdown className="d-inline-block">
+                  <CDropdownToggle
+                    id="sexo-dropdown"
+                    color="light"
+                    size="sm"
+                    className="text-start d-flex align-items-center py-1"
+                  >
+                    {sexoFilter || "Seleccione..."}
+                  </CDropdownToggle>
+                  <CDropdownMenu style={{ minWidth: "max-content" }}>
+                    <CDropdownItem onClick={() => onSexoFilterChange("")}>
+                      Seleccione...
+                    </CDropdownItem>
+                    <CDropdownItem onClick={() => onSexoFilterChange("Masculino")}>
+                      Masculino
+                    </CDropdownItem>
+                    <CDropdownItem onClick={() => onSexoFilterChange("Femenino")}>
+                      Femenino
+                    </CDropdownItem>
+                    <CDropdownItem onClick={() => onSexoFilterChange("Otro")}>
+                      Otro
+                    </CDropdownItem>
+                  </CDropdownMenu>
+                </CDropdown>
+              </div>
+            </CCol>
+          </CRow>
+        </CCardBody>
+      </CCard>
+    </CCollapse>
   );
 }

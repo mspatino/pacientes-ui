@@ -1,3 +1,21 @@
+:root {
+  --sipac-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --cui-body-font-family: var(--sipac-font-family);
+}
+
+html,
+body,
+#root {
+  font-family: var(--sipac-font-family);
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
 .counter {
   font-size: 16px;
   padding: 5px 10px;

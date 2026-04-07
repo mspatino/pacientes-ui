@@ -22,3 +22,15 @@ export const getPacienteById = async (id: number): Promise<PacienteResponseDTO> 
   const res = await api.get(`/pacientes/${id}`);
   return res.data;
 };
+
+export const updatePaciente = async (
+  id: number,
+  payload: Record<string, unknown>,
+): Promise<PacienteResponseDTO> => {
+  const res = await api.put(`/pacientes/${id}`, payload);
+  return res.data;
+};
+
+export const deletePaciente = async (id: number): Promise<void> => {
+  await api.delete(`/pacientes/${id}`);
+};

@@ -1,8 +1,17 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  BsChevronDoubleLeft,
+  BsChevronDoubleRight,
+  BsChevronLeft,
+  BsChevronRight,
+  BsFillEyeFill,
+  BsListUl,
+  BsSliders2,
+} from "react-icons/bs";
+import { FaFilePdf } from "react-icons/fa";
 import { getPacientes } from "../api/pacientes";
 import type { Paciente } from "../api/pacientes";
-import { CButton } from "@coreui/react";
 import PacientesFiltersCollapse, {
   type SexoFilter,
 } from "../components/PacientesFiltersCollapse";
@@ -10,6 +19,7 @@ import PacientesFiltersCollapse, {
 export default function PacientesPage() {
   type SortField = "apellido" | "nombre" | "fechaAlta";
   type SortOrder = "asc" | "desc";
+  const PAGE_SIZE = 10;
 
   const navigate = useNavigate();
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
@@ -20,6 +30,9 @@ export default function PacientesPage() {
   const [sexoFilter, setSexoFilter] = useState<SexoFilter>("");
   const [sortField, setSortField] = useState<SortField>("apellido");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const sipacBlue = "#2F6FB3";
+  const sipacSoftBlue = "#E8F1FB";
 
   useEffect(() => {
     loadData();
@@ -92,9 +105,21 @@ export default function PacientesPage() {
     setSortOrder("asc");
   };
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, diagnosticoTerm, sexoFilter, sortField, sortOrder]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedPacientes.length / PAGE_SIZE));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const pageStartIndex = (safeCurrentPage - 1) * PAGE_SIZE;
+  const paginatedPacientes = sortedPacientes.slice(
+    pageStartIndex,
+    pageStartIndex + PAGE_SIZE,
+  );
+
   const sortIndicator = (field: SortField): string => {
-    if (sortField !== field) return "↕";
-    return sortOrder === "asc" ? "↑" : "↓";
+    if (sortField !== field) return "△";
+    return sortOrder === "asc" ? "▲" : "▼";
   };
 
   const formatFechaAlta = (paciente: Paciente): string => {
@@ -145,36 +170,63 @@ export default function PacientesPage() {
 
   return (
     <div className="p-3">
-      <h1 className="h4 fw-bold mb-3">Pacientes</h1>
+      <div className="border rounded bg-white p-3 mb-4">
+        <div
+          className="d-flex align-items-center gap-2 mb-2"
+          role="button"
+          tabIndex={0}
+          onClick={() => setShowFilters((prev) => !prev)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setShowFilters((prev) => !prev);
+            }
+          }}
+          style={{ cursor: "pointer" }}
+        >
+          <BsSliders2 style={{ color: sipacBlue }} />
+          <h1 className="h5 fw-bold mb-0">
+            Filtros{" "}
+            <span style={{ fontSize: "0.7rem", lineHeight: 1 }}>
+              {showFilters ? "▲" : "▼"}
+            </span>
+          </h1>
+        </div>
+        <PacientesFiltersCollapse
+          showFilters={showFilters}
+          searchTerm={searchTerm}
+          onSearchTermChange={setSearchTerm}
+          diagnosticoTerm={diagnosticoTerm}
+          onDiagnosticoTermChange={setDiagnosticoTerm}
+          sexoFilter={sexoFilter}
+          onSexoFilterChange={setSexoFilter}
+        />
+      </div>
 
-      <PacientesFiltersCollapse
-        showFilters={showFilters}
-        onToggleFilters={() => setShowFilters((prev) => !prev)}
-        searchTerm={searchTerm}
-        onSearchTermChange={setSearchTerm}
-        diagnosticoTerm={diagnosticoTerm}
-        onDiagnosticoTermChange={setDiagnosticoTerm}
-        sexoFilter={sexoFilter}
-        onSexoFilterChange={setSexoFilter}
-      />
+      <div className="border rounded bg-white p-3">
+        <div className="d-flex align-items-center gap-2 mb-3">
+          <BsListUl style={{ color: sipacBlue }} />
+          <h1 className="h5 fw-bold mb-0">Pacientes</h1>
+        </div>
 
-      <div className="table-responsive">
-        <table className="table table-bordered table-hover align-middle mb-0">
-          <thead className="table-light">
-            <tr>
-              <th>
+        <div className="table-responsive">
+          <table className="table table-bordered table-hover align-middle mb-0">
+            <thead className="table-light">
+              <tr>
+              <th style={{ width: "25%" }}>
                 <div className="d-flex align-items-center justify-content-between gap-2">
                   <span>Apellido</span>
                   <button
                     type="button"
-                    className="btn btn-sm btn-link p-0 text-decoration-none"
+                    className="btn btn-sm btn-link p-0 text-decoration-none d-inline-flex align-items-center gap-1"
                     onClick={() => toggleSort("apellido")}
+                    title="Ordenar por apellido"
                   >
                     {sortIndicator("apellido")}
                   </button>
                 </div>
               </th>
-              <th>
+              <th style={{ width: "25%" }}>
                 <div className="d-flex align-items-center justify-content-between gap-2">
                   <span>Nombres</span>
                   <button
@@ -186,8 +238,8 @@ export default function PacientesPage() {
                   </button>
                 </div>
               </th>
-              <th>Documento</th>
-              <th>
+              <th style={{ width: "20%" }}>Documento</th>
+              <th style={{ width: "18%", whiteSpace: "nowrap" }}>
                 <div className="d-flex align-items-center justify-content-between gap-2">
                   <span>Fecha de alta</span>
                   <button
@@ -199,52 +251,125 @@ export default function PacientesPage() {
                   </button>
                 </div>
               </th>
-              <th>Detalle</th>
-            </tr>
-          </thead>
+              <th style={{ width: "12%", whiteSpace: "nowrap" }}>Detalle</th>
+              </tr>
+            </thead>
 
-          <tbody>
-            {sortedPacientes.length > 0 ? (
-              sortedPacientes.map((p) => (
-                <tr key={p.id}>
-                  <td>{p.apellido}</td>
-                  <td>{p.nombre}</td>
-                  <td>{p.dni}</td>
-                  <td>{formatFechaAlta(p)}</td>
-                  <td>
-                    <div className="d-flex gap-2">
-                      <CButton
-                        color="info"
-                        size="sm"
-                        variant="outline"
-                        onClick={() =>
-                          navigate(`/pacientes/${p.id}`, { state: { paciente: p } })
-                        }
-                      >
-                        Ver
-                      </CButton>
-                      <CButton
-                        color="secondary"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handlePrintPaciente(p)}
-                      >
-                        PDF
-                      </CButton>
-                    </div>
+            <tbody>
+              {paginatedPacientes.length > 0 ? (
+                paginatedPacientes.map((p) => (
+                  <tr key={p.id}>
+                    <td>{p.apellido}</td>
+                    <td>{p.nombre}</td>
+                    <td>{p.dni}</td>
+                    <td className="text-nowrap">{formatFechaAlta(p)}</td>
+                    <td>
+                      <div className="d-flex gap-2 justify-content-center">
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          title="Ver detalle del paciente"
+                          aria-label="Ver detalle del paciente"
+                          className="d-inline-flex align-items-center"
+                          style={{ cursor: "pointer", fontSize: "1.1rem", color: "#2F6FB3" }}
+                          onClick={() =>
+                            navigate(`/pacientes/${p.id}`, { state: { paciente: p } })
+                          }
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              navigate(`/pacientes/${p.id}`, { state: { paciente: p } });
+                            }
+                          }}
+                        >
+                          <BsFillEyeFill />
+                        </span>
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          title="Imprimir planilla en PDF"
+                          aria-label="Imprimir planilla en PDF"
+                          className="d-inline-flex align-items-center"
+                          style={{ cursor: "pointer", fontSize: "1.1rem", color: "#2F6FB3" }}
+                          onClick={() => handlePrintPaciente(p)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              handlePrintPaciente(p);
+                            }
+                          }}
+                        >
+                          <FaFilePdf />
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="text-center text-muted py-3">
+                    No se encontraron pacientes con esos filtros.
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={5} className="text-center text-muted py-3">
-                  No se encontraron pacientes con esos filtros.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
+
+      {sortedPacientes.length > 0 ? (
+        <div className="d-flex justify-content-center mt-3">
+          <div className="d-flex align-items-center gap-2">
+            <button
+              type="button"
+              className="btn btn-sm border-0"
+              style={{ color: sipacBlue, backgroundColor: sipacSoftBlue }}
+              disabled={safeCurrentPage === 1}
+              onClick={() => setCurrentPage(1)}
+              aria-label="Primera página"
+              title="Primera página"
+            >
+              <BsChevronDoubleLeft />
+            </button>
+            <button
+              type="button"
+              className="btn btn-sm border-0"
+              style={{ color: sipacBlue, backgroundColor: sipacSoftBlue }}
+              disabled={safeCurrentPage === 1}
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              aria-label="Página anterior"
+              title="Página anterior"
+            >
+              <BsChevronLeft />
+            </button>
+            <span className="small text-muted px-2">
+              {safeCurrentPage} de {totalPages}
+            </span>
+            <button
+              type="button"
+              className="btn btn-sm border-0"
+              style={{ color: sipacBlue, backgroundColor: sipacSoftBlue }}
+              disabled={safeCurrentPage === totalPages}
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              aria-label="Página siguiente"
+              title="Página siguiente"
+            >
+              <BsChevronRight />
+            </button>
+            <button
+              type="button"
+              className="btn btn-sm border-0"
+              style={{ color: sipacBlue, backgroundColor: sipacSoftBlue }}
+              disabled={safeCurrentPage === totalPages}
+              onClick={() => setCurrentPage(totalPages)}
+              aria-label="Última página"
+              title="Última página"
+            >
+              <BsChevronDoubleRight />
+            </button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -1,15 +1,27 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import {
+  BsArrowLeftCircleFill,
+  BsPencilSquare,
+  BsPersonCircle,
+  BsTrashFill,
+} from "react-icons/bs";
 import CIcon from "@coreui/icons-react";
 import { cilList } from "@coreui/icons";
 import {
+  CAlert,
   CButton,
   CCard,
   CCardBody,
   CCollapse,
+  CModal,
+  CModalBody,
+  CModalFooter,
+  CModalHeader,
+  CModalTitle,
   CSpinner,
 } from "@coreui/react";
-import { getPacienteById } from "../api/pacientes";
+import { deletePaciente, getPacienteById } from "../api/pacientes";
 import type { Paciente, PacienteResponseDTO } from "../api/pacientes";
 
 interface LocationState {
@@ -48,6 +60,11 @@ export default function PacientePage() {
   const [loading, setLoading] = useState(true);
   const [showGeneral, setShowGeneral] = useState(true);
   const [showHistoria, setShowHistoria] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [actionError, setActionError] = useState("");
+  const sipacBlue = "#2F6FB3";
+  const sipacDarkBlue = "#1E4F85";
 
   const pacienteId = useMemo(() => {
     if (paciente?.id) return paciente.id;
@@ -88,6 +105,9 @@ export default function PacientePage() {
   const fechaAlta = formatDate(
     firstString(pacienteData ?? {}, ["fechaAlta", "fecha_alta"]),
   );
+  const apellidoPaciente = firstString(pacienteData ?? {}, ["apellido"]) || "";
+  const nombrePaciente = firstString(pacienteData ?? {}, ["nombre", "nombres"]) || "";
+  const pacienteNombreCompleto = `${apellidoPaciente} ${nombrePaciente}`.trim() || "Paciente";
 
   const historiaClinica =
     firstString(pacienteData ?? {}, [
@@ -101,14 +121,6 @@ export default function PacientePage() {
 
 
   const generalFields: Array<{ label: string; value: string }> = [
-    {
-      label: "Apellido",
-      value: firstString(pacienteData ?? {}, ["apellido"]) || "-",
-    },
-    {
-      label: "Nombre",
-      value: firstString(pacienteData ?? {}, ["nombre", "nombres"]) || "-",
-    },
     {
       label: "DNI",
       value: firstString(pacienteData ?? {}, ["dni", "documento"]) || "-",
@@ -141,13 +153,112 @@ export default function PacientePage() {
     },
   ];
 
+  const handleDeletePaciente = async () => {
+    if (!pacienteId) return;
+
+    setActionError("");
+    setDeleting(true);
+    try {
+      await deletePaciente(pacienteId);
+      setShowDeleteModal(false);
+      navigate("/");
+    } catch (error) {
+      console.error("No se pudo eliminar el paciente", error);
+      setActionError("No se pudo eliminar el paciente. Intente nuevamente.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="p-3">
       <div className="d-flex align-items-center justify-content-between mb-3">
-        <h1 className="h4 fw-bold mb-0">Paciente</h1>
-        <button className="btn btn-outline-secondary" onClick={() => navigate(-1)}>
-          Volver
-        </button>
+        <h1 className="h4 fw-bold mb-0 d-flex align-items-center gap-2">
+          <BsPersonCircle color={sipacBlue} />
+          {pacienteNombreCompleto}
+        </h1>
+        <div className="d-flex align-items-center gap-3">
+          <span
+            role="button"
+            tabIndex={0}
+            title="Editar paciente"
+            aria-label="Editar paciente"
+            className="d-inline-flex align-items-center justify-content-center rounded-circle"
+            style={{
+              cursor: "pointer",
+              fontSize: "1.1rem",
+              color: sipacBlue,
+              backgroundColor: "#E8F1FB",
+              width: "34px",
+              height: "34px",
+            }}
+            onClick={() => {
+              if (pacienteId) navigate(`/pacientes/${pacienteId}/editar`);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                if (pacienteId) navigate(`/pacientes/${pacienteId}/editar`);
+              }
+            }}
+          >
+            <BsPencilSquare />
+          </span>
+
+          <span
+            role="button"
+            tabIndex={0}
+            title="Eliminar paciente"
+            aria-label="Eliminar paciente"
+            className="d-inline-flex align-items-center justify-content-center rounded-circle"
+            style={{
+              cursor: "pointer",
+              fontSize: "1.1rem",
+              color: "#C62828",
+              backgroundColor: "#FDECEC",
+              width: "34px",
+              height: "34px",
+            }}
+            onClick={() => {
+              setActionError("");
+              setShowDeleteModal(true);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setActionError("");
+                setShowDeleteModal(true);
+              }
+            }}
+          >
+            <BsTrashFill />
+          </span>
+
+          <span
+            role="button"
+            tabIndex={0}
+            title="Volver"
+            aria-label="Volver"
+            className="d-inline-flex align-items-center justify-content-center rounded-circle"
+            style={{
+              cursor: "pointer",
+              fontSize: "1.1rem",
+              color: sipacDarkBlue,
+              backgroundColor: "#DCE9F8",
+              width: "34px",
+              height: "34px",
+            }}
+            onClick={() => navigate("/")}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                navigate("/");
+              }
+            }}
+          >
+            <BsArrowLeftCircleFill />
+          </span>
+        </div>
       </div>
 
       {loading ? (
@@ -170,6 +281,8 @@ export default function PacientePage() {
             <CCollapse visible={showGeneral}>
               <CCard>
                 <CCardBody>
+               
+
                   <div className="row g-2">
                     {generalFields.map((field) => (
                       <div key={field.label} className="col-12 col-md-6">
@@ -180,6 +293,7 @@ export default function PacientePage() {
                       </div>
                     ))}
                   </div>
+
                 </CCardBody>
               </CCard>
             </CCollapse>
@@ -212,6 +326,31 @@ export default function PacientePage() {
           Volvé al listado y abrí el detalle desde allí.
         </div>
       )}
+
+      <CModal visible={showDeleteModal} onClose={() => setShowDeleteModal(false)}>
+        <CModalHeader>
+          <CModalTitle>Eliminar paciente</CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+          {actionError ? (
+            <CAlert color="danger" className="mb-3">
+              {actionError}
+            </CAlert>
+          ) : null}
+          <p className="mb-0">
+            Ud. esta seguro que desea eliminar al paciente{" "}
+            <strong>{pacienteNombreCompleto}</strong>?
+          </p>
+        </CModalBody>
+        <CModalFooter>
+          <CButton color="secondary" variant="outline" onClick={() => setShowDeleteModal(false)}>
+            Cancelar
+          </CButton>
+          <CButton color="danger" onClick={handleDeletePaciente} disabled={deleting}>
+            {deleting ? "Eliminando..." : "Aceptar"}
+          </CButton>
+        </CModalFooter>
+      </CModal>
     </div>
   );
 }
