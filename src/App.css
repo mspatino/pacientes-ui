@@ -226,3 +226,241 @@ textarea {
 .dropdown-item:hover {
   background-color: #f8f9fa;
 }
+
+.paciente-accordion .accordion-button {
+  width: auto;
+  display: inline-flex;
+  border-radius: 0;
+  padding-inline: 0.75rem;
+  border: none;
+  background-color: transparent;
+  box-shadow: none;
+  color: #1e4f85;
+  font-weight: 600;
+}
+
+.paciente-accordion .accordion-button:not(.collapsed) {
+  background-color: transparent;
+  box-shadow: none;
+  color: #1e4f85;
+}
+
+.paciente-accordion .accordion-button::after {
+  display: none;
+}
+
+.paciente-accordion .paciente-accordion-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background-color: transparent;
+  transition: filter 0.2s ease, transform 0.2s ease;
+  filter: none;
+}
+
+.paciente-accordion .accordion-button:not(.collapsed) .paciente-accordion-icon {
+  background-color: rgba(47, 111, 179, 0.14);
+  filter: drop-shadow(0 1px 2px rgba(47, 111, 179, 0.4));
+  transform: translateY(-1px);
+}
+
+.sipac-section-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  color: #1e4f85;
+  background-color: rgba(47, 111, 179, 0.14);
+  filter: drop-shadow(0 1px 2px rgba(47, 111, 179, 0.35));
+}
+
+.sipac-section-title {
+  color: #1e4f85 !important;
+}
+
+.paciente-accordion .accordion-item,
+.paciente-accordion .accordion-header {
+  border: none;
+}
+
+.paciente-accordion .accordion-button:focus,
+.paciente-accordion .accordion-button:focus-visible,
+.paciente-accordion .accordion-button:active {
+  outline: none;
+  box-shadow: none;
+  border-color: transparent;
+}
+
+.paciente-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.4rem;
+  border-radius: 999px;
+  background: #f5f8fc;
+  border: 1px solid #d9e6f7;
+}
+
+.paciente-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.paciente-action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.paciente-action-btn:focus-visible {
+  outline: 2px solid #2f6fb3;
+  outline-offset: 2px;
+}
+
+.paciente-action-btn.is-edit {
+  color: #2f6fb3;
+  background: #e8f1fb;
+}
+
+.paciente-action-btn.is-delete {
+  color: #2f6fb3;
+  background: #e8f1fb;
+}
+
+.paciente-conviviente-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background-color: #eef2f7;
+  border: 1px solid #d7dee9;
+  color: #1f2937;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.conviviente-option-check .form-check-label {
+  color: #1e4f85;
+  font-weight: 600;
+  display: block;
+  width: 100%;
+  margin-left: 0.08rem;
+  font-size: 0.84rem;
+  line-height: 1.1;
+}
+
+.conviviente-option-check .form-check-input:focus {
+  box-shadow: 0 0 0 0.15rem rgba(30, 79, 133, 0.2);
+  border-color: #1e4f85;
+}
+
+.conviviente-option-check {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 0;
+  padding: 0.02rem 0.12rem;
+}
+
+.conviviente-option-check .form-check-input {
+  margin-top: 0;
+}
+
+.conviviente-selector .conviviente-selected-zone {
+  min-height: 1.4rem;
+}
+
+.conviviente-selector .conviviente-pick-zone {
+  border-top: 1px dashed #d9e3f2;
+  padding-top: 0.2rem;
+}
+
+.paciente-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border-radius: 0.5rem;
+}
+
+.paciente-table-head th {
+  background: linear-gradient(180deg, #e8f1fb 0%, #dce9f8 100%);
+  color: #1f2937 !important;
+  font-family: var(--sipac-font-family);
+  font-weight: 600;
+  border-color: #c7daef;
+  vertical-align: middle;
+}
+
+.paciente-table-head th span,
+.paciente-table-head th button {
+  color: #1f2937 !important;
+  font-family: var(--sipac-font-family);
+}
+
+.paciente-table tbody tr:nth-child(even) {
+  background-color: #f7faff;
+}
+
+.paciente-table tbody tr:hover {
+  background-color: #edf4ff;
+}
+
+.paciente-table td,
+.paciente-table th {
+  border-color: #dce6f5;
+}
+
+.hc-status-badge {
+  color: #1e4f85 !important;
+  --cui-badge-color: #1e4f85;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.hc-status-active {
+  background-color: #e8f5ee;
+  border-color: #b9dfc9;
+}
+
+.hc-status-inactive {
+  background-color: #fbecec;
+  border-color: #edc2c2;
+}
+
+.sipac-form-card {
+  width: 82%;
+  max-width: 1400px;
+}
+
+.sipac-phone-input {
+  max-width: 200px;
+}
+
+.sipac-form-card .form-control,
+.sipac-form-card .form-select,
+.sipac-form-card .form-label,
+.sipac-form-card .form-check-label {
+  font-size: 0.92rem;
+}
+
+@media (max-width: 768px) {
+  .sipac-form-card {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .sipac-phone-input {
+    max-width: 100%;
+  }
+}

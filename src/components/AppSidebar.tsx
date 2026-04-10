@@ -37,14 +37,14 @@ export default function AppSidebar() {
         </CNavItem>
 
         <CNavItem>
-          <CNavLink as={NavLink} to="/turnos">
-             {!collapsed && "Turnos"}
+          <CNavLink as={NavLink} to="/historia">
+             {!collapsed && "Historia Clinica"}
           </CNavLink>
         </CNavItem>
 
         <CNavItem>
-          <CNavLink as={NavLink} to="/usuarios">
-             {!collapsed && "Usuarios"}
+          <CNavLink as={NavLink} to="/diagnostico">
+             {!collapsed && "Diagnósticos"}
           </CNavLink>
         </CNavItem>
 
