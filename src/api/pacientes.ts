@@ -38,6 +38,31 @@ export interface HistoriaClinicaDTO {
   diagnosticos?: Array<Record<string, unknown>>;
 }
 
+export interface DiagnosticoDTO {
+  descripcion?: string;
+  evolucion?: string;
+  tratamiento?: string;
+  cie10?: Cie10DTO;
+  principal: boolean;
+  fechaFin?: string;
+}
+
+export interface Cie10DTO {
+  codigo: string;
+  descripcion: string;
+}
+
+
+export interface HistoriaClinicaPayload {
+  motivoConsulta: string;
+  activa?: boolean | null;
+  medicacion?: string;
+  consumo?: string;
+  tratamientosAnteriores?: string;
+  observaciones?: string;
+  diagnosticos: DiagnosticoDTO[];
+}
+
 export const getPacientes = async (): Promise<Paciente[]> => {
   const res = await api.get("/pacientes");
   return res.data;
@@ -52,7 +77,7 @@ export const getHistoriaClinicaByPacienteId = async (
   pacienteId: number,
 ): Promise<HistoriaClinicaDTO> => {
   const candidates = [
-    `/historias/${pacienteId}`,
+    //`/historias/${pacienteId}`,
     `/pacientes/${pacienteId}/historia-clinica`,
     `/historias-clinicas/paciente/${pacienteId}`,
     `/historia-clinica/paciente/${pacienteId}`,
@@ -72,6 +97,47 @@ export const getHistoriaClinicaByPacienteId = async (
 
   throw new Error("No se encontró endpoint de historia clínica para paciente");
 };
+
+const saveHistoriaClinicaWithMethod = async (
+  method: "post" | "put",
+  pacienteId: number,
+  payload: HistoriaClinicaPayload,
+): Promise<HistoriaClinicaDTO> => {
+  const candidates = [
+    `/pacientes/${pacienteId}/historia-clinica`,
+    `/historias-clinicas/paciente/${pacienteId}`,
+    `/historia-clinica/paciente/${pacienteId}`,
+  ];
+
+  for (const endpoint of candidates) {
+    try {
+      const res =
+        method === "post"
+          ? await api.post(endpoint, payload)
+          : await api.put(endpoint, payload);
+      return res.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  throw new Error("No se encontró endpoint para guardar historia clínica");
+};
+
+export const createHistoriaClinica = async (
+  pacienteId: number,
+  payload: HistoriaClinicaPayload,
+): Promise<HistoriaClinicaDTO> =>
+  saveHistoriaClinicaWithMethod("post", pacienteId, payload);
+
+export const updateHistoriaClinica = async (
+  pacienteId: number,
+  payload: HistoriaClinicaPayload,
+): Promise<HistoriaClinicaDTO> =>
+  saveHistoriaClinicaWithMethod("put", pacienteId, payload);
 
 export const updatePaciente = async (
   id: number,

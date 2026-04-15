@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
+  BsArrowLeft,
   BsClipboard2Pulse,
   BsJournalText,
   BsPencilSquare,
@@ -315,6 +316,22 @@ export default function PacientePage() {
           >
             <BsTrashFill />
           </span>
+          <span
+            role="button"
+            tabIndex={0}
+            title="Volver"
+            aria-label="Volver"
+            className="paciente-action-btn"
+            onClick={() => navigate(-1)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                navigate(-1);
+              }
+            }}
+          >
+            <BsArrowLeft />
+          </span>          
 
         </div>
       </div>
@@ -400,73 +417,52 @@ export default function PacientePage() {
                 </div>
               </CAccordionBody>
             </CAccordionItem>
-            <CAccordionItem itemKey={2}>
-              <CAccordionHeader>
-                <span className="d-inline-flex align-items-center gap-2">
-                  <span className="paciente-accordion-icon">
-                    <BsClipboard2Pulse />
-                  </span>
-                  Historia clínica
-                </span>
-              </CAccordionHeader>
-              <CAccordionBody>
-                {hasHistoriaClinica ? (
-                  <>
-                    <div className="row g-2">
-                      <div className="col-12">
-                        <div className="border rounded p-2 h-100 bg-light-subtle">
-                          <div className="small text-muted">Motivo de consulta</div>
-                          <div className="fw-semibold">{motivoConsulta}</div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="d-flex justify-content-end mt-3">
-                      <CButton
-                        color="primary"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          if (pacienteId) navigate(`/pacientes/${pacienteId}/historia-clinica`);
-                        }}
-                        disabled={!pacienteId}
-                      >
-                        Ver historia clínica
-                      </CButton>
-                    </div>
-                  </>
-                ) : (
-                  <div className="row mt-3">
-                    <div className="col-12 col-md-6">
-                      <div className="d-flex flex-column gap-2 border rounded p-3 bg-light-subtle">
-                        <span className="small text-muted">
-                          Este paciente todavía no tiene historia clínica.
-                        </span>
-                        <CButton
-                          color="primary"
-                          size="sm"
-                          className="d-inline-flex align-items-center gap-2 align-self-start"
-                          title="Agregar historia clínica"
-                          aria-label="Agregar historia clínica"
-                          onClick={() => {
-                            if (pacienteId) {
-                              navigate(`/pacientes/${pacienteId}/historia-clinica`, {
-                                state: { mode: "create" },
-                              });
-                            }
-                          }}
-                          disabled={!pacienteId}
-                        >
-                          <BsJournalText />
-                          <BsPlusLg />
-                          Alta
-                        </CButton>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </CAccordionBody>
-            </CAccordionItem>
           </CAccordion>
+
+          <div className="border rounded p-3 bg-light-subtle">
+            <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+              <div className="d-flex flex-column gap-1">
+                <div className="d-inline-flex align-items-center gap-2 fw-semibold">
+                  <BsClipboard2Pulse />
+                  Historia clínica
+                </div>
+                <div className="small text-muted">
+                  {hasHistoriaClinica
+                    ? "La historia clínica ya está disponible para este paciente."
+                    : "Este paciente todavía no tiene historia clínica cargada."}
+                </div>
+                {hasHistoriaClinica && motivoConsulta !== "-" ? (
+                  <div className="small text-body">
+                    Motivo de consulta: <span className="fw-semibold">{motivoConsulta}</span>
+                  </div>
+                ) : null}
+              </div>
+
+              <CButton
+                color="primary"
+                size="sm"
+                className="d-inline-flex align-items-center gap-2"
+                title={hasHistoriaClinica ? "Ver historia clínica" : "Crear historia clínica"}
+                aria-label={hasHistoriaClinica ? "Ver historia clínica" : "Crear historia clínica"}
+                onClick={() => {
+                  if (!pacienteId) return;
+
+                  navigate(
+                    hasHistoriaClinica
+                      ? `/pacientes/${pacienteId}/historia-clinica`
+                      : `/pacientes/${pacienteId}/historia-clinica/editar`,
+                    {
+                    state: hasHistoriaClinica ? undefined : { mode: "create" },
+                    },
+                  );
+                }}
+                disabled={!pacienteId}
+              >
+                {hasHistoriaClinica ? <BsJournalText /> : <BsPlusLg />}
+                {hasHistoriaClinica ? "Ver historia clínica" : "Crear historia clínica"}
+              </CButton>
+            </div>
+          </div>
         </div>
       ) : (
         <div className="alert alert-warning mb-0" role="alert">

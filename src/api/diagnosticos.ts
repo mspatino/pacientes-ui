@@ -27,9 +27,11 @@ export interface DiagnosticoResponseDTO {
 
 export const autocompleteDiagnosticos = async (
   query: string,
+  page = 0,
+  size = 10,
 ): Promise<Cie10DTO[]> => {
   const res = await api.get(
-    `/diagnosticos/autocomplete?q=${encodeURIComponent(query)}`,
+    `/diagnosticos/autocomplete?q=${encodeURIComponent(query)}&page=${page}&size=${size}`,
   );
   return res.data;
 };
