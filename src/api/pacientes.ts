@@ -39,6 +39,7 @@ export interface HistoriaClinicaDTO {
 }
 
 export interface DiagnosticoDTO {
+  id?: number;
   descripcion?: string;
   evolucion?: string;
   tratamiento?: string;

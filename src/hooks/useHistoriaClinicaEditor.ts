@@ -13,12 +13,31 @@ import {
   updateHistoriaClinica,
 } from "../api/pacientes";
 import { createEmptyDiagnostico } from "../components/historia-clinica/diagnosticoUtils";
+//import { SlSocialYoutube } from "react-icons/sl";
 
 interface UseHistoriaClinicaEditorOptions {
   patientIdParam?: string;
   mode?: "create";
   onSaved: (patientId: number) => void;
 }
+
+interface DiagnosticoPayloadCompat {
+  id?: number;
+  descripcion: string;
+  evolucion: string;
+  tratamiento: string;
+  cie10?: Cie10DTO;
+  principal: boolean;
+  fechaFin?: string;
+  fecha_fin?: string;
+}
+
+const normalizeLocalDateTime = (value?: string) => {
+  const trimmed = value?.trim() ?? "";
+  if (!trimmed) return "";
+
+  return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(trimmed) ? `${trimmed}:00` : trimmed;
+};
 
 export default function useHistoriaClinicaEditor({
   patientIdParam,
@@ -84,6 +103,12 @@ export default function useHistoriaClinicaEditor({
             ? data.diagnosticos.map((item) => {
                 const diagnostico = item as Record<string, unknown>;
                 return {
+                  id:
+                    typeof diagnostico.id === "number"
+                      ? diagnostico.id
+                      : typeof diagnostico.id === "string" && diagnostico.id.trim()
+                        ? Number(diagnostico.id)
+                        : undefined,
                   descripcion:
                     typeof diagnostico.descripcion === "string" ? diagnostico.descripcion : "",
                   evolucion:
@@ -96,7 +121,11 @@ export default function useHistoriaClinicaEditor({
                       : undefined,
                   principal: diagnostico.principal === true,
                   fechaFin:
-                    typeof diagnostico.fechaFin === "string" ? diagnostico.fechaFin : "",
+                    typeof diagnostico.fechaFin === "string"
+                      ? diagnostico.fechaFin
+                      : typeof diagnostico.fecha_fin === "string"
+                        ? diagnostico.fecha_fin
+                        : "",
                 };
               })
             : [],
@@ -155,41 +184,141 @@ export default function useHistoriaClinicaEditor({
     }));
   };
 
-  const saveDiagnosticoDraft = () => {
-    if (!diagnosticoDraft) return;
-
-    setForm((prev) => {
-      if (selectedIndex === null || isNewDiagnostico) {
-        const nextDiagnosticos = [...prev.diagnosticos, { ...diagnosticoDraft }];
-        return {
-          ...prev,
-          diagnosticos: diagnosticoDraft.principal
-            ? nextDiagnosticos.map((diag, index) => ({
-                ...diag,
-                principal: index === nextDiagnosticos.length - 1,
-              }))
-            : nextDiagnosticos,
-        };
-      }
-
-      const nextDiagnosticos = prev.diagnosticos.map((diag, index) =>
-        index === selectedIndex ? { ...diagnosticoDraft } : diag,
-      );
-
+  const applyDiagnosticoDraftToForm = (
+    currentForm: HistoriaClinicaPayload,
+    draft: DiagnosticoDTO,
+  ): HistoriaClinicaPayload => {
+    if (selectedIndex === null || isNewDiagnostico) {
+      const nextDiagnosticos = [...currentForm.diagnosticos, { ...draft }];
       return {
-        ...prev,
-        diagnosticos: diagnosticoDraft.principal
+        ...currentForm,
+        diagnosticos: draft.principal
           ? nextDiagnosticos.map((diag, index) => ({
               ...diag,
-              principal: index === selectedIndex,
+              principal: index === nextDiagnosticos.length - 1,
             }))
           : nextDiagnosticos,
       };
-    });
+    }
+
+    const nextDiagnosticos = currentForm.diagnosticos.map((diag, index) =>
+      index === selectedIndex ? { ...draft } : diag,
+    );
+
+    return {
+      ...currentForm,
+      diagnosticos: draft.principal
+        ? nextDiagnosticos.map((diag, index) => ({
+            ...diag,
+            principal: index === selectedIndex,
+          }))
+        : nextDiagnosticos,
+    };
+  };
+
+  const buildPayloadFromForm = (currentForm: HistoriaClinicaPayload): HistoriaClinicaPayload => {
+    const diagnosticos = currentForm.diagnosticos
+      .map((diag) => {
+        const fechaFin = normalizeLocalDateTime(diag.fechaFin);
+
+        const diagnosticoPayload: DiagnosticoPayloadCompat = {
+          id: typeof diag.id === "number" ? diag.id : undefined,
+          descripcion: diag.descripcion?.trim() || "",
+          evolucion: diag.evolucion?.trim() || "",
+          tratamiento: diag.tratamiento?.trim() || "",
+          cie10:
+            diag.cie10?.codigo || diag.cie10?.descripcion
+              ? {
+                  codigo: diag.cie10?.codigo?.trim() || "",
+                  descripcion: diag.cie10?.descripcion?.trim() || "",
+                }
+              : undefined,
+          principal: Boolean(diag.principal),
+          fechaFin: fechaFin || undefined,
+          fecha_fin: fechaFin || undefined,
+        };
+
+        return diagnosticoPayload;
+      })
+      .filter(
+        (diag) =>
+          diag.descripcion ||
+          diag.evolucion ||
+          diag.tratamiento ||
+          diag.cie10?.codigo ||
+          diag.cie10?.descripcion ||
+          diag.principal ||
+          diag.fechaFin,
+      );
+
+    return {
+      motivoConsulta: currentForm.motivoConsulta.trim(),
+      activa: currentForm.activa ?? true,
+      medicacion: currentForm.medicacion?.trim() || "",
+      consumo: currentForm.consumo?.trim() || "",
+      tratamientosAnteriores: currentForm.tratamientosAnteriores?.trim() || "",
+      observaciones: currentForm.observaciones?.trim() || "",
+      diagnosticos: diagnosticos as HistoriaClinicaPayload["diagnosticos"],
+    };
+  };
+
+  const persistHistoriaClinica = async (
+    currentForm: HistoriaClinicaPayload,
+    options?: { redirectOnSuccess?: boolean },
+  ) => {
+    if (!pacienteId) return;
+
+    const payload = buildPayloadFromForm(currentForm);
+
+    if (!payload.motivoConsulta.trim()) {
+      setSubmitError("El motivo de consulta es obligatorio.");
+      return;
+    }
+
+    if (payload.diagnosticos.length > 0 && !payload.diagnosticos.some((diag) => diag.principal)) {
+      setSubmitError("Si cargás diagnósticos, uno debe quedar marcado como principal.");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      if (exists) {
+        await updateHistoriaClinica(pacienteId, payload);
+      } else {
+        await createHistoriaClinica(pacienteId, payload);
+        setExists(true);
+      }
+
+      if (options?.redirectOnSuccess) {
+        onSaved(pacienteId);
+      }
+    } catch (submitError) {
+      console.error("No se pudo guardar la historia clínica", submitError);
+      setSubmitError("No se pudo guardar la historia clínica. Intente nuevamente.");
+      throw submitError;
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const saveDiagnosticoDraft = async () => {
+    if (!diagnosticoDraft) return;
+
+    const nextForm = applyDiagnosticoDraftToForm(form, diagnosticoDraft);
+    setForm(nextForm);
 
     if (selectedIndex === null || isNewDiagnostico) {
       setSelectedIndex(form.diagnosticos.length);
     }
+
+    if (exists) {
+      try {
+        await persistHistoriaClinica(nextForm, { redirectOnSuccess: false });
+      } catch {
+        return;
+      }
+    }
+
     closeDiagnosticoModal();
   };
 
@@ -231,70 +360,8 @@ export default function useHistoriaClinicaEditor({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!pacienteId) return;
-
     setSubmitError("");
-
-    if (!form.motivoConsulta.trim()) {
-      setSubmitError("El motivo de consulta es obligatorio.");
-      return;
-    }
-
-    const diagnosticos = form.diagnosticos
-      .map((diag) => ({
-        descripcion: diag.descripcion?.trim() || "",
-        evolucion: diag.evolucion?.trim() || "",
-        tratamiento: diag.tratamiento?.trim() || "",
-        cie10:
-          diag.cie10?.codigo || diag.cie10?.descripcion
-            ? {
-                codigo: diag.cie10?.codigo?.trim() || "",
-                descripcion: diag.cie10?.descripcion?.trim() || "",
-              }
-            : undefined,
-        principal: Boolean(diag.principal),
-        fechaFin: diag.fechaFin?.trim() || "",
-      }))
-      .filter(
-        (diag) =>
-          diag.descripcion ||
-          diag.evolucion ||
-          diag.tratamiento ||
-          diag.cie10?.codigo ||
-          diag.cie10?.descripcion ||
-          diag.principal ||
-          diag.fechaFin,
-      );
-
-    if (diagnosticos.length > 0 && !diagnosticos.some((diag) => diag.principal)) {
-      setSubmitError("Si cargás diagnósticos, uno debe quedar marcado como principal.");
-      return;
-    }
-
-    const payload: HistoriaClinicaPayload = {
-      motivoConsulta: form.motivoConsulta.trim(),
-      activa: form.activa ?? true,
-      medicacion: form.medicacion?.trim() || "",
-      consumo: form.consumo?.trim() || "",
-      tratamientosAnteriores: form.tratamientosAnteriores?.trim() || "",
-      observaciones: form.observaciones?.trim() || "",
-      diagnosticos,
-    };
-
-    setSaving(true);
-    try {
-      if (exists) {
-        await updateHistoriaClinica(pacienteId, payload);
-      } else {
-        await createHistoriaClinica(pacienteId, payload);
-      }
-      onSaved(pacienteId);
-    } catch (submitError) {
-      console.error("No se pudo guardar la historia clínica", submitError);
-      setSubmitError("No se pudo guardar la historia clínica. Intente nuevamente.");
-    } finally {
-      setSaving(false);
-    }
+    await persistHistoriaClinica(form, { redirectOnSuccess: true });
   };
 
   return {

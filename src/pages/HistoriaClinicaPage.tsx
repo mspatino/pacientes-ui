@@ -342,6 +342,8 @@ export default function HistoriaClinicaPage() {
                       const fechaFin =
                         typeof item.fechaFin === "string" && item.fechaFin.trim()
                           ? formatDateTime(item.fechaFin)
+                          : typeof item.fecha_fin === "string" && item.fecha_fin.trim()
+                            ? formatDateTime(item.fecha_fin)
                           : null;
                       const cie10 =
                         item.cie10 && typeof item.cie10 === "object"
@@ -403,9 +405,9 @@ export default function HistoriaClinicaPage() {
                         color="secondary"
                         variant="outline"
                         size="sm"
-                        onClick={() =>
-                          alert("Vista completa de diagnósticos: próximo paso de implementación.")
-                        }
+                        onClick={() => {
+                          if (pacienteId) navigate(`/pacientes/${pacienteId}/diagnosticos`);
+                        }}
                       >
                         Ver diagnósticos
                       </CButton>

@@ -19,6 +19,21 @@ import {
   sipacBlue,
 } from "./diagnosticoUtils";
 
+const formatDateTime = (raw?: string): string => {
+  if (!raw) return "-";
+
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) return raw;
+
+  return new Intl.DateTimeFormat("es-AR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+};
+
 interface DiagnosticoModalProps {
   activeDiagnostico: DiagnosticoDTO | null;
   diagnosticoEditMode: boolean;
@@ -152,7 +167,7 @@ export default function DiagnosticoModal({
                     ? [{ label: "Tratamiento", value: activeDiagnostico.tratamiento.trim() }]
                     : []),
                   ...(activeDiagnostico.fechaFin?.trim()
-                    ? [{ label: "Fecha fin", value: activeDiagnostico.fechaFin.trim() }]
+                    ? [{ label: "Fecha fin", value: formatDateTime(activeDiagnostico.fechaFin) }]
                     : []),
                 ];
 

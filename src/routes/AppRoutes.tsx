@@ -9,6 +9,7 @@ import EditarPacientePage from "../pages/paciente/EditarPaciente";
 import AltaPacientePage from "../pages/paciente/AltaPaciente";
 import HistoriaClinicaPage from "../pages/HistoriaClinicaPage";
 import EditarHistoriaClinicaPage from "../pages/EditarHistoriaClinica";
+import DiagnosticosPacientePage from "../pages/DiagnosticosPacientePage";
 import DiagnosticoPage from "../pages/diagnostico/DiagnosticoPage";
 
 export default function AppRoutes() {
@@ -35,6 +36,7 @@ export default function AppRoutes() {
               path="/pacientes/:id/historia-clinica/editar"
               element={<EditarHistoriaClinicaPage />}
             />
+            <Route path="/pacientes/:id/diagnosticos" element={<DiagnosticosPacientePage />} />
 
             <Route path="/diagnostico" element={<DiagnosticoPage />} />
 

@@ -12,11 +12,96 @@ import {
   BsClipboard2Pulse,
 } from "react-icons/bs";
 import { FaFilePdf } from "react-icons/fa";
-import { getPacientes } from "../../api/pacientes";
-import type { Paciente } from "../../api/pacientes";
+import pdfMake from "pdfmake/build/pdfmake";
+import pdfFonts from "pdfmake/build/vfs_fonts";
+import type { TDocumentDefinitions } from "pdfmake/interfaces";
+
+import { getPacienteById, getPacientes } from "../../api/pacientes";
+import type { Paciente, PacienteResponseDTO } from "../../api/pacientes";
 import PacientesFiltersCollapse, {
   type SexoFilter,
 } from "../../components/PacientesFiltersCollapse";
+import { BiAlignMiddle } from "react-icons/bi";
+
+pdfMake.addVirtualFileSystem(pdfFonts);
+
+const asRecord = (value: unknown): Record<string, unknown> =>
+  (value as Record<string, unknown>) || {};
+
+const firstString = (source: Record<string, unknown>, keys: string[]): string | null => {
+  for (const key of keys) {
+    const value = source[key];
+    if (typeof value === "string" && value.trim()) return value;
+  }
+  return null;
+};
+
+const firstStringArray = (source: Record<string, unknown>, keys: string[]): string[] => {
+  for (const key of keys) {
+    const value = source[key];
+    if (Array.isArray(value)) {
+      return value.filter((item): item is string => typeof item === "string" && item.trim().length > 0);
+    }
+  }
+  return [];
+};
+
+const formatDate = (rawFecha?: string | null): string => {
+  if (!rawFecha) return "-";
+
+  const dateFormatter = new Intl.DateTimeFormat("es-AR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+
+  const trimmed = rawFecha.trim();
+  const dateOnlyMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})(?:$|T|\s)/);
+
+  if (dateOnlyMatch) {
+    const year = Number(dateOnlyMatch[1]);
+    const month = Number(dateOnlyMatch[2]);
+    const day = Number(dateOnlyMatch[3]);
+    return dateFormatter.format(new Date(year, month - 1, day));
+  }
+
+  const date = new Date(trimmed);
+  if (Number.isNaN(date.getTime())) return rawFecha;
+
+  return dateFormatter.format(date);
+};
+
+const formatEstadoCivil = (rawValue?: string | null): string => {
+  if (!rawValue) return "-";
+
+  const normalized = rawValue
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, "_");
+
+  if (normalized === "SOLTERO") return "Soltero/a";
+  if (normalized === "CASADO") return "Casado/a";
+  if (normalized === "DIVORCIADO") return "Divorciado/a";
+  if (normalized === "VIUDO") return "Viudo/a";
+  if (normalized === "UNION_CONVIVENCIAL") return "Unión convivencial";
+  return rawValue;
+};
+
+const formatConviviente = (value: string): string =>
+  value
+    .toLowerCase()
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+
+const formatNivelEducativo = (rawValue?: string | null): string => {
+  if (!rawValue) return "-";
+  return rawValue
+    .toLowerCase()
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+};
 
 export default function PacientesPage() {
   type SortField = "apellido" | "nombre" | "fechaAlta";
@@ -150,38 +235,207 @@ export default function PacientesPage() {
     return dateFormatter.format(date);
   };
 
-  const handlePrintPaciente = (paciente: Paciente) => {
-    const popup = window.open("", "_blank", "width=900,height=700");
-    if (!popup) return;
+  const handleDownloadListaPdf = () => {
+    const headerMargin: [number, number, number, number] = [0, 0, 0, 10];
+    const footerMargin: [number, number, number, number] = [0, 10, 0, 0];
 
-    const fechaAlta = formatFechaAlta(paciente);
-    popup.document.write(`
-      <!DOCTYPE html>
-      <html lang="es">
-        <head>
-          <meta charset="UTF-8" />
-          <title>Planilla paciente #${paciente.id}</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 32px; color: #1f2937; }
-            h1 { margin: 0 0 20px; font-size: 24px; }
-            .row { margin-bottom: 10px; }
-            .label { font-weight: 700; display: inline-block; min-width: 130px; }
-          </style>
-        </head>
-        <body>
-          <h1>Planilla de paciente</h1>
-          <div class="row"><span class="label">ID:</span> ${paciente.id}</div>
-          <div class="row"><span class="label">Apellido:</span> ${paciente.apellido}</div>
-          <div class="row"><span class="label">Nombre:</span> ${paciente.nombre}</div>
-          <div class="row"><span class="label">DNI:</span> ${paciente.dni}</div>
-          <div class="row"><span class="label">Fecha de alta:</span> ${fechaAlta}</div>
-        </body>
-      </html>
-    `);
+    const tableBody = [
+      ["Apellido", "Nombre", "Documento", "Fecha de alta"],
+      ...paginatedPacientes.map((p) => [
+        p.apellido || "",
+        p.nombre || "",
+        p.dni?.toString() || "",
+        formatFechaAlta(p),
+      ]),
+    ];
 
-    popup.document.close();
-    popup.focus();
-    popup.print();
+    const docDefinition = {
+      content: [
+        { text: "Lista de Pacientes", style: "header" },
+        {
+          table: {
+            widths: ["25%", "25%", "20%", "30%"],
+            body: tableBody,
+          },
+          layout: "lightHorizontalLines",
+        },
+        {
+          text: `Total de pacientes: ${sortedPacientes.length}`,
+          style: "footer",
+        },
+      ],
+      styles: {
+        header: {
+          fontSize: 18,
+          bold: true,
+          margin: headerMargin,
+        },
+        footer: {
+          fontSize: 10,
+          italics: true,
+          margin: footerMargin,
+        },
+      },
+      defaultStyle: {
+        fontSize: 10,
+      },
+    };
+
+    pdfMake.createPdf(docDefinition).download("lista-pacientes.pdf");
+  };
+
+  const handlePrintPaciente = async (paciente: Paciente) => {
+    try {
+      const detalle: PacienteResponseDTO = await getPacienteById(paciente.id);
+      const pacienteData = asRecord(detalle);
+
+      const apellido = firstString(pacienteData, ["apellido"]) || paciente.apellido || "";
+      const nombre = firstString(pacienteData, ["nombre", "nombres"]) || paciente.nombre || "";
+      const nombreCompleto = `${apellido} ${nombre}`.trim() || `Paciente #${paciente.id}`;
+
+      const identificacionContactoFields: Array<[string, string]> = [
+        ["DNI", firstString(pacienteData, ["dni", "documento"]) || paciente.dni?.toString() || "-"],
+        [
+          "Fecha de nacimiento",
+          formatDate(firstString(pacienteData, ["fechaNacimiento", "fecha_nacimiento"])),
+        ],
+        ["Teléfono", firstString(pacienteData, ["telefono", "teléfono", "celular"]) || "-"],
+        ["Email", firstString(pacienteData, ["email", "correo"]) || "-"],
+        ["Ocupación", firstString(pacienteData, ["ocupacion", "ocupación"]) || "-"],
+        ["Dirección", firstString(pacienteData, ["direccion", "dirección", "domicilio"]) || "-"],
+        ["Fecha de alta", formatDate(firstString(pacienteData, ["fechaAlta", "fecha_alta"]))],
+      ];
+
+      const estadoConvivenciaFields: Array<[string, string]> = [
+        [
+          "Estado civil",
+          formatEstadoCivil(
+            firstString(pacienteData, ["estadoCivil", "estado_civil", "civilStatus"]),
+          ),
+        ],
+        ["Sexo", firstString(pacienteData, ["sexo", "genero", "género"]) || "-"],
+        ["Ocupación", firstString(pacienteData, ["ocupacion", "ocupación"]) || "-"],
+        [
+          "Nivel educativo",
+          formatNivelEducativo(firstString(pacienteData, ["nivelEducativo", "nivel_educativo"])),
+        ],
+        [
+          "Convivientes",
+          (() => {
+            const convivientes = firstStringArray(pacienteData, ["convivientes"]);
+            return convivientes.length > 0
+              ? convivientes.map(formatConviviente).join(", ")
+              : "-";
+          })(),
+        ],
+      ];
+
+      const infoTableLayout = {
+        hLineColor: () => "#D6E4F4",
+        vLineColor: () => "#D6E4F4",
+        paddingLeft: () => 10,
+        paddingRight: () => 10,
+        paddingTop: () => 8,
+        paddingBottom: () => 8,
+      };
+
+      const buildInfoTable = (title: string, fields: Array<[string, string]>) => ({
+        stack: [
+          { text: title, style: "sectionTitle" },
+          {
+            table: {
+              widths: ["38%", "62%"],
+              body: fields.map(([label, value]) => [
+                { text: label, style: "fieldLabel" },
+                { text: value || "-", style: "fieldValue" },
+              ]),
+            },
+            layout: infoTableLayout,
+          },
+        ],
+      });
+
+      const pacienteHeader: TDocumentDefinitions["content"] extends Array<infer T> ? T : never = {
+        table: {
+          widths: [52, "*"],
+          body: [[
+            {
+              text: "Paciente",
+              alignment: "center",
+              style: "eyebrow",
+              color: sipacBlue,
+              bold: true,
+              fillColor: sipacSoftBlue,
+              margin: [0, 10, 0, 10] as [number, number, number, number],
+            },
+            {
+              stack: [
+                // { text: "Paciente", style: "eyebrow" },
+                { text: nombreCompleto, style: "header" },
+              ],
+              border: [false, false, false, false] as [boolean, boolean, boolean, boolean],
+            },
+          ]],
+        },
+        layout: {
+          hLineWidth: () => 0,
+          vLineWidth: () => 0,
+          paddingLeft: () => 0,
+          paddingRight: () => 0,
+          paddingTop: () => 0,
+          paddingBottom: () => 0,
+        },
+        margin: [0, 0, 0, 18] as [number, number, number, number],
+      } as never;
+
+      const docDefinition: TDocumentDefinitions = {
+        pageSize: "A4",
+        pageMargins: [32, 36, 32, 36] as [number, number, number, number],
+        content: [
+          pacienteHeader,
+          buildInfoTable("Datos personales", identificacionContactoFields),
+          {
+            text: "",
+            margin: [0, 8, 0, 0] as [number, number, number, number],
+          },
+          buildInfoTable("Estado personal y convivencia", estadoConvivenciaFields),
+        ],
+        styles: {
+          eyebrow: {
+            fontSize: 10,
+            color: "#6C7A89",
+            margin: [0, 0, 0, 2] as [number, number, number, number],
+          },
+          header: {
+            fontSize: 20,
+            bold: true,
+            color: "#16324F",
+          },
+          sectionTitle: {
+            fontSize: 12,
+            bold: true,
+            color: sipacBlue,
+            margin: [0, 0, 0, 8] as [number, number, number, number],
+          },
+          fieldLabel: {
+            fontSize: 10,
+            color: "#6C7A89",
+          },
+          fieldValue: {
+            fontSize: 11,
+            bold: true,
+            color: "#1F2D3D",
+          },
+        },
+        defaultStyle: {
+          fontSize: 10,
+        },
+      };
+
+      pdfMake.createPdf(docDefinition).download(`Paciente-${paciente.apellido+", "+paciente.nombre}.pdf`);
+    } catch (error) {
+      console.error("No se pudo generar el PDF del paciente", error);
+    }
   };
 
   if (loading) return <p>Cargando pacientes...</p>;
@@ -227,14 +481,25 @@ export default function PacientesPage() {
             <BsListUl style={{ color: sipacBlue }} />
             <h1 className="h5 fw-bold mb-0">Pacientes</h1>
           </div>
-          <button
-            type="button"
-            className="btn btn-primary btn-sm d-inline-flex align-items-center gap-2"
-            onClick={() => navigate("/pacientes/nuevo")}
-          >
-            <BsFillPersonPlusFill />
-            Nuevo
-          </button>
+          <div className="d-flex gap-2">
+         
+            <button
+              type="button"
+              className="btn btn-primary btn-sm d-inline-flex align-items-center gap-2"
+              onClick={() => navigate("/pacientes/nuevo")}
+            >
+              <BsFillPersonPlusFill />
+              Nuevo
+            </button>
+               <button
+              type="button"
+              className="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-2"
+              onClick={handleDownloadListaPdf}
+            >
+              <FaFilePdf />
+              Pacientes 
+            </button>
+          </div>
         </div>
 
         <div className="table-responsive">
