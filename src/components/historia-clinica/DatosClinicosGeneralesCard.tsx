@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import {
   CCard,
   CCardBody,
@@ -20,6 +21,32 @@ export default function DatosClinicosGeneralesCard({
   form,
   setForm,
 }: DatosClinicosGeneralesCardProps) {
+  const motivoConsultaRef = useRef<HTMLTextAreaElement>(null);
+  const medicacionRef = useRef<HTMLTextAreaElement>(null);
+  const consumoRef = useRef<HTMLTextAreaElement>(null);
+  const tratamientosAnterioresRef = useRef<HTMLTextAreaElement>(null);
+  const observacionesRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    [
+      motivoConsultaRef.current,
+      medicacionRef.current,
+      consumoRef.current,
+      tratamientosAnterioresRef.current,
+      observacionesRef.current,
+    ].forEach((element) => {
+      if (element) {
+        autoResizeTextarea(element);
+      }
+    });
+  }, [
+    form.motivoConsulta,
+    form.medicacion,
+    form.consumo,
+    form.tratamientosAnteriores,
+    form.observaciones,
+  ]);
+
   return (
     <CCard className="sipac-form-card">
       <CCardHeader>Datos clínicos generales</CCardHeader>
@@ -28,6 +55,7 @@ export default function DatosClinicosGeneralesCard({
           <CCol md={10}>
             <CFormLabel htmlFor="motivoConsulta">Motivo de consulta</CFormLabel>
             <CFormTextarea
+              ref={motivoConsultaRef}
               id="motivoConsulta"
               value={form.motivoConsulta}
               onChange={(e) =>
@@ -53,6 +81,7 @@ export default function DatosClinicosGeneralesCard({
           <CCol md={6}>
             <CFormLabel htmlFor="medicacion">Medicación</CFormLabel>
             <CFormTextarea
+              ref={medicacionRef}
               id="medicacion"
               value={form.medicacion || ""}
               onChange={(e) =>
@@ -67,6 +96,7 @@ export default function DatosClinicosGeneralesCard({
           <CCol md={6}>
             <CFormLabel htmlFor="consumo">Consumo</CFormLabel>
             <CFormTextarea
+              ref={consumoRef}
               id="consumo"
               value={form.consumo || ""}
               onChange={(e) =>
@@ -81,6 +111,7 @@ export default function DatosClinicosGeneralesCard({
           <CCol md={6}>
             <CFormLabel htmlFor="tratamientosAnteriores">Tratamientos anteriores</CFormLabel>
             <CFormTextarea
+              ref={tratamientosAnterioresRef}
               id="tratamientosAnteriores"
               value={form.tratamientosAnteriores || ""}
               onChange={(e) =>
@@ -98,6 +129,7 @@ export default function DatosClinicosGeneralesCard({
           <CCol md={6}>
             <CFormLabel htmlFor="observaciones">Observaciones</CFormLabel>
             <CFormTextarea
+              ref={observacionesRef}
               id="observaciones"
               value={form.observaciones || ""}
               onChange={(e) =>

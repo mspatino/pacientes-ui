@@ -12,6 +12,7 @@ import {
   CModalTitle,
   CRow,
 } from "@coreui/react";
+import { useEffect, useRef } from "react";
 import type { Cie10DTO, DiagnosticoDTO } from "../../api/pacientes";
 import DiagnosticoAutocompleteFields from "../diagnostico/DiagnosticoAutocompleteFields";
 import {
@@ -60,6 +61,19 @@ export default function DiagnosticoModal({
   onSave,
   onRemove,
 }: DiagnosticoModalProps) {
+  const evolucionRef = useRef<HTMLTextAreaElement>(null);
+  const tratamientoRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (!diagnosticoEditMode) return;
+
+    [evolucionRef.current, tratamientoRef.current].forEach((element) => {
+      if (element) {
+        autoResizeTextarea(element);
+      }
+    });
+  }, [diagnosticoEditMode, activeDiagnostico?.evolucion, activeDiagnostico?.tratamiento]);
+
   return (
     <CModal visible={visible && Boolean(activeDiagnostico)} onClose={onClose} size="lg">
       <CModalHeader>
@@ -111,6 +125,7 @@ export default function DiagnosticoModal({
                 <CCol md={6}>
                   <CFormLabel htmlFor={`evolucion-${selectedIndex}`}>Evolución</CFormLabel>
                   <CFormTextarea
+                    ref={evolucionRef}
                     id={`evolucion-${selectedIndex}`}
                     rows={1}
                     style={{ resize: "none", overflow: "hidden" }}
@@ -133,6 +148,7 @@ export default function DiagnosticoModal({
                 <CCol md={6}>
                   <CFormLabel htmlFor={`tratamiento-${selectedIndex}`}>Tratamiento</CFormLabel>
                   <CFormTextarea
+                    ref={tratamientoRef}
                     id={`tratamiento-${selectedIndex}`}
                     rows={1}
                     style={{ resize: "none", overflow: "hidden" }}

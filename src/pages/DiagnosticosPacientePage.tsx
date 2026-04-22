@@ -11,7 +11,15 @@ import {
   CRow,
   CSpinner,
 } from "@coreui/react";
-import { BsArrowLeft, BsCalendar3, BsSearch } from "react-icons/bs";
+import {
+  BsArrowLeft,
+  BsCalendar3,
+  BsChevronDoubleLeft,
+  BsChevronDoubleRight,
+  BsChevronLeft,
+  BsChevronRight,
+  BsSearch,
+} from "react-icons/bs";
 import { GiBrain } from "react-icons/gi";
 import { getHistoriaClinicaByPacienteId, getPacienteById, type PacienteResponseDTO } from "../api/pacientes";
 
@@ -73,6 +81,9 @@ const getDiagnosticoFields = (diagnostico: Record<string, unknown>) => {
 };
 
 export default function DiagnosticosPacientePage() {
+  const PAGE_SIZE = 5;
+  const sipacBlue = "#2F6FB3";
+  const sipacSoftBlue = "#E8F1FB";
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -81,6 +92,7 @@ export default function DiagnosticosPacientePage() {
   const [diagnosticos, setDiagnosticos] = useState<Record<string, unknown>[]>([]);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "principal" | "active" | "closed">("all");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const pacienteId = useMemo(() => {
     if (!id) return null;
@@ -139,6 +151,18 @@ export default function DiagnosticosPacientePage() {
     if (filter === "closed") return Boolean(fechaFin);
     return true;
   });
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredDiagnosticos.length / PAGE_SIZE));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const pageStartIndex = (safeCurrentPage - 1) * PAGE_SIZE;
+  const paginatedDiagnosticos = filteredDiagnosticos.slice(
+    pageStartIndex,
+    pageStartIndex + PAGE_SIZE,
+  );
 
   const totalDiagnosticos = diagnosticos.length;
   const principales = diagnosticos.filter((item) => item.principal === true).length;
@@ -283,15 +307,16 @@ export default function DiagnosticosPacientePage() {
           </CCard>
         ) : (
           <div className="d-flex flex-column gap-3">
-            {filteredDiagnosticos.map((diagnostico, index) => {
+            {paginatedDiagnosticos.map((diagnostico, index) => {
               const { descripcion, evolucion, tratamiento, fecha, fechaFin, cie10Label, principal } =
                 getDiagnosticoFields(diagnostico);
+              const diagnosticoKey = pageStartIndex + index;
 
               return (
-                <CCard key={`diagnostico-${index}`} className="border-0 shadow-sm">
-                  <CCardBody>
+                <CCard key={`diagnostico-${diagnosticoKey}`} className="border-0 shadow-sm">
+                  <CCardBody className="p-3">
                     <div className="d-flex flex-column flex-lg-row justify-content-between gap-3">
-                      <div className="flex-grow-1 d-flex flex-column gap-3">
+                      <div className="flex-grow-1 d-flex flex-column gap-2">
                         <div className="d-flex flex-wrap align-items-center gap-2">
                           {principal ? <CBadge color="primary">Principal</CBadge> : null}
                           <CBadge color={fechaFin ? "secondary" : "success"}>
@@ -302,25 +327,31 @@ export default function DiagnosticosPacientePage() {
 
                         {descripcion ? (
                           <div>
-                            <div className="small text-muted">Descripción clínica</div>
-                            <div className="fw-semibold fs-5">{descripcion}</div>
+                            <div className="small text-muted mb-1">Descripción clínica</div>
+                            <div className="fw-semibold" style={{ lineHeight: 1.35 }}>
+                              {descripcion}
+                            </div>
                           </div>
                         ) : null}
 
-                        <CRow className="g-3">
+                        <CRow className="g-2">
                           {evolucion ? (
                             <CCol md={6}>
-                              <div className="border rounded p-3 h-100 bg-light-subtle">
+                              <div className="border rounded px-3 py-2 h-100 bg-light-subtle">
                                 <div className="small text-muted mb-1">Evolución</div>
-                                <div className="fw-semibold">{evolucion}</div>
+                                <div className="fw-semibold small" style={{ lineHeight: 1.4 }}>
+                                  {evolucion}
+                                </div>
                               </div>
                             </CCol>
                           ) : null}
                           {tratamiento ? (
                             <CCol md={6}>
-                              <div className="border rounded p-3 h-100 bg-light-subtle">
+                              <div className="border rounded px-3 py-2 h-100 bg-light-subtle">
                                 <div className="small text-muted mb-1">Tratamiento</div>
-                                <div className="fw-semibold">{tratamiento}</div>
+                                <div className="fw-semibold small" style={{ lineHeight: 1.4 }}>
+                                  {tratamiento}
+                                </div>
                               </div>
                             </CCol>
                           ) : null}
@@ -329,8 +360,8 @@ export default function DiagnosticosPacientePage() {
 
                       {(fecha || fechaFin) ? (
                         <div
-                          className="border rounded p-3 bg-light-subtle d-flex flex-column gap-2"
-                          style={{ minWidth: 240 }}
+                          className="border rounded px-3 py-2 bg-light-subtle d-flex flex-column gap-2"
+                          style={{ minWidth: 220 }}
                         >
                           <div className="d-inline-flex align-items-center gap-2 small text-muted">
                             <BsCalendar3 />
@@ -355,6 +386,60 @@ export default function DiagnosticosPacientePage() {
                 </CCard>
               );
             })}
+
+            {totalPages > 1 ? (
+              <div className="d-flex justify-content-center mt-2">
+                <div className="d-flex align-items-center gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-sm border-0"
+                    style={{ color: sipacBlue, backgroundColor: sipacSoftBlue }}
+                    disabled={safeCurrentPage === 1}
+                    onClick={() => setCurrentPage(1)}
+                    aria-label="Primera página"
+                    title="Primera página"
+                  >
+                    <BsChevronDoubleLeft />
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-sm border-0"
+                    style={{ color: sipacBlue, backgroundColor: sipacSoftBlue }}
+                    disabled={safeCurrentPage === 1}
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    aria-label="Página anterior"
+                    title="Página anterior"
+                  >
+                    <BsChevronLeft />
+                  </button>
+                  <span className="small text-muted px-2">
+                    {safeCurrentPage} de {totalPages}
+                  </span>
+                  <button
+                    type="button"
+                    className="btn btn-sm border-0"
+                    style={{ color: sipacBlue, backgroundColor: sipacSoftBlue }}
+                    disabled={safeCurrentPage === totalPages}
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    aria-label="Página siguiente"
+                    title="Página siguiente"
+                  >
+                    <BsChevronRight />
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-sm border-0"
+                    style={{ color: sipacBlue, backgroundColor: sipacSoftBlue }}
+                    disabled={safeCurrentPage === totalPages}
+                    onClick={() => setCurrentPage(totalPages)}
+                    aria-label="Última página"
+                    title="Última página"
+                  >
+                    <BsChevronDoubleRight />
+                  </button>
+                </div>
+              </div>
+            ) : null}
           </div>
         )}
       </div>

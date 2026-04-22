@@ -21,7 +21,6 @@ import type { Paciente, PacienteResponseDTO } from "../../api/pacientes";
 import PacientesFiltersCollapse, {
   type SexoFilter,
 } from "../../components/PacientesFiltersCollapse";
-import { BiAlignMiddle } from "react-icons/bi";
 
 pdfMake.addVirtualFileSystem(pdfFonts);
 
@@ -360,9 +359,8 @@ export default function PacientesPage() {
           widths: [52, "*"],
           body: [[
             {
-              text: "Paciente",
+              text: "P",
               alignment: "center",
-              style: "eyebrow",
               color: sipacBlue,
               bold: true,
               fillColor: sipacSoftBlue,
@@ -370,7 +368,7 @@ export default function PacientesPage() {
             },
             {
               stack: [
-                // { text: "Paciente", style: "eyebrow" },
+                { text: "Paciente", style: "eyebrow" },
                 { text: nombreCompleto, style: "header" },
               ],
               border: [false, false, false, false] as [boolean, boolean, boolean, boolean],

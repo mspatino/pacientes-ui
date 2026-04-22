@@ -48,6 +48,12 @@ export default function AppSidebar() {
           </CNavLink>
         </CNavItem>
 
+           <CNavItem>
+          <CNavLink as={NavLink} to="/agenda">
+             {!collapsed && "Agenda"}
+          </CNavLink>
+        </CNavItem>
+
       </CSidebarNav>
     </CSidebar>
   );
