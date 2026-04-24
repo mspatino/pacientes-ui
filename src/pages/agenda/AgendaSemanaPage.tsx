@@ -1,45 +1,90 @@
 import { useEffect, useMemo, useState } from "react";
-import { CAlert, CBadge, CCard, CCardBody, CCol, CRow, CSpinner } from "@coreui/react";
-import { BsClock } from "react-icons/bs";
-import { getAgendaByWeek, type AgendaTurno } from "../../api/agenda";
-import { estadoColor, formatHour, formatShortDayLabel, getWeekdays } from "./agenda.utils";
+import {
+  CAlert,
+  CBadge,
+  CCard,
+  CCardBody,
+  CCol,
+  CRow,
+  CSpinner,
+} from "@coreui/react";
+
+import {
+  getAgendaByWeek,
+  type AgendaTurno,
+} from "../../api/agenda";
+
+import {
+  estadoColor,
+  formatHour,
+  formatShortDayLabel,
+  getWeekdays,
+} from "./agenda.utils";
+
 import type { AgendaViewProps } from "./agenda.types";
 
-export default function AgendaSemanaPage({ selectedDate, refreshKey }: AgendaViewProps) {
-  const [turnosByDay, setTurnosByDay] = useState<Record<string, AgendaTurno[]>>({});
+export default function AgendaSemanaPage({
+  selectedDate,
+  refreshKey,
+}: AgendaViewProps) {
+  const [turnosByDay, setTurnosByDay] = useState<
+    Record<string, AgendaTurno[]>
+  >({});
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const weekdays = useMemo(() => getWeekdays(selectedDate), [selectedDate]);
+
+  const weekdays = useMemo(
+    () => getWeekdays(selectedDate),
+    [selectedDate],
+  );
 
   useEffect(() => {
     const loadWeek = async () => {
       try {
         setLoading(true);
         setError("");
+
         const turnos = await getAgendaByWeek(selectedDate);
-        const grouped = weekdays.reduce<Record<string, AgendaTurno[]>>((acc, date) => {
+
+        const grouped = weekdays.reduce<
+          Record<string, AgendaTurno[]>
+        >((acc, date) => {
           acc[date] = [];
           return acc;
         }, {});
 
         turnos.forEach((turno) => {
           const dayKey = turno.fechaHora.slice(0, 10);
+
           if (!grouped[dayKey]) {
             grouped[dayKey] = [];
           }
+
           grouped[dayKey].push(turno);
         });
 
-        const entries = Object.entries(grouped).map(([date, dayTurnos]) => [
-          date,
-          [...dayTurnos].sort(
-            (a, b) => new Date(a.fechaHora).getTime() - new Date(b.fechaHora).getTime(),
-          ),
-        ]);
+        const entries = Object.entries(grouped).map(
+          ([date, dayTurnos]) => [
+            date,
+            [...dayTurnos].sort(
+              (a, b) =>
+                new Date(a.fechaHora).getTime() -
+                new Date(b.fechaHora).getTime(),
+            ),
+          ],
+        );
+
         setTurnosByDay(Object.fromEntries(entries));
       } catch (loadError) {
-        console.error("No se pudo cargar la agenda semanal", loadError);
-        setError("No se pudo cargar la agenda semanal.");
+        console.error(
+          "No se pudo cargar la agenda semanal",
+          loadError,
+        );
+
+        setError(
+          "No se pudo cargar la agenda semanal.",
+        );
       } finally {
         setLoading(false);
       }
@@ -66,38 +111,114 @@ export default function AgendaSemanaPage({ selectedDate, refreshKey }: AgendaVie
   }
 
   return (
-    <CRow className="g-3">
+    <CRow className="g-2">
       {weekdays.map((date) => {
         const turnos = turnosByDay[date] ?? [];
 
         return (
           <CCol key={date} xl={4} md={6}>
             <CCard className="border-0 shadow-sm h-100">
-              <CCardBody className="p-3">
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <div className="fw-semibold text-capitalize">{formatShortDayLabel(date)}</div>
-                  <CBadge color="light" textColor="dark">
+              <CCardBody className="p-2">
+
+                {/* HEADER */}
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <div
+                    className="fw-semibold text-capitalize"
+                    style={{
+                      fontSize: "0.9rem",
+                      color: "#1E293B",
+                    }}
+                  >
+                    {formatShortDayLabel(date)}
+                  </div>
+
+                  <CBadge
+                    color="light"
+                    textColor="dark"
+                    style={{
+                      fontSize: "0.65rem",
+                    }}
+                  >
                     {turnos.length}
                   </CBadge>
                 </div>
 
+                {/* SIN TURNOS */}
                 {turnos.length === 0 ? (
-                  <div className="small text-muted">Sin turnos</div>
+                  <div
+                    className="small text-muted"
+                    style={{
+                      fontSize: "0.78rem",
+                    }}
+                  >
+                    Sin turnos
+                  </div>
                 ) : (
-                  <div className="d-flex flex-column gap-2">
-                    {turnos.map((turno) => (
-                      <div key={turno.id} className="border rounded-3 px-2 py-2 bg-light-subtle">
-                        <div className="d-flex justify-content-between align-items-center gap-2 mb-1">
-                          <span className="small fw-semibold d-inline-flex align-items-center gap-1">
-                            <BsClock />
+                  <div className="d-flex flex-column">
+
+                    {turnos.map((turno, index) => (
+                      <div
+                        key={turno.id}
+                        className="d-flex align-items-center justify-content-between py-1"
+                        style={{
+                          minHeight: 28,
+
+                          borderBottom:
+                            index === turnos.length - 1
+                              ? "none"
+                              : "1px solid #F1F5F9",
+
+                          opacity:
+                            turno.estado === "CANCELADO"
+                              ? 0.55
+                              : 1,
+                        }}
+                      >
+
+                        {/* IZQUIERDA */}
+                        <div
+                          className="d-flex align-items-center gap-2 overflow-hidden"
+                          style={{ minWidth: 0 }}
+                        >
+                          <span
+                            className="small fw-semibold"
+                            style={{
+                              width: 42,
+                              flexShrink: 0,
+                              color: "#64748B",
+                              fontSize: "0.72rem",
+                            }}
+                          >
                             {formatHour(turno.fechaHora)}
                           </span>
-                          <CBadge color={estadoColor(turno.estado)}>{turno.estado}</CBadge>
+
+                          <span
+                            className="text-truncate"
+                            style={{
+                              fontSize: "0.78rem",
+                              color: "#111827",
+
+                              textDecoration:
+                                turno.estado === "CANCELADO"
+                                  ? "line-through"
+                                  : "none",
+                            }}
+                          >
+                            {turno.pacienteNombre}
+                          </span>
                         </div>
-                        <div className="small fw-semibold">{turno.pacienteNombre}</div>
-                        {turno.notas?.trim() ? (
-                          <div className="small text-muted mt-1">{turno.notas}</div>
-                        ) : null}
+
+                        {/* ESTADO */}
+                        <CBadge
+                          color={estadoColor(turno.estado)}
+                          style={{
+                            fontSize: "0.52rem",
+                            padding: "0.15rem 0.32rem",
+                            flexShrink: 0,
+                          }}
+                        >
+                          {turno.estado}
+                        </CBadge>
                       </div>
                     ))}
                   </div>
