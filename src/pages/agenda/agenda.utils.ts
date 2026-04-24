@@ -2,6 +2,33 @@ import type { EstadoTurno } from "../../api/agenda";
 
 export const ESTADOS: EstadoTurno[] = ["PENDIENTE", "CONFIRMADO", "AUSENTE", "CANCELADO"];
 
+export const ESTADO_LABELS: Record<EstadoTurno, string> = {
+  PENDIENTE: "Pendiente",
+  CONFIRMADO: "Confirmado",
+  CANCELADO: "Cancelado",
+  AUSENTE: "Ausente",
+};
+
+export const getAvailableActions = (estado: EstadoTurno) => {
+  switch (estado) {
+    case "PENDIENTE":
+      return [
+        { label: "Confirmar", nextState: "CONFIRMADO" as const },
+        { label: "Cancelar", nextState: "CANCELADO" as const },
+      ];
+    case "CONFIRMADO":
+      return [
+        { label: "Ausente", nextState: "AUSENTE" as const },
+        { label: "Cancelar", nextState: "CANCELADO" as const },
+      ];
+    case "CANCELADO":
+    case "AUSENTE":
+      return [];
+    default:
+      return [];
+  }
+};
+
 export const estadoColor = (estado: EstadoTurno) => {
   switch (estado) {
     case "CONFIRMADO":
@@ -26,16 +53,41 @@ export const formatDateInput = (date: Date) => {
 
 export const parseLocalDate = (raw: string) => new Date(`${raw}T00:00:00`);
 
+// export const formatDateLabel = (raw: string) => {
+//   const date = parseLocalDate(raw);
+//   if (Number.isNaN(date.getTime())) return raw;
+
+//   return new Intl.DateTimeFormat("es-AR", {
+//     weekday: "long",
+//     day: "numeric",
+//     month: "long",
+//     year: "numeric",
+//   }).format(date);
+// };
 export const formatDateLabel = (raw: string) => {
   const date = parseLocalDate(raw);
-  if (Number.isNaN(date.getTime())) return raw;
 
-  return new Intl.DateTimeFormat("es-AR", {
+  if (Number.isNaN(date.getTime())) {
+    return raw;
+  }
+
+  const weekday = new Intl.DateTimeFormat("es-AR", {
     weekday: "long",
+  }).format(date);
+
+  const day = new Intl.DateTimeFormat("es-AR", {
     day: "numeric",
+  }).format(date);
+
+  const month = new Intl.DateTimeFormat("es-AR", {
     month: "long",
+  }).format(date);
+
+  const year = new Intl.DateTimeFormat("es-AR", {
     year: "numeric",
   }).format(date);
+
+  return `${weekday}, ${day} ${month} ${year}`;
 };
 
 export const formatShortDayLabel = (raw: string) => {
@@ -59,11 +111,50 @@ export const formatMonthTitle = (raw: string) => {
   }).format(date);
 };
 
+export const formatMonthName = (raw: string) => {
+  const date = parseLocalDate(raw);
+  if (Number.isNaN(date.getTime())) return raw;
+
+  return new Intl.DateTimeFormat("es-AR", {
+    month: "long",
+  }).format(date);
+};
+
+export const formatYearNumber = (raw: string) => {
+  const date = parseLocalDate(raw);
+  if (Number.isNaN(date.getTime())) return raw;
+
+  return new Intl.DateTimeFormat("es-AR", {
+    year: "numeric",
+  }).format(date);
+};
+
+export const formatDayNumber = (raw: string) => {
+  const date = parseLocalDate(raw);
+  if (Number.isNaN(date.getTime())) return raw;
+
+  return String(date.getDate()).padStart(2, "0");
+};
+
+export const formatWeekdayName = (raw: string) => {
+  const date = parseLocalDate(raw);
+  if (Number.isNaN(date.getTime())) return raw;
+
+  return new Intl.DateTimeFormat("es-AR", {
+    weekday: "long",
+  }).format(date);
+};
+
 export const formatHour = (iso: string) => {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
   return date.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
 };
+
+export const getHourSlots = (startHour = 8, endHour = 20) =>
+  Array.from({ length: endHour - startHour + 1 }, (_, index) =>
+    String(startHour + index).padStart(2, "0"),
+  );
 
 export const buildTurnoDateTime = (date: string, time: string) => `${date}T${time}:00`;
 
@@ -130,4 +221,3 @@ export const getMonthCalendarDays = (selectedDate: string) => {
 
   return days;
 };
-

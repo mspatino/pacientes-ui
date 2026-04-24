@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { CAlert, CBadge, CCard, CCardBody, CCol, CRow, CSpinner } from "@coreui/react";
 import { BsClock } from "react-icons/bs";
-import { getAgendaByDate, type AgendaTurno } from "../../api/agenda";
+import { getAgendaByWeek, type AgendaTurno } from "../../api/agenda";
 import { estadoColor, formatHour, formatShortDayLabel, getWeekdays } from "./agenda.utils";
 import type { AgendaViewProps } from "./agenda.types";
 
@@ -16,17 +16,26 @@ export default function AgendaSemanaPage({ selectedDate, refreshKey }: AgendaVie
       try {
         setLoading(true);
         setError("");
-        const entries = await Promise.all(
-          weekdays.map(async (date) => {
-            const turnos = await getAgendaByDate(date);
-            return [
-              date,
-              [...turnos].sort(
-                (a, b) => new Date(a.fechaHora).getTime() - new Date(b.fechaHora).getTime(),
-              ),
-            ] as const;
-          }),
-        );
+        const turnos = await getAgendaByWeek(selectedDate);
+        const grouped = weekdays.reduce<Record<string, AgendaTurno[]>>((acc, date) => {
+          acc[date] = [];
+          return acc;
+        }, {});
+
+        turnos.forEach((turno) => {
+          const dayKey = turno.fechaHora.slice(0, 10);
+          if (!grouped[dayKey]) {
+            grouped[dayKey] = [];
+          }
+          grouped[dayKey].push(turno);
+        });
+
+        const entries = Object.entries(grouped).map(([date, dayTurnos]) => [
+          date,
+          [...dayTurnos].sort(
+            (a, b) => new Date(a.fechaHora).getTime() - new Date(b.fechaHora).getTime(),
+          ),
+        ]);
         setTurnosByDay(Object.fromEntries(entries));
       } catch (loadError) {
         console.error("No se pudo cargar la agenda semanal", loadError);
@@ -37,7 +46,7 @@ export default function AgendaSemanaPage({ selectedDate, refreshKey }: AgendaVie
     };
 
     void loadWeek();
-  }, [weekdays, refreshKey]);
+  }, [selectedDate, weekdays, refreshKey]);
 
   if (error) {
     return (
@@ -101,4 +110,3 @@ export default function AgendaSemanaPage({ selectedDate, refreshKey }: AgendaVie
     </CRow>
   );
 }
-

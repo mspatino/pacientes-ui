@@ -1,7 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { CAlert, CBadge, CCard, CCardBody, CSpinner } from "@coreui/react";
-import { getAgendaByDate, type AgendaTurno } from "../../api/agenda";
-import { formatMonthTitle, getMonthCalendarDays, getMonthDates, parseLocalDate } from "./agenda.utils";
+import { getAgendaByMonth, type AgendaTurno } from "../../api/agenda";
+import {
+  formatMonthName,
+  formatMonthTitle,
+  formatYearNumber,
+  getMonthCalendarDays,
+  getMonthDates,
+  parseLocalDate,
+} from "./agenda.utils";
 import type { AgendaViewProps } from "./agenda.types";
 
 export default function AgendaMesPage({ selectedDate, refreshKey }: AgendaViewProps) {
@@ -16,9 +23,21 @@ export default function AgendaMesPage({ selectedDate, refreshKey }: AgendaViewPr
       try {
         setLoading(true);
         setError("");
-        const entries = await Promise.all(
-          monthDates.map(async (date) => [date, await getAgendaByDate(date)] as const),
-        );
+        const turnos = await getAgendaByMonth(selectedDate);
+        const grouped = monthDates.reduce<Record<string, AgendaTurno[]>>((acc, date) => {
+          acc[date] = [];
+          return acc;
+        }, {});
+
+        turnos.forEach((turno) => {
+          const dayKey = turno.fechaHora.slice(0, 10);
+          if (!grouped[dayKey]) {
+            grouped[dayKey] = [];
+          }
+          grouped[dayKey].push(turno);
+        });
+
+        const entries = Object.entries(grouped);
         setTurnosByDay(Object.fromEntries(entries));
       } catch (loadError) {
         console.error("No se pudo cargar la agenda mensual", loadError);
@@ -29,7 +48,7 @@ export default function AgendaMesPage({ selectedDate, refreshKey }: AgendaViewPr
     };
 
     void loadMonth();
-  }, [monthDates, refreshKey]);
+  }, [monthDates, refreshKey, selectedDate]);
 
   if (error) {
     return (
@@ -51,9 +70,14 @@ export default function AgendaMesPage({ selectedDate, refreshKey }: AgendaViewPr
   return (
     <CCard className="border-0 shadow-sm">
       <CCardBody className="p-3 p-md-4">
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <div className="fw-semibold text-capitalize">{formatMonthTitle(selectedDate)}</div>
-          <div className="small text-muted">Vista mensual de turnos</div>
+        <div className="mb-4">
+          <div
+            className="fw-bold text-uppercase"
+            style={{ color: "#2F6FB3", fontSize: "clamp(1.8rem, 4vw, 3rem)", letterSpacing: "0.08em" }}
+          >
+            {formatMonthName(selectedDate)} / {formatYearNumber(selectedDate)}
+          </div>
+          <div className="small text-muted text-capitalize">{formatMonthTitle(selectedDate)}</div>
         </div>
 
         <div className="row row-cols-7 g-2 mb-2">
@@ -106,4 +130,3 @@ export default function AgendaMesPage({ selectedDate, refreshKey }: AgendaViewPr
     </CCard>
   );
 }
-

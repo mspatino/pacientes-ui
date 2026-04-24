@@ -12,6 +12,7 @@ import EditarHistoriaClinicaPage from "../pages/EditarHistoriaClinica";
 import DiagnosticosPacientePage from "../pages/DiagnosticosPacientePage";
 import DiagnosticoPage from "../pages/diagnostico/DiagnosticoPage";
 import AgendaPage from "../pages/agenda/AgendaPage";
+import NuevoTurnoPage from "../pages/agenda/NuevoTurnoPage";
 
 export default function AppRoutes() {
   return (
@@ -41,6 +42,7 @@ export default function AppRoutes() {
 
             <Route path="/diagnostico" element={<DiagnosticoPage />} />
             <Route path="/agenda" element={<AgendaPage />} />
+            <Route path="/agenda/nuevo" element={<NuevoTurnoPage />} />
 
             {/* futuras rutas */}
             {/* <Route path="/patients" element={<PatientsPage />} /> */}
