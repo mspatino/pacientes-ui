@@ -464,3 +464,71 @@ textarea {
     max-width: 100%;
   }
 }
+
+.paciente-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.95rem;
+}
+
+.paciente-table-head th {
+  background: #2f6fb3;
+  color: white;
+  font-weight: 600;
+  border: none;
+  padding: 0.9rem 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.paciente-table tbody tr {
+  transition:
+    background-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.paciente-table tbody tr:hover {
+  background-color: #f8fbff;
+}
+
+.paciente-table td {
+  padding: 0.9rem 1rem;
+  vertical-align: middle;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.table-sort-btn {
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.85);
+  padding: 0;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+}
+
+.table-sort-btn:hover {
+  color: white;
+}
+
+.action-icon-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: none;
+  background: #eef4fb;
+  color: #2f6fb3;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: all 0.15s ease;
+}
+
+.action-icon-btn:hover {
+  background: #2f6fb3;
+  color: white;
+  transform: translateY(-1px);
+}

@@ -1,7 +1,7 @@
 import axios from "axios";
 import api from "./api";
 
-export type EstadoTurno = "PENDIENTE" | "CONFIRMADO" | "CANCELADO" | "AUSENTE";
+export type EstadoTurno = "CONFIRMADO" | "CANCELADO" | "AUSENTE";
 
 export interface AgendaTurno {
   id: number;
@@ -62,14 +62,14 @@ const mapTurno = (item: Record<string, unknown>): AgendaTurno => {
   const estadoRaw =
     (typeof item.estado === "string" && item.estado.toUpperCase()) ||
     (typeof item.status === "string" && item.status.toUpperCase()) ||
-    "PENDIENTE";
+    "CONFIRMADO";
 
   const estado: EstadoTurno =
     estadoRaw === "CONFIRMADO" ||
     estadoRaw === "CANCELADO" ||
     estadoRaw === "AUSENTE"
       ? estadoRaw
-      : "PENDIENTE";
+      : "CONFIRMADO";
 
   return {
     id:

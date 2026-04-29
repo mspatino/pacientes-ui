@@ -20,6 +20,7 @@ import {
 import ConvivientesMultiSelect from "./ConvivientesMultiSelect";
 import SipacDateInput from "./SipacDateInput";
 import { CONVIVIENTE_OPTIONS } from "../constants/convivientes";
+import { asRecord , firstString } from "../utils/pacienteFormatters";
 
 type Mode = "create" | "edit";
 
@@ -35,6 +36,7 @@ type FormState = {
   ocupacion: string;
   sexo: string;
   estadoCivil: string;
+  nivelEducativo: string;
   convivientes: string[];
   telefono: string;
   email: string;
@@ -60,20 +62,27 @@ const ESTADO_CIVIL_OPTIONS: EstadoCivilValue[] = [
   "VIUDO",
   "UNION_CONVIVENCIAL",
 ];
+// type NivelEducativoValue =
+//   | ""
+//   | "PRIMARIO"
+//   | "SECUNDARIO"
+//   | "TERCIARIO"
+//   | "UNIVERSITARIO"
+//   | "OTRO"
+//   | "SIN_ESCOLARIDAD";
 
-const asRecord = (value: unknown): Record<string, unknown> =>
-  (value as Record<string, unknown>) || {};
+// const NIVEL_EDUCATIVO_OPTIONS: NivelEducativoValue[] = [
+//   "",
+//   "PRIMARIO",
+//   "SECUNDARIO",
+//   "TERCIARIO",
+//   "UNIVERSITARIO",
+//   "OTRO",
+//   "SIN_ESCOLARIDAD",
+// ];
 
-const firstString = (
-  source: Record<string, unknown>,
-  keys: string[],
-): string | null => {
-  for (const key of keys) {
-    const val = source[key];
-    if (typeof val === "string" && val.trim()) return val;
-  }
-  return null;
-};
+
+
 
 const firstStringArray = (
   source: Record<string, unknown>,
@@ -156,7 +165,8 @@ const validateField = (name: EditableField, value: string): string => {
     return "";
   }
   if (name === "telefono") {
-    if (trimmed && !/^[0-9+\-\s]{6,20}$/.test(trimmed)) return "Teléfono inválido";
+    if (trimmed && !/^[0-9+\-\s]{6,20}$/.test(trimmed))
+      return "Teléfono inválido";
     return "";
   }
   if (name === "sexo") {
@@ -170,9 +180,14 @@ const validateField = (name: EditableField, value: string): string => {
     if (!trimmed) return "El estado civil es obligatorio";
     return "";
   }
+  if (name === "nivelEducativo") {
+    if (!trimmed) return "El nivel educativo es obligatorio";
+    return "";
+  }
   if (name === "email") {
     if (trimmed.length > 150) return "El email es demasiado largo";
-    if (trimmed && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return "Email inválido";
+    if (trimmed && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed))
+      return "Email inválido";
     return "";
   }
   if (name === "fechaNacimiento") {
@@ -191,6 +206,7 @@ const validateForm = (form: FormState): FormErrors => {
     "ocupacion",
     "sexo",
     "estadoCivil",
+    "nivelEducativo",
     "telefono",
     "email",
     "direccion",
@@ -232,6 +248,7 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
     ocupacion: "",
     sexo: "",
     estadoCivil: "",
+    nivelEducativo: "",
     convivientes: [],
     telefono: "",
     email: "",
@@ -259,20 +276,29 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
             firstString(source, ["fechaNacimiento", "fecha_nacimiento"]),
           ),
           sexo: SEXO_OPTIONS.includes(
-            (firstString(source, ["sexo", "genero", "género"]) || "") as SexoValue,
+            (firstString(source, ["sexo", "genero", "género"]) ||
+              "") as SexoValue,
           )
             ? (firstString(source, ["sexo", "genero", "género"]) as SexoValue)
             : "",
           estadoCivil: normalizeEstadoCivil(
-            firstString(source, ["estadoCivil", "estado_civil", "civilStatus"]) || "",
+            firstString(source, [
+              "estadoCivil",
+              "estado_civil",
+              "civilStatus",
+            ]) || "",
           ),
+          nivelEducativo:
+            firstString(source, ["nivelEducativo", "nivel_educativo"]) || "",
           convivientes: firstStringArray(source, ["convivientes"])
             .map(normalizeConviviente)
             .filter((value) => CONVIVIENTE_OPTIONS.includes(value)),
           ocupacion: firstString(source, ["ocupacion", "ocupación"]) || "",
-          telefono: firstString(source, ["telefono", "teléfono", "celular"]) || "",
+          telefono:
+            firstString(source, ["telefono", "teléfono", "celular"]) || "",
           email: firstString(source, ["email", "correo"]) || "",
-          direccion: firstString(source, ["direccion", "dirección", "domicilio"]) || "",
+          direccion:
+            firstString(source, ["direccion", "dirección", "domicilio"]) || "",
         });
       } catch (loadError) {
         console.error("No se pudo cargar el paciente", loadError);
@@ -287,7 +313,10 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
 
   const handleChange = (name: EditableField, value: string) => {
     setForm((prev) => ({ ...prev, [name]: value }));
-    setFieldErrors((prev) => ({ ...prev, [name]: validateField(name, value) || undefined }));
+    setFieldErrors((prev) => ({
+      ...prev,
+      [name]: validateField(name, value) || undefined,
+    }));
   };
 
   const handleSave = async () => {
@@ -311,6 +340,7 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
           fechaNacimiento: form.fechaNacimiento || null,
           sexo: form.sexo || null,
           estadoCivil: form.estadoCivil || null,
+          nivelEducativo: form.nivelEducativo || null,
           convivientes: form.convivientes,
           ocupacion: form.ocupacion || null,
           telefono: form.telefono || null,
@@ -328,6 +358,7 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
         fechaNacimiento: form.fechaNacimiento,
         sexo: form.sexo,
         estadoCivil: form.estadoCivil,
+        nivelEducativo: form.nivelEducativo,
         convivientes: form.convivientes,
       };
 
@@ -379,8 +410,14 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
   return (
     <div className="p-3">
       <div className="d-flex align-items-center justify-content-between mb-3">
-        <h1 className="h4 fw-bold mb-0">{isEditMode ? "Editar paciente" : "Alta paciente"}</h1>
-        <CButton color="secondary" variant="outline" onClick={() => navigate(-1)}>
+        <h1 className="h4 fw-bold mb-0">
+          {isEditMode ? "Editar paciente" : "Alta paciente"}
+        </h1>
+        <CButton
+          color="secondary"
+          variant="outline"
+          onClick={() => navigate(-1)}
+        >
           Volver
         </CButton>
       </div>
@@ -404,6 +441,11 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
                       invalid={!!fieldErrors.apellido}
                       onChange={(e) => handleChange("apellido", e.target.value)}
                     />
+                    {fieldErrors.apellido && (
+                      <div className="text-danger small mt-1">
+                        {fieldErrors.apellido}
+                      </div>
+                    )}
                   </div>
                   <div className="col-12 col-md-6">
                     <CFormLabel>Nombre</CFormLabel>
@@ -412,6 +454,11 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
                       invalid={!!fieldErrors.nombre}
                       onChange={(e) => handleChange("nombre", e.target.value)}
                     />
+                    {fieldErrors.nombre && (
+                      <div className="text-danger small mt-1">
+                        {fieldErrors.nombre}
+                      </div>
+                    )}
                   </div>
                   <div className="col-12 col-md-6">
                     <CFormLabel>DNI</CFormLabel>
@@ -420,14 +467,26 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
                       invalid={!!fieldErrors.dni}
                       onChange={(e) => handleChange("dni", e.target.value)}
                     />
+                    {fieldErrors.dni && (
+                      <div className="text-danger small mt-1">
+                        {fieldErrors.dni}
+                      </div>
+                    )}
                   </div>
                   <div className="col-12 col-md-6">
                     <SipacDateInput
                       label="Fecha de nacimiento"
                       value={form.fechaNacimiento}
                       invalid={!!fieldErrors.fechaNacimiento}
-                      onValueChange={(value) => handleChange("fechaNacimiento", value)}
+                      onValueChange={(value) =>
+                        handleChange("fechaNacimiento", value)
+                      }
                     />
+                    {fieldErrors.fechaNacimiento && (
+                      <div className="text-danger small mt-1">
+                        {fieldErrors.fechaNacimiento}
+                      </div>
+                    )}
                   </div>
                   <div className="col-12 col-md-6">
                     <CFormLabel>Sexo</CFormLabel>
@@ -448,17 +507,49 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
                     <CFormSelect
                       value={form.estadoCivil}
                       invalid={!!fieldErrors.estadoCivil}
-                      onChange={(e) => handleChange("estadoCivil", e.target.value)}
+                      onChange={(e) =>
+                        handleChange("estadoCivil", e.target.value)
+                      }
                       options={[
                         { label: "Seleccione...", value: "" },
                         { label: "Soltero/a", value: "SOLTERO" },
                         { label: "Casado/a", value: "CASADO" },
                         { label: "Divorciado/a", value: "DIVORCIADO" },
                         { label: "Viudo/a", value: "VIUDO" },
-                        { label: "Unión convivencial", value: "UNION_CONVIVENCIAL" },
+                        {
+                          label: "Unión convivencial",
+                          value: "UNION_CONVIVENCIAL",
+                        },
                       ]}
                     />
                   </div>
+                  <div className="col-12 col-md-6">
+  <CFormLabel>Nivel educativo</CFormLabel>
+
+  <CFormSelect
+    value={form.nivelEducativo}
+    invalid={!!fieldErrors.nivelEducativo}
+    onChange={(e) =>
+      handleChange("nivelEducativo", e.target.value)
+    }
+    options={[
+      { label: "Seleccione...", value: "" },
+      { label: "Sin escolaridad", value: "SIN_ESCOLARIDAD" },
+      { label: "Primario", value: "PRIMARIO" },
+      { label: "Secundario", value: "SECUNDARIO" },
+      { label: "Terciario", value: "TERCIARIO" },
+      { label: "Universitario", value: "UNIVERSITARIO" },
+      { label: "Otro", value: "OTRO" },
+
+    ]}
+  />
+
+  {fieldErrors.nivelEducativo && (
+    <div className="text-danger small mt-1">
+      {fieldErrors.nivelEducativo}
+    </div>
+  )}
+</div>
                   <div className="col-12 col-md-4">
                     <CFormLabel>Teléfono</CFormLabel>
                     <CFormInput
@@ -488,7 +579,9 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
                     <CFormInput
                       value={form.direccion}
                       invalid={!!fieldErrors.direccion}
-                      onChange={(e) => handleChange("direccion", e.target.value)}
+                      onChange={(e) =>
+                        handleChange("direccion", e.target.value)
+                      }
                     />
                   </div>
                   <div className="col-12">
@@ -496,7 +589,9 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
                     <CFormInput
                       value={form.ocupacion}
                       invalid={!!fieldErrors.ocupacion}
-                      onChange={(e) => handleChange("ocupacion", e.target.value)}
+                      onChange={(e) =>
+                        handleChange("ocupacion", e.target.value)
+                      }
                     />
                   </div>
                   <div className="col-12">
@@ -505,12 +600,20 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
                       options={CONVIVIENTE_OPTIONS}
                       selected={form.convivientes}
                       onChange={(nextValues) => {
-                        setForm((prev) => ({ ...prev, convivientes: nextValues }));
-                        setFieldErrors((prev) => ({ ...prev, convivientes: undefined }));
+                        setForm((prev) => ({
+                          ...prev,
+                          convivientes: nextValues,
+                        }));
+                        setFieldErrors((prev) => ({
+                          ...prev,
+                          convivientes: undefined,
+                        }));
                       }}
                     />
                     {fieldErrors.convivientes ? (
-                      <div className="text-danger small mt-1">{fieldErrors.convivientes}</div>
+                      <div className="text-danger small mt-1">
+                        {fieldErrors.convivientes}
+                      </div>
                     ) : null}
                   </div>
                 </div>
@@ -522,7 +625,11 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
             <CButton color="primary" onClick={handleSave} disabled={saving}>
               {saving ? "Guardando..." : "Guardar"}
             </CButton>
-            <CButton color="secondary" variant="outline" onClick={() => navigate(-1)}>
+            <CButton
+              color="secondary"
+              variant="outline"
+              onClick={() => navigate(-1)}
+            >
               Cancelar
             </CButton>
           </div>
@@ -531,4 +638,3 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
     </div>
   );
 }
-

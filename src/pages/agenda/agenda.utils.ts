@@ -1,9 +1,9 @@
 import type { EstadoTurno } from "../../api/agenda";
 
-export const ESTADOS: EstadoTurno[] = ["PENDIENTE", "CONFIRMADO", "AUSENTE", "CANCELADO"];
+export const ESTADOS: EstadoTurno[] = ["CONFIRMADO", "AUSENTE", "CANCELADO"];
 
 export const ESTADO_LABELS: Record<EstadoTurno, string> = {
-  PENDIENTE: "Pendiente",
+  
   CONFIRMADO: "Confirmado",
   CANCELADO: "Cancelado",
   AUSENTE: "Ausente",
@@ -11,11 +11,6 @@ export const ESTADO_LABELS: Record<EstadoTurno, string> = {
 
 export const getAvailableActions = (estado: EstadoTurno) => {
   switch (estado) {
-    case "PENDIENTE":
-      return [
-        { label: "Confirmar", nextState: "CONFIRMADO" as const },
-        { label: "Cancelar", nextState: "CANCELADO" as const },
-      ];
     case "CONFIRMADO":
       return [
         { label: "Ausente", nextState: "AUSENTE" as const },
@@ -33,12 +28,10 @@ export const estadoColor = (estado: EstadoTurno) => {
   switch (estado) {
     case "CONFIRMADO":
       return "success";
-    case "PENDIENTE":
-      return "warning";
     case "CANCELADO":
       return "danger";
     case "AUSENTE":
-      return "dark";
+      return "warning";
     default:
       return "secondary";
   }
@@ -145,10 +138,18 @@ export const formatWeekdayName = (raw: string) => {
   }).format(date);
 };
 
-export const formatHour = (iso: string) => {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
+// export const formatHour = (iso: string) => {
+//   const date = new Date(iso);
+//   if (Number.isNaN(date.getTime())) return iso;
+//   return date.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
+// };
+
+export const formatHour = (dateTime: string): string => {
+  return new Intl.DateTimeFormat("es-AR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(new Date(dateTime));
 };
 
 export const getHourSlots = (startHour = 8, endHour = 20) =>

@@ -22,6 +22,7 @@ import {
 } from "./agenda.utils";
 
 import type { AgendaViewProps } from "./agenda.types";
+import { useNavigate } from "react-router-dom";
 
 export default function AgendaSemanaPage({
   selectedDate,
@@ -31,6 +32,7 @@ export default function AgendaSemanaPage({
     Record<string, AgendaTurno[]>
   >({});
 
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -131,7 +133,54 @@ export default function AgendaSemanaPage({
                   >
                     {formatShortDayLabel(date)}
                   </div>
+                     <div className="d-flex align-items-center gap-1">
+                          <button
+      type="button"
+      onClick={() =>
+        navigate(
+          `/agenda/nuevo?fecha=${date}&view=week`,
+        )
+      }
+      title="Agregar turno"
+      style={{
+        width: 22,
+        height: 22,
 
+        border: "none",
+
+        borderRadius: "50%",
+
+        backgroundColor: "#E8F1FB",
+
+        color: "#2F6FB3",
+
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+
+        fontSize: "0.9rem",
+
+        fontWeight: 700,
+
+        cursor: "pointer",
+
+        transition: "all 0.15s ease",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor =
+          "#2F6FB3";
+
+        e.currentTarget.style.color = "#FFFFFF";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor =
+          "#E8F1FB";
+
+        e.currentTarget.style.color = "#2F6FB3";
+      }}
+    >
+      +
+    </button>
                   <CBadge
                     color="light"
                     textColor="dark"
@@ -142,7 +191,7 @@ export default function AgendaSemanaPage({
                     {turnos.length}
                   </CBadge>
                 </div>
-
+</div>
                 {/* SIN TURNOS */}
                 {turnos.length === 0 ? (
                   <div
@@ -159,9 +208,9 @@ export default function AgendaSemanaPage({
                     {turnos.map((turno, index) => (
                       <div
                         key={turno.id}
-                        className="d-flex align-items-center justify-content-between py-1"
+                        className="d-flex align-items-center justify-content-between py-0"
                         style={{
-                          minHeight: 28,
+                          minHeight: 22,
 
                           borderBottom:
                             index === turnos.length - 1
@@ -183,10 +232,10 @@ export default function AgendaSemanaPage({
                           <span
                             className="small fw-semibold"
                             style={{
-                              width: 42,
+                              width: 36,
                               flexShrink: 0,
                               color: "#64748B",
-                              fontSize: "0.72rem",
+                              fontSize: "0.68rem",
                             }}
                           >
                             {formatHour(turno.fechaHora)}

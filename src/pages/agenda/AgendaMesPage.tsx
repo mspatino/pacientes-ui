@@ -1,46 +1,77 @@
 import { useEffect, useMemo, useState } from "react";
-import { CAlert, CBadge, CCard, CCardBody, CSpinner } from "@coreui/react";
+import { CAlert, CCard, CCardBody, CSpinner } from "@coreui/react";
+import { useNavigate } from "react-router-dom";
 import { getAgendaByMonth, type AgendaTurno } from "../../api/agenda";
+
 import {
-  formatMonthName,
-  formatMonthTitle,
-  formatYearNumber,
   getMonthCalendarDays,
   getMonthDates,
   parseLocalDate,
 } from "./agenda.utils";
+
 import type { AgendaViewProps } from "./agenda.types";
 
-export default function AgendaMesPage({ selectedDate, refreshKey }: AgendaViewProps) {
-  const [turnosByDay, setTurnosByDay] = useState<Record<string, AgendaTurno[]>>({});
+export default function AgendaMesPage({
+  selectedDate,
+  refreshKey,
+}: AgendaViewProps) {
+  const [turnosByDay, setTurnosByDay] = useState<Record<string, AgendaTurno[]>>(
+    {},
+  );
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const monthDays = useMemo(() => getMonthCalendarDays(selectedDate), [selectedDate]);
-  const monthDates = useMemo(() => getMonthDates(selectedDate).dates, [selectedDate]);
+
+  const monthDays = useMemo(
+    () => getMonthCalendarDays(selectedDate),
+    [selectedDate],
+  );
+
+  const monthDates = useMemo(
+    () => getMonthDates(selectedDate).dates,
+    [selectedDate],
+  );
+
+  const today = new Date();
+
+  const todayKey = [
+    today.getFullYear(),
+    String(today.getMonth() + 1).padStart(2, "0"),
+    String(today.getDate()).padStart(2, "0"),
+  ].join("-");
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadMonth = async () => {
       try {
         setLoading(true);
         setError("");
+
         const turnos = await getAgendaByMonth(selectedDate);
-        const grouped = monthDates.reduce<Record<string, AgendaTurno[]>>((acc, date) => {
-          acc[date] = [];
-          return acc;
-        }, {});
+
+        const grouped = monthDates.reduce<Record<string, AgendaTurno[]>>(
+          (acc, date) => {
+            acc[date] = [];
+            return acc;
+          },
+          {},
+        );
 
         turnos.forEach((turno) => {
           const dayKey = turno.fechaHora.slice(0, 10);
+
           if (!grouped[dayKey]) {
             grouped[dayKey] = [];
           }
+
           grouped[dayKey].push(turno);
         });
 
-        const entries = Object.entries(grouped);
-        setTurnosByDay(Object.fromEntries(entries));
+        setTurnosByDay(grouped);
       } catch (loadError) {
         console.error("No se pudo cargar la agenda mensual", loadError);
+
         setError("No se pudo cargar la agenda mensual.");
       } finally {
         setLoading(false);
@@ -69,58 +100,150 @@ export default function AgendaMesPage({ selectedDate, refreshKey }: AgendaViewPr
 
   return (
     <CCard className="border-0 shadow-sm">
-      <CCardBody className="p-3 p-md-4">
-        <div className="mb-4">
-          <div
-            className="fw-bold text-uppercase"
-            style={{ color: "#2F6FB3", fontSize: "clamp(1.8rem, 4vw, 3rem)", letterSpacing: "0.08em" }}
-          >
-            {formatMonthName(selectedDate)} / {formatYearNumber(selectedDate)}
-          </div>
-          <div className="small text-muted text-capitalize">{formatMonthTitle(selectedDate)}</div>
-        </div>
+      <CCardBody className="p-0">
+        {/* HEADER */}
 
-        <div className="row row-cols-7 g-2 mb-2">
+        {/* CALENDARIO */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(7, 1fr)",
+            borderTop: "1px solid #E5E7EB",
+            borderLeft: "1px solid #E5E7EB",
+          }}
+        >
+          {/* HEADER DIAS */}
           {["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"].map((label) => (
-            <div key={label} className="col">
-              <div className="small text-muted fw-semibold text-center py-2">{label}</div>
+            <div
+              key={label}
+              style={{
+                borderRight: "1px solid #E5E7EB",
+                borderBottom: "1px solid #E5E7EB",
+                backgroundColor: "#F8FAFC",
+                padding: "8px 4px",
+                textAlign: "center",
+                fontSize: "0.72rem",
+                fontWeight: 600,
+                color: "#64748B",
+              }}
+            >
+              {label}
             </div>
           ))}
-        </div>
 
-        <div className="row row-cols-7 g-2">
+          {/* CELDAS */}
           {monthDays.map((day) => {
             const turnos = turnosByDay[day.date] ?? [];
+
             const date = parseLocalDate(day.date);
 
+            const isToday = day.date === todayKey;
+
             return (
-              <div key={day.date} className="col">
+              <div
+                key={day.date}
+                onClick={() => navigate(`/agenda?view=day&fecha=${day.date}`)}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = day.inCurrentMonth
+                    ? "#F8FBFF"
+                    : "#F1F5F9";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = day.inCurrentMonth
+                    ? "#FFFFFF"
+                    : "#F8FAFC";
+                }}
+                style={{
+                  height: 120,
+
+                  borderRight: "1px solid #E5E7EB",
+
+                  borderBottom: "1px solid #E5E7EB",
+
+                  padding: 4,
+
+                  backgroundColor: day.inCurrentMonth ? "#FFFFFF" : "#F8FAFC",
+
+                  opacity: day.inCurrentMonth ? 1 : 0.5,
+
+                  overflow: "hidden",
+
+                  cursor: "pointer",
+
+                  transition: "background-color 0.15s ease",
+                }}
+              >
+                {/* NUMERO DIA */}
+                <div className="d-flex justify-content-end mb-1">
+                  <div
+                    className="d-flex align-items-center justify-content-center"
+                    style={{
+                      width: 24,
+                      height: 24,
+
+                      borderRadius: "50%",
+
+                      backgroundColor: isToday ? "#2F6FB3" : "transparent",
+
+                      color: isToday ? "#FFFFFF" : "#111827",
+
+                      fontSize: "0.78rem",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {date.getDate()}
+                  </div>
+                </div>
+
+                {/* TURNOS */}
                 <div
-                  className="border rounded-3 p-2 h-100"
+                  className="d-flex flex-column"
                   style={{
-                    minHeight: 110,
-                    backgroundColor: day.inCurrentMonth ? "#FFFFFF" : "#F8FAFC",
-                    opacity: day.inCurrentMonth ? 1 : 0.7,
-                    borderColor: "#E2E8F0",
+                    gap: 2,
                   }}
                 >
-                  <div className="d-flex justify-content-between align-items-center mb-2">
-                    <span className="small fw-semibold">{date.getDate()}</span>
-                    {turnos.length > 0 ? (
-                      <CBadge color="primary">{turnos.length}</CBadge>
-                    ) : null}
-                  </div>
+                  {turnos.slice(0, 3).map((turno) => (
+                    <div
+                      key={turno.id}
+                      className="text-truncate"
+                      style={{
+                        fontSize: "0.68rem",
 
-                  <div className="d-flex flex-column gap-1">
-                    {turnos.slice(0, 3).map((turno) => (
-                      <div key={turno.id} className="small text-truncate rounded-2 px-2 py-1 bg-light-subtle">
-                        {turno.pacienteNombre}
-                      </div>
-                    ))}
-                    {turnos.length > 3 ? (
-                      <div className="small text-muted">+{turnos.length - 3} más</div>
-                    ) : null}
-                  </div>
+                        lineHeight: 1.2,
+
+                        padding: "1px 4px",
+
+                        borderRadius: 4,
+
+                        backgroundColor: "#E8F1FB",
+
+                        color: "#1E3A5F",
+
+                        fontWeight: 500,
+                      }}
+                    >
+                      {turno.pacienteNombre}
+                    </div>
+                  ))}
+                  {turnos.length > 3 ? (
+                    <div
+                      title={turnos
+                        .slice(3)
+                        .map((t) => t.pacienteNombre)
+                        .join("\n")}
+                      style={{
+                        fontSize: "0.65rem",
+                        color: "#475569",
+                        paddingLeft: 4,
+                        cursor: "pointer",
+                        fontWeight: 600,
+                        marginTop: 1,
+                        userSelect: "none",
+                      }}
+                    >
+                      +{turnos.length - 4} más...
+                    </div>
+                  ) : null}
                 </div>
               </div>
             );

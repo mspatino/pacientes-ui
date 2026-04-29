@@ -15,12 +15,49 @@ import {
   CRow,
   CSpinner,
 } from "@coreui/react";
-import { BsArrowLeft, BsCalendar3, BsCheckCircle, BsSearch, BsXLg } from "react-icons/bs";
+import {
+  BsArrowLeft,
+  BsCalendar3,
+  BsCheckCircle,
+  BsSearch,
+  BsXLg,
+} from "react-icons/bs";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { createTurno, getAgendaByDate, getTurnoById, updateTurno, type AgendaTurno } from "../../api/agenda";
+import {
+  createTurno,
+  getAgendaByDate,
+  getTurnoById,
+  updateTurno,
+  type AgendaTurno,
+} from "../../api/agenda";
 import { getPacientes, type Paciente } from "../../api/pacientes";
 import type { AgendaViewMode } from "./agenda.types";
-import { buildTurnoDateTime, formatDateInput, formatDateLabel } from "./agenda.utils";
+import {
+  buildTurnoDateTime,
+  formatDateInput,
+  formatDateLabel,
+} from "./agenda.utils";
+
+/* =========================
+   ESTILOS REUTILIZABLES
+========================= */
+
+const compactInputStyle = {
+  fontSize: "0.82rem",
+  minHeight: 34,
+  borderRadius: 10,
+  paddingLeft: 38,
+};
+
+const compactLabelStyle = {
+  fontSize: "0.74rem",
+  fontWeight: 600,
+  color: "#64748B",
+  marginBottom: 4,
+  letterSpacing: "0.02em",
+};
+
+/* ========================= */
 
 interface NuevoTurnoForm {
   pacienteId: number;
@@ -68,7 +105,9 @@ export default function NuevoTurnoPage() {
   const [pacienteQuery, setPacienteQuery] = useState("");
   const [showPacienteSuggestions, setShowPacienteSuggestions] = useState(false);
   const [dayTurnos, setDayTurnos] = useState<AgendaTurno[]>([]);
-  const [nuevo, setNuevo] = useState<NuevoTurnoForm>(() => initialNuevoTurno(selectedDate));
+  const [nuevo, setNuevo] = useState<NuevoTurnoForm>(() =>
+    initialNuevoTurno(selectedDate),
+  );
 
   useEffect(() => {
     setNuevo((prev) => ({ ...prev, fecha: selectedDate }));
@@ -127,7 +166,9 @@ export default function NuevoTurnoPage() {
           ...prev,
           pacienteId: turno.pacienteId ? Number(turno.pacienteId) : 0,
           pacienteNombre: turno.pacienteId ? turno.pacienteNombre : "",
-          nombreContacto: turno.pacienteId ? "" : (turno.nombreContacto || turno.pacienteNombre || ""),
+          nombreContacto: turno.pacienteId
+            ? ""
+            : turno.nombreContacto || turno.pacienteNombre || "",
           telefonoContacto: turno.telefonoContacto || "",
           fecha,
           hora,
@@ -151,7 +192,8 @@ export default function NuevoTurnoPage() {
 
     return pacientes
       .filter((paciente) => {
-        const nombreCompleto = `${paciente.apellido || ""} ${paciente.nombre || ""}`.toLowerCase();
+        const nombreCompleto =
+          `${paciente.apellido || ""} ${paciente.nombre || ""}`.toLowerCase();
         const dni = (paciente.dni || "").toString().toLowerCase();
         return nombreCompleto.includes(normalized) || dni.includes(normalized);
       })
@@ -160,10 +202,14 @@ export default function NuevoTurnoPage() {
 
   const availableHours = useMemo(() => {
     const selectedStartForEdit =
-      turnoId && nuevo.hora ? new Date(buildTurnoDateTime(nuevo.fecha, nuevo.hora)).getTime() : null;
+      turnoId && nuevo.hora
+        ? new Date(buildTurnoDateTime(nuevo.fecha, nuevo.hora)).getTime()
+        : null;
 
     return QUICK_HOURS.filter((hour) => {
-      const slotStart = new Date(buildTurnoDateTime(nuevo.fecha, hour)).getTime();
+      const slotStart = new Date(
+        buildTurnoDateTime(nuevo.fecha, hour),
+      ).getTime();
       const slotEnd = slotStart + DEFAULT_TURNO_DURATION * 60 * 1000;
 
       const hasOverlap = dayTurnos
@@ -171,7 +217,8 @@ export default function NuevoTurnoPage() {
         .filter((turno) => !(turnoId && turno.id === turnoId))
         .some((turno) => {
           const turnoStart = new Date(turno.fechaHora).getTime();
-          const turnoDuration = (turno.duracionMinutos ?? DEFAULT_TURNO_DURATION) * 60 * 1000;
+          const turnoDuration =
+            (turno.duracionMinutos ?? DEFAULT_TURNO_DURATION) * 60 * 1000;
           const turnoEnd = turnoStart + turnoDuration;
           return slotStart < turnoEnd && slotEnd > turnoStart;
         });
@@ -199,16 +246,21 @@ export default function NuevoTurnoPage() {
   }, [availableHours, loadingAvailability, nuevo.hora]);
 
   const volverAgenda = () => {
-    navigate(`/agenda?fecha=${encodeURIComponent(nuevo.fecha)}&view=${agendaView}`, {
-      state: { refreshAt: Date.now() },
-    });
+    navigate(
+      `/agenda?fecha=${encodeURIComponent(nuevo.fecha)}&view=${agendaView}`,
+      {
+        state: { refreshAt: Date.now() },
+      },
+    );
   };
 
   const agregarTurno = async () => {
     const hasRegisteredPaciente = Boolean(nuevo.pacienteId);
     const hasManualContact = Boolean(nuevo.nombreContacto.trim());
     if ((!hasRegisteredPaciente && !hasManualContact) || !nuevo.hora) {
-      setError("Completá un paciente registrado o un nombre de contacto, y la hora del turno.");
+      setError(
+        "Completá un paciente registrado o un nombre de contacto, y la hora del turno.",
+      );
       return;
     }
 
@@ -219,10 +271,12 @@ export default function NuevoTurnoPage() {
     try {
       const payload = {
         pacienteId: nuevo.pacienteId || undefined,
-        nombreContacto: !nuevo.pacienteId ? nuevo.nombreContacto.trim() || undefined : undefined,
+        nombreContacto: !nuevo.pacienteId
+          ? nuevo.nombreContacto.trim() || undefined
+          : undefined,
         telefonoContacto: nuevo.telefonoContacto.trim() || undefined,
         fechaHoraInicio: buildTurnoDateTime(nuevo.fecha, nuevo.hora),
-        estado: "PENDIENTE" as const,
+        estado: "CONFIRMADO" as const,
         duracionMinutos: DEFAULT_TURNO_DURATION,
         notas: nuevo.notas.trim() || undefined,
       };
@@ -233,7 +287,11 @@ export default function NuevoTurnoPage() {
         await createTurno(payload);
       }
 
-      setSuccessMessage(turnoId ? "Turno actualizado correctamente." : "Turno agregado correctamente.");
+      setSuccessMessage(
+        turnoId
+          ? "Turno actualizado correctamente."
+          : "Turno agregado correctamente.",
+      );
       window.setTimeout(() => {
         volverAgenda();
       }, 500);
@@ -247,10 +305,7 @@ export default function NuevoTurnoPage() {
               ? saveError.response.data.message
               : "";
 
-        setError(
-          backendMessage ||
-            "No se pudo guardar el turno.",
-        );
+        setError(backendMessage || "No se pudo guardar el turno.");
         return;
       }
 
@@ -263,26 +318,52 @@ export default function NuevoTurnoPage() {
   return (
     <div className="p-3">
       <div style={{ maxWidth: "920px", margin: "0 auto" }}>
-        <div className="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div className="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
           <div>
-            <div className="small text-muted mb-1">Agenda</div>
-            <h3 className="h3 mb-1 d-flex align-items-center gap-2">
+            {/* <div className="small text-muted mb-1">Agenda</div> */}
+            <h3
+              className="mb-1 d-flex align-items-center gap-2"
+              style={{
+                fontSize: "1.1rem",
+                fontWeight: 600,
+                color: "#1E293B",
+              }}
+            >
               <BsCalendar3 color="#2F6FB3" />
               {turnoId ? "Editar turno" : "Nuevo turno"}
             </h3>
-            <div className="text-muted">
-              {turnoId ? "Editá el turno" : "Creá el turno"} y volvemos a la agenda del {formatDateLabel(nuevo.fecha)}.
+            <div
+              className="text-muted"
+              style={{
+                fontSize: "0.78rem",
+                lineHeight: 1.3,
+              }}
+            >
+              {turnoId ? "Editá el turno" : "Creá el turno"} y volvemos a la
+              agenda del {formatDateLabel(nuevo.fecha)}.
             </div>
           </div>
 
-          <CButton color="secondary" variant="outline" onClick={volverAgenda}>
-            <BsArrowLeft className="me-2" />
-            Volver a agenda
-          </CButton>
+          <span
+            role="button"
+            tabIndex={0}
+            title="Volver"
+            aria-label="Volver"
+            className="paciente-action-btn"
+            onClick={volverAgenda}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                volverAgenda();
+              }
+            }}
+          >
+            <BsArrowLeft />
+          </span>
         </div>
 
         <CCard className="border-0 shadow-sm">
-          <CCardBody className="p-4">
+          <CCardBody className="p-3">
             {loadingTurno ? (
               <div className="d-flex align-items-center gap-2 text-muted mb-3">
                 <CSpinner size="sm" />
@@ -291,34 +372,35 @@ export default function NuevoTurnoPage() {
             ) : null}
             {error ? <CAlert color="danger">{error}</CAlert> : null}
             {successMessage ? (
-              <CAlert color="success" className="d-flex align-items-center gap-2">
+              <CAlert
+                color="success"
+                className="d-flex align-items-center gap-2"
+              >
                 <BsCheckCircle />
                 {successMessage}
               </CAlert>
             ) : null}
 
-            <CRow className="g-3">
-              <CCol md={6}>
-                <CFormLabel>Fecha</CFormLabel>
-                <CFormInput
-                  type="date"
-                  value={nuevo.fecha}
-                  onChange={(e) => setNuevo((prev) => ({ ...prev, fecha: e.target.value }))}
-                />
-              </CCol>
+            <CRow className="g-2">
+              <CCol md={4}>
+                <CFormLabel style={compactLabelStyle}>Hora</CFormLabel>
 
-              <CCol md={6}>
-                <CFormLabel>Hora</CFormLabel>
                 <CFormSelect
                   value={nuevo.hora}
+                  style={compactInputStyle}
                   disabled={loadingAvailability || availableHours.length === 0}
-                  onChange={(e) => setNuevo((prev) => ({ ...prev, hora: e.target.value }))}
+                  onChange={(e) =>
+                    setNuevo((prev) => ({
+                      ...prev,
+                      hora: e.target.value,
+                    }))
+                  }
                   options={[
                     {
                       label: loadingAvailability
-                        ? "Cargando horarios disponibles..."
+                        ? "Cargando..."
                         : availableHours.length === 0
-                          ? "Sin horarios disponibles"
+                          ? "Sin horarios"
                           : "Seleccionar horario",
                       value: "",
                       disabled: true,
@@ -329,7 +411,25 @@ export default function NuevoTurnoPage() {
                     })),
                   ]}
                 />
-                <div className="d-flex flex-wrap gap-2 mt-2">
+              </CCol>
+              <CCol md={4}>
+                <CFormLabel style={compactLabelStyle}>Fecha</CFormLabel>
+                <CFormInput
+                  size="sm"
+                  style={compactInputStyle}
+                  type="date"
+                  value={nuevo.fecha}
+                  onChange={(e) =>
+                    setNuevo((prev) => ({ ...prev, fecha: e.target.value }))
+                  }
+                />
+              </CCol>
+              <CCol md={8}>
+                <CFormLabel style={compactLabelStyle}>
+                  Horarios rápidos
+                </CFormLabel>
+
+                <div className="d-flex flex-wrap gap-2">
                   {availableHours.map((hour) => (
                     <CButton
                       key={hour}
@@ -337,39 +437,50 @@ export default function NuevoTurnoPage() {
                       size="sm"
                       color={nuevo.hora === hour ? "primary" : "secondary"}
                       variant={nuevo.hora === hour ? undefined : "outline"}
-                      onClick={() => setNuevo((prev) => ({ ...prev, hora: hour }))}
+                      onClick={() =>
+                        setNuevo((prev) => ({
+                          ...prev,
+                          hora: hour,
+                        }))
+                      }
+                      style={{
+                        borderRadius: 10,
+                        minWidth: 62,
+                        fontSize: "0.76rem",
+                        fontWeight: 600,
+                      }}
                     >
                       {hour}
                     </CButton>
                   ))}
                 </div>
-                {loadingAvailability ? (
-                  <div className="d-flex align-items-center gap-2 text-muted mt-2">
-                    <CSpinner size="sm" />
-                    Revisando disponibilidad...
-                  </div>
-                ) : null}
-                {!loadingAvailability && availableHours.length === 0 ? (
-                  <div className="small text-danger mt-2">
-                    No hay horarios disponibles para esta fecha.
-                  </div>
-                ) : null}
               </CCol>
-
               <CCol md={12}>
-                <CFormLabel>Paciente</CFormLabel>
+                <CFormLabel style={compactLabelStyle}>Paciente</CFormLabel>
                 <div className="position-relative">
                   <BsSearch
-                    className="position-absolute text-muted"
-                    style={{ left: 12, top: "50%", transform: "translateY(-50%)" }}
+                    className="position-absolute"
+                    style={{
+                      left: 12,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      color: "#94A3B8",
+                      fontSize: "0.82rem",
+                      pointerEvents: "none",
+                      zIndex: 2,
+                    }}
                   />
                   <CFormInput
+                    size="sm"
+                    style={compactInputStyle}
                     value={pacienteQuery}
                     placeholder="Buscar por apellido, nombre o DNI"
-                    style={{ paddingLeft: 36 }}
                     disabled={loadingPacientes}
                     onFocus={() => {
-                      if (pacienteQuery.trim().length >= 2 && filteredPacientes.length > 0) {
+                      if (
+                        pacienteQuery.trim().length >= 2 &&
+                        filteredPacientes.length > 0
+                      ) {
                         setShowPacienteSuggestions(true);
                       }
                     }}
@@ -391,8 +502,13 @@ export default function NuevoTurnoPage() {
                         pacientes.some((paciente) => {
                           const nombreCompleto =
                             `${paciente.apellido || ""} ${paciente.nombre || ""}`.toLowerCase();
-                          const dni = (paciente.dni || "").toString().toLowerCase();
-                          return nombreCompleto.includes(normalized) || dni.includes(normalized);
+                          const dni = (paciente.dni || "")
+                            .toString()
+                            .toLowerCase();
+                          return (
+                            nombreCompleto.includes(normalized) ||
+                            dni.includes(normalized)
+                          );
                         });
                       setPacienteQuery(value);
                       setShowPacienteSuggestions(hasMatches);
@@ -411,7 +527,10 @@ export default function NuevoTurnoPage() {
                 {nuevo.pacienteId ? (
                   <div className="mt-2 d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill bg-light-subtle">
                     <span className="small">
-                      Paciente seleccionado: <span className="fw-semibold text-body">{nuevo.pacienteNombre}</span>
+                      Paciente seleccionado:{" "}
+                      <span className="fw-semibold text-body">
+                        {nuevo.pacienteNombre}
+                      </span>
                     </span>
                     <button
                       type="button"
@@ -434,15 +553,23 @@ export default function NuevoTurnoPage() {
                   </div>
                 ) : null}
 
-                {showPacienteSuggestions && !nuevo.pacienteId && filteredPacientes.length > 0 ? (
-                  <CListGroup className="mt-2 rounded-3 overflow-hidden">
+                {showPacienteSuggestions &&
+                !nuevo.pacienteId &&
+                filteredPacientes.length > 0 ? (
+                  <CListGroup className="mt-2 rounded-3 overflow-auto">
                     {filteredPacientes.map((paciente) => (
                       <CListGroupItem
                         key={paciente.id}
                         role="button"
-                        style={{ cursor: "pointer" }}
+                        style={{
+                          cursor: "pointer",
+                          padding: "0.45rem 0.7rem",
+                          border: "none",
+                          borderBottom: "1px solid #EEF2F7",
+                        }}
                         onClick={() => {
-                          const nombre = `${paciente.apellido || ""} ${paciente.nombre || ""}`.trim();
+                          const nombre =
+                            `${paciente.apellido || ""} ${paciente.nombre || ""}`.trim();
                           setNuevo((prev) => ({
                             ...prev,
                             pacienteId: paciente.id,
@@ -454,55 +581,121 @@ export default function NuevoTurnoPage() {
                           setShowPacienteSuggestions(false);
                         }}
                       >
-                        <div className="fw-semibold">{`${paciente.apellido || ""} ${paciente.nombre || ""}`.trim()}</div>
-                        <div className="small text-muted">DNI: {paciente.dni || "-"}</div>
+                        <div
+                          className="fw-semibold"
+                          style={{
+                            fontSize: "0.82rem",
+                            fontWeight: 600,
+                            color: "#1E293B",
+                            lineHeight: 1.2,
+                          }}
+                        >
+                          {`${paciente.apellido || ""} ${paciente.nombre || ""}`.trim()}
+                        </div>
+                        <div
+                          className="small text-muted"
+                          style={{
+                            fontSize: "0.7rem",
+                            color: "#94A3B8",
+                            marginTop: 2,
+                          }}
+                        >
+                          DNI: {paciente.dni || "-"}
+                        </div>
                       </CListGroupItem>
                     ))}
                   </CListGroup>
                 ) : null}
               </CCol>
 
-              <CCol md={6}>
-                <CFormLabel>Nombre de contacto</CFormLabel>
+              <CCol md={7}>
+                <CFormLabel style={compactLabelStyle}>
+                  Nombre de contacto
+                </CFormLabel>
                 <CFormInput
+                  style={compactInputStyle}
+                  size="sm"
                   value={nuevo.nombreContacto}
                   placeholder="Ej: Luis Suarez"
                   disabled={Boolean(nuevo.pacienteId)}
-                  onChange={(e) => setNuevo((prev) => ({ ...prev, nombreContacto: e.target.value }))}
+                  onChange={(e) =>
+                    setNuevo((prev) => ({
+                      ...prev,
+                      nombreContacto: e.target.value,
+                    }))
+                  }
                 />
-                <div className="small text-muted mt-1">
-                  Si no seleccionás un paciente registrado, cargá acá el nombre del contacto.
+                <div
+                  className="small text-muted mt-1"
+                  style={{
+                    fontSize: "0.68rem",
+                    color: "#94A3B8",
+                    marginTop: 4,
+                    lineHeight: 1.35,
+                    fontWeight: 500,
+                  }}
+                >
+                  Si no seleccionás un paciente registrado, cargá acá el nombre
+                  del contacto.
                 </div>
               </CCol>
 
-              <CCol md={6}>
-                <CFormLabel>Teléfono de contacto</CFormLabel>
+              <CCol md={5}>
+                <CFormLabel style={compactLabelStyle}>
+                  Teléfono de contacto
+                </CFormLabel>
                 <CFormInput
+                  size="sm"
+                  style={compactInputStyle}
                   value={nuevo.telefonoContacto}
                   placeholder="Ej: 11 5555 5555"
-                  onChange={(e) => setNuevo((prev) => ({ ...prev, telefonoContacto: e.target.value }))}
+                  onChange={(e) =>
+                    setNuevo((prev) => ({
+                      ...prev,
+                      telefonoContacto: e.target.value,
+                    }))
+                  }
                 />
               </CCol>
 
               <CCol md={12}>
-                <CFormLabel>Notas rápidas</CFormLabel>
+                <CFormLabel style={compactLabelStyle}>Notas rápidas</CFormLabel>
                 <CFormTextarea
-                  rows={3}
+                  style={{
+                    ...compactInputStyle,
+                    resize: "none",
+                    fontSize: "0.82rem",
+                    borderRadius: 10,
+                  }}
+                  rows={2}
                   value={nuevo.notas}
-                  onChange={(e) => setNuevo((prev) => ({ ...prev, notas: e.target.value }))}
+                  onChange={(e) =>
+                    setNuevo((prev) => ({ ...prev, notas: e.target.value }))
+                  }
                   placeholder="Agregar una nota breve para el turno"
                 />
               </CCol>
 
-              <CCol md={12} className="d-flex justify-content-end gap-2 pt-2">
-                <CButton color="secondary" variant="outline" onClick={volverAgenda}>
-                  Cancelar
+              <CCol md={12} className="d-flex justify-content-end gap-2 pt-1">
+                <CButton
+                  size="sm"
+                  onClick={() => void agregarTurno()}
+                  disabled={
+                    loadingTurno ||
+                    (!nuevo.pacienteId && !nuevo.nombreContacto.trim()) ||
+                    !nuevo.hora ||
+                    saving
+                  }
+                >
+                  {saving ? "Guardando..." : turnoId ? "Actualizar" : "Guardar"}
                 </CButton>
                 <CButton
-                  onClick={() => void agregarTurno()}
-                  disabled={loadingTurno || (!nuevo.pacienteId && !nuevo.nombreContacto.trim()) || !nuevo.hora || saving}
+                  color="secondary"
+                  variant="outline"
+                  onClick={volverAgenda}
+                  size="sm"
                 >
-                  {saving ? "Guardando..." : turnoId ? "Actualizar turno" : "Guardar turno"}
+                  Cancelar
                 </CButton>
               </CCol>
             </CRow>

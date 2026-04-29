@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { CButton, CButtonGroup } from "@coreui/react";
 import {
   BsCalendar3,
@@ -6,11 +6,7 @@ import {
   BsChevronRight,
   BsPlusLg,
 } from "react-icons/bs";
-import {
-  useLocation,
-  useNavigate,
-  useSearchParams,
-} from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 import AgendaDiaPage from "./AgendaDiaPage";
 import AgendaSemanaPage from "./AgendaSemanaPage";
@@ -22,7 +18,6 @@ import {
   formatDateInput,
   formatDateLabel,
   formatMonthName,
-  formatMonthTitle,
   formatYearNumber,
   shiftDateByDays,
   shiftDateByMonths,
@@ -39,42 +34,18 @@ export default function AgendaPage() {
   const queryDate = searchParams.get("fecha");
   const queryView = searchParams.get("view");
 
-  const [viewMode, setViewMode] = useState<AgendaViewMode>(
-    queryView === "week" || queryView === "month"
-      ? queryView
-      : "day",
-  );
+  const selectedDate = queryDate || formatDateInput(new Date());
 
-  const [selectedDate, setSelectedDate] = useState(
-    () => queryDate || formatDateInput(new Date()),
-  );
+  const viewMode: AgendaViewMode =
+    queryView === "week" || queryView === "month" ? queryView : "day";
 
-  const [refreshKey, setRefreshKey] = useState(0);
+  // const [refreshKey, setRefreshKey] = useState(0);
+  const refreshKey =
+    location.state && typeof location.state === "object"
+      ? (location.state.refreshAt ?? 0)
+      : 0;
 
   const dateInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (queryDate) {
-      setSelectedDate(queryDate);
-    }
-
-    if (
-      queryView === "day" ||
-      queryView === "week" ||
-      queryView === "month"
-    ) {
-      setViewMode(queryView);
-    }
-
-    const refreshAt =
-      location.state && typeof location.state === "object"
-        ? location.state.refreshAt
-        : undefined;
-
-    if (typeof refreshAt === "number") {
-      setRefreshKey((prev) => prev + 1);
-    }
-  }, [location.state, queryDate, queryView]);
 
   useEffect(() => {
     setSearchParams((prev) => {
@@ -91,49 +62,49 @@ export default function AgendaPage() {
     viewMode === "day"
       ? formatDateLabel(selectedDate)
       : viewMode === "week"
-        ? `Semana de ${formatDateLabel(selectedDate)}`
-        : formatMonthTitle(selectedDate);
+        ? `Semana ${formatDateLabel(selectedDate)}`
+        : `${formatMonthName(selectedDate)} ${formatYearNumber(selectedDate)}`;
 
   const handleShift = (direction: -1 | 1) => {
-    if (viewMode === "month") {
-      setSelectedDate((prev) =>
-        shiftDateByMonths(prev, direction),
-      );
-      return;
-    }
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
 
-    if (viewMode === "week") {
-      setSelectedDate((prev) =>
-        shiftDateByDays(prev, 7 * direction),
-      );
-      return;
-    }
+      const currentDate = prev.get("fecha") || formatDateInput(new Date());
 
-    setSelectedDate((prev) =>
-      shiftDateByDays(prev, direction),
-    );
+      let newDate = currentDate;
+
+      if (viewMode === "month") {
+        newDate = shiftDateByMonths(currentDate, direction);
+      } else if (viewMode === "week") {
+        newDate = shiftDateByDays(currentDate, 7 * direction);
+      } else {
+        newDate = shiftDateByDays(currentDate, direction);
+      }
+
+      next.set("fecha", newDate);
+
+      return next;
+    });
   };
 
   return (
     <div className="p-3">
       <div style={{ maxWidth: "1080px", margin: "0 auto" }}>
         <div
-          className="border rounded-4 p-3 mb-3"
+          className="border rounded-4 p-2 mb-2"
           style={{
             background:
               "linear-gradient(135deg, #F7FBFF 0%, #EEF5FD 55%, #E4EEF9 100%)",
             borderColor: "#D5E5F6",
           }}
         >
-          <div className="d-flex flex-column gap-3">
-
+          <div className="d-flex flex-column gap-2">
             {/* HEADER */}
             <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
-
               <div className="d-flex align-items-center gap-3 flex-wrap">
                 <BsCalendar3
                   color={sipacBlue}
-                  size={26}
+                  size={20}
                   className="flex-shrink-0"
                 />
 
@@ -142,73 +113,207 @@ export default function AgendaPage() {
                     className="fw-semibold mb-0"
                     style={{
                       color: "#2D3748",
-                      fontSize: "1.1rem",
+                      fontSize: "0.95rem",
                     }}
                   >
                     Agenda
                   </h3>
-
                   <div
-                    className="fw-bold text-uppercase"
+                    className="d-flex align-items-center gap-2"
                     style={{
-                      color: sipacBlue,
-                      fontSize:
-                        "clamp(0.8rem, 1.4vw, 1rem)",
-                      letterSpacing: "0.02em",
-                      lineHeight: 1,
+                      padding: "0.28rem 0.65rem",
+                      borderRadius: 12,
+                      background:
+                        "linear-gradient(135deg, #F4F9FF 0%, #E7F0FB 100%)",
+                      border: "1px solid #D7E6F5",
+                      boxShadow: "0 2px 8px rgba(47,111,179,0.08)",
                     }}
                   >
-                    {formatMonthName(selectedDate)} /{" "}
-                    {formatYearNumber(selectedDate)}
+                    <span
+                      style={{
+                        color: "#2F6FB3",
+                        fontWeight: 700,
+                        fontSize: "0.88rem",
+                        letterSpacing: "0.04em",
+                        textTransform: "uppercase",
+                        lineHeight: 1,
+                      }}
+                    >
+                      {formatMonthName(selectedDate)}
+                    </span>
+
+                    <div
+                      style={{
+                        width: 4,
+                        height: 4,
+                        borderRadius: "50%",
+                        backgroundColor: "#93C5FD",
+                        flexShrink: 0,
+                      }}
+                    />
+
+                    <span
+                      style={{
+                        color: "#2F6FB3",
+                        fontWeight: 600,
+                        fontSize: "0.82rem",
+                        letterSpacing: "0.03em",
+                        lineHeight: 1,
+                      }}
+                    >
+                      {formatYearNumber(selectedDate)}
+                    </span>
                   </div>
                 </div>
               </div>
 
-              <CButtonGroup>
+              {/* <CButtonGroup>
                 <CButton
-                  color={
-                    viewMode === "day"
-                      ? "primary"
-                      : "secondary"
+                  color={viewMode === "day" ? "primary" : "secondary"}
+                  variant={viewMode === "day" ? undefined : "outline"}
+                  style={{
+                    padding: "0.22rem 0.55rem",
+                    fontSize: "0.8rem",
+                  }}
+                  onClick={() =>
+                    setSearchParams((prev) => {
+                      const next = new URLSearchParams(prev);
+                      next.set("view", "day");
+                      return next;
+                    })
                   }
-                  variant={
-                    viewMode === "day"
-                      ? undefined
-                      : "outline"
-                  }
-                  onClick={() => setViewMode("day")}
                 >
                   Día
                 </CButton>
 
                 <CButton
-                  color={
-                    viewMode === "week"
-                      ? "primary"
-                      : "secondary"
+                  color={viewMode === "week" ? "primary" : "secondary"}
+                  variant={viewMode === "week" ? undefined : "outline"}
+                  style={{
+                    padding: "0.22rem 0.55rem",
+                    fontSize: "0.8rem",
+                  }}
+                  onClick={() =>
+                    setSearchParams((prev) => {
+                      const next = new URLSearchParams(prev);
+                      next.set("view", "week");
+                      return next;
+                    })
                   }
-                  variant={
-                    viewMode === "week"
-                      ? undefined
-                      : "outline"
-                  }
-                  onClick={() => setViewMode("week")}
                 >
                   Semana
                 </CButton>
 
                 <CButton
-                  color={
-                    viewMode === "month"
-                      ? "primary"
-                      : "secondary"
+                  color={viewMode === "month" ? "primary" : "secondary"}
+                  variant={viewMode === "month" ? undefined : "outline"}
+                  style={{
+                    padding: "0.22rem 0.55rem",
+                    fontSize: "0.8rem",
+                  }}
+                  onClick={() =>
+                    setSearchParams((prev) => {
+                      const next = new URLSearchParams(prev);
+                      next.set("view", "month");
+                      return next;
+                    })
                   }
-                  variant={
-                    viewMode === "month"
-                      ? undefined
-                      : "outline"
+                >
+                  Mes
+                </CButton>
+              </CButtonGroup> */}
+              <CButtonGroup
+                style={{
+                  padding: 4,
+                  borderRadius: 14,
+
+                  background:
+                    "linear-gradient(135deg, #F7FBFF 0%, #EAF3FC 100%)",
+
+                  border: "1px solid #D8E6F5",
+
+                  boxShadow: "0 2px 10px rgba(47,111,179,0.08)",
+
+                  marginRight: "1rem",
+                }}
+              >
+                <CButton
+                  onClick={() =>
+                    setSearchParams((prev) => {
+                      const next = new URLSearchParams(prev);
+                      next.set("view", "day");
+                      return next;
+                    })
                   }
-                  onClick={() => setViewMode("month")}
+                  style={{
+                    border: "none",
+                    borderRadius: 10,
+                    padding: "0.32rem 0.9rem",
+                    fontSize: "0.82rem",
+                    fontWeight: 600,
+                    backgroundColor:
+                      viewMode === "day" ? "#2F6FB3" : "transparent",
+                    color: viewMode === "day" ? "#FFFFFF" : "#47637F",
+                    transition: "all 0.18s ease",
+                    boxShadow:
+                      viewMode === "day"
+                        ? "0 2px 8px rgba(47,111,179,0.22)"
+                        : "none",
+                  }}
+                >
+                  Día
+                </CButton>
+
+                <CButton
+                  onClick={() =>
+                    setSearchParams((prev) => {
+                      const next = new URLSearchParams(prev);
+                      next.set("view", "week");
+                      return next;
+                    })
+                  }
+                  style={{
+                    border: "none",
+                    borderRadius: 10,
+                    padding: "0.32rem 0.9rem",
+                    fontSize: "0.82rem",
+                    fontWeight: 600,
+                    backgroundColor:
+                      viewMode === "week" ? "#2F6FB3" : "transparent",
+                    color: viewMode === "week" ? "#FFFFFF" : "#47637F",
+                    transition: "all 0.18s ease",
+                    boxShadow:
+                      viewMode === "week"
+                        ? "0 2px 8px rgba(47,111,179,0.22)"
+                        : "none",
+                  }}
+                >
+                  Semana
+                </CButton>
+
+                <CButton
+                  onClick={() =>
+                    setSearchParams((prev) => {
+                      const next = new URLSearchParams(prev);
+                      next.set("view", "month");
+                      return next;
+                    })
+                  }
+                  style={{
+                    border: "none",
+                    borderRadius: 10,
+                    padding: "0.32rem 0.9rem",
+                    fontSize: "0.82rem",
+                    fontWeight: 600,
+                    backgroundColor:
+                      viewMode === "month" ? "#2F6FB3" : "transparent",
+                    color: viewMode === "month" ? "#FFFFFF" : "#47637F",
+                    transition: "all 0.18s ease",
+                    boxShadow:
+                      viewMode === "month"
+                        ? "0 2px 8px rgba(47,111,179,0.22)"
+                        : "none",
+                  }}
                 >
                   Mes
                 </CButton>
@@ -217,43 +322,51 @@ export default function AgendaPage() {
 
             {/* CONTROLES */}
             <div className="d-flex align-items-center justify-content-between flex-wrap gap-4">
-
               <div className="d-flex align-items-center gap-3 flex-nowrap">
-
                 {/* BOTON IZQUIERDA */}
                 <CButton
-                  color="secondary"
-                  variant="outline"
-                  size="sm"
                   onClick={() => handleShift(-1)}
+                  className="d-flex align-items-center justify-content-center border-0"
                   style={{
-                    width: 36,
-                    height: 36,
+                    width: 32,
+                    height: 32,
                     borderRadius: 10,
                     flexShrink: 0,
+                    padding: 0,
+                    background:
+                      "linear-gradient(135deg, #F4F9FF 0%, #E6F0FB 100%)",
+                    color: "#2F6FB3",
+                    boxShadow: "0 2px 8px rgba(47,111,179,0.12)",
+                    transition: "all 0.18s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background =
+                      "linear-gradient(135deg, #E8F1FB 0%, #D9E9FA 100%)";
+                    e.currentTarget.style.transform = "translateY(-1px)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background =
+                      "linear-gradient(135deg, #F4F9FF 0%, #E6F0FB 100%)";
+                    e.currentTarget.style.transform = "translateY(0)";
                   }}
                 >
-                  <BsChevronLeft size={18} />
+                  <BsChevronLeft size={15} />
                 </CButton>
-
                 {/* DATEPICKER CUSTOM */}
                 <div
-                  onClick={() =>
-                    dateInputRef.current?.showPicker()
-                  }
+                  onClick={() => dateInputRef.current?.showPicker()}
                   className="d-flex align-items-center justify-content-center gap-3 fw-semibold text-capitalize"
                   style={{
                     position: "relative",
-                    minWidth: 240,
-                    padding: "0.45rem 0.85rem",
-                    borderRadius: "14px",
+                    minWidth: 210,
+                    padding: "0.32rem 0.7rem",
+                    borderRadius: "10px",
                     background:
                       "linear-gradient(135deg, #FFFFFF 0%, #F5F9FF 100%)",
                     border: "1px solid #D8E6F5",
-                    boxShadow:
-                      "0 4px 14px rgba(47,111,179,0.08)",
+                    boxShadow: "0 4px 14px rgba(47,111,179,0.08)",
                     color: "#2F6FB3",
-                    fontSize: "0.9rem",
+                    fontSize: "0.8rem",
                     whiteSpace: "nowrap",
                     letterSpacing: "0.01em",
                     cursor: "pointer",
@@ -263,8 +376,14 @@ export default function AgendaPage() {
                     ref={dateInputRef}
                     type="date"
                     value={selectedDate}
-                    onChange={(e) =>
-                      setSelectedDate(e.target.value)
+                    onChange={
+                      (e) =>
+                        setSearchParams((prev) => {
+                          const next = new URLSearchParams(prev);
+                          next.set("fecha", e.target.value);
+                          return next;
+                        })
+                      // setSelectedDate(e.target.value)
                     }
                     style={{
                       position: "absolute",
@@ -284,7 +403,7 @@ export default function AgendaPage() {
                       flexShrink: 0,
                     }}
                   >
-                    <BsCalendar3 size={15} />
+                    <BsCalendar3 size={14} />
                   </div>
 
                   <span
@@ -296,23 +415,35 @@ export default function AgendaPage() {
                     {pageLabel}
                   </span>
                 </div>
-
                 {/* BOTON DERECHA */}
                 <CButton
-                  color="secondary"
-                  variant="outline"
-                  size="sm"
                   onClick={() => handleShift(1)}
+                  className="d-flex align-items-center justify-content-center border-0"
                   style={{
-                    width: 42,
-                    height: 42,
-                    borderRadius: 12,
+                    width: 32,
+                    height: 32,
+                    borderRadius: 10,
                     flexShrink: 0,
+                    padding: 0,
+                    background:
+                      "linear-gradient(135deg, #F4F9FF 0%, #E6F0FB 100%)",
+                    color: "#2F6FB3",
+                    boxShadow: "0 2px 8px rgba(47,111,179,0.12)",
+                    transition: "all 0.18s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background =
+                      "linear-gradient(135deg, #E8F1FB 0%, #D9E9FA 100%)";
+                    e.currentTarget.style.transform = "translateY(-1px)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background =
+                      "linear-gradient(135deg, #F4F9FF 0%, #E6F0FB 100%)";
+                    e.currentTarget.style.transform = "translateY(0)";
                   }}
                 >
-                  <BsChevronRight size={18} />
+                  <BsChevronRight size={15} />
                 </CButton>
-
                 {/* BOTON NUEVO TURNO */}
                 <CButton
                   onClick={() => {
@@ -326,28 +457,26 @@ export default function AgendaPage() {
                   style={{
                     backgroundColor: "#E8F1FB",
                     color: sipacBlue,
-                    borderRadius: "12px",
-                    padding: "0.4rem 0.8rem",
+                    borderRadius: "10px",
+                    padding: "0.3rem 0.65rem",
                     whiteSpace: "nowrap",
-                    boxShadow:
-                      "0 2px 8px rgba(47,111,179,0.10)",
+                    boxShadow: "0 2px 8px rgba(47,111,179,0.10)",
                   }}
                 >
                   <div
                     className="d-flex align-items-center justify-content-center"
                     style={{
-                      width: 24,
-                      height: 24,
+                      width: 20,
+                      height: 20,
                       borderRadius: "50%",
                       backgroundColor: sipacBlue,
                       color: "white",
-                      fontSize: "0.75rem",
+                      fontSize: "0.65rem",
                       flexShrink: 0,
                     }}
                   >
                     <BsPlusLg />
                   </div>
-
                   <span>Agregar turno</span>
                 </CButton>
               </div>
@@ -356,24 +485,16 @@ export default function AgendaPage() {
         </div>
 
         {viewMode === "day" ? (
-          <AgendaDiaPage
-            selectedDate={selectedDate}
-            refreshKey={refreshKey}
-          />
+          <AgendaDiaPage selectedDate={selectedDate} refreshKey={refreshKey} />
         ) : null}
-
         {viewMode === "week" ? (
           <AgendaSemanaPage
             selectedDate={selectedDate}
             refreshKey={refreshKey}
           />
         ) : null}
-
         {viewMode === "month" ? (
-          <AgendaMesPage
-            selectedDate={selectedDate}
-            refreshKey={refreshKey}
-          />
+          <AgendaMesPage selectedDate={selectedDate} refreshKey={refreshKey} />
         ) : null}
       </div>
     </div>

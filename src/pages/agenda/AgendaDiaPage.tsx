@@ -133,9 +133,9 @@ export default function AgendaDiaPage({
       <CCardBody className="p-3 p-md-4">
         <div
           className="mb-0 d-flex align-items-center justify-content-between flex-wrap gap-3"
-         style={{
-    paddingBottom: "0.35rem",
-  }}
+          style={{
+            paddingBottom: "0.35rem",
+          }}
         >
           {/* IZQUIERDA */}
           <div
@@ -165,7 +165,7 @@ export default function AgendaDiaPage({
           </div>
 
           {/* DERECHA */}
-          <div className="d-flex align-items-center gap-3">
+          {/* <div className="d-flex align-items-center gap-3">
             <CFormCheck
               label="Ver todos"
               checked={mostrarCancelados}
@@ -175,6 +175,30 @@ export default function AgendaDiaPage({
                 color: "#64748B",
                 marginBottom: 0,
                 whiteSpace: "nowrap",
+              }}
+            />
+          </div> */}
+          <div
+            className="d-flex align-items-center"
+            style={{
+              padding: "0.32rem 0.75rem",
+              borderRadius: 12,
+              background: "linear-gradient(135deg, #F7FBFF 0%, #EDF5FD 100%)",
+              border: "1px solid #D8E6F5",
+              boxShadow: "0 2px 8px rgba(47,111,179,0.06)",
+            }}
+          >
+            <CFormCheck
+              label="Ver todos"
+              checked={mostrarCancelados}
+              onChange={(e) => setMostrarCancelados(e.target.checked)}
+              style={{
+                marginBottom: 0,
+                fontSize: "0.8rem",
+                fontWeight: 600,
+                color: "#2F4F6F",
+                whiteSpace: "nowrap",
+                userSelect: "none",
               }}
             />
           </div>
