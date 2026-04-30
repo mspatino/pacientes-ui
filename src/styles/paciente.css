@@ -36,3 +36,49 @@
   flex-direction: column;
   gap: 1rem;
 }
+
+
+/* =========================
+   COMPACT MODE
+========================= */
+
+.paciente-accordion-compact {
+  font-size: 0.92rem;
+}
+
+.paciente-accordion-compact .accordion-button {
+  padding: 0.7rem 0.9rem;
+  min-height: auto;
+}
+
+.paciente-accordion-compact .accordion-body {
+  padding: 0.9rem;
+}
+
+.paciente-accordion-compact .paciente-section-card {
+  padding: 0.85rem;
+  border-radius: 10px;
+}
+
+.paciente-accordion-compact .paciente-accordion-icon {
+  font-size: 0.95rem;
+}
+
+.paciente-accordion-compact .paciente-chip {
+  padding: 0.2rem 0.55rem;
+  font-size: 0.78rem;
+  border-radius: 999px;
+}
+
+.paciente-accordion-compact .info-row {
+  padding: 0.45rem 0;
+}
+
+.paciente-accordion-compact .info-row-label {
+  font-size: 0.84rem;
+}
+
+.paciente-accordion-compact .info-row-value {
+  font-size: 0.84rem;
+}
+

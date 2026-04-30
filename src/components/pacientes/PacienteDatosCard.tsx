@@ -31,7 +31,7 @@ export default function PacienteDatosCard({
     <CAccordion
       activeItemKey={1}
       alwaysOpen
-      className="paciente-accordion w-100"
+      className="paciente-accordion paciente-accordion-compact w-100"
     >
       <CAccordionItem itemKey={1}>
         <CAccordionHeader>
@@ -45,7 +45,7 @@ export default function PacienteDatosCard({
         </CAccordionHeader>
 
         <CAccordionBody>
-          <div className="row g-3">
+          <div className="row g-1">
 
             {/* DATOS PERSONALES */}
             <div className="col-12 col-lg-6">

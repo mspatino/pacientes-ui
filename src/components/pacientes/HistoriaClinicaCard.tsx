@@ -16,7 +16,7 @@ export default function HistoriaClinicaCard({
     <div className="border rounded p-3 bg-light-subtle">
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
         <div className="d-flex flex-column gap-1">
-          <div className="d-inline-flex align-items-center gap-2 fw-semibold">
+          <div className="d-inline-flex align-items-center gap-2 fw-semibold text-primary">
             <BsClipboard2Pulse />
             Historia clínica
           </div>
