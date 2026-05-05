@@ -4,13 +4,14 @@ import {
   CAccordionItem,
 } from "@coreui/react";
 import { BsJournalText } from "react-icons/bs";
+import InfoList from "./InfoList";
 
 interface Field {
   label: string;
   value: string;
 }
 
-interface HistoriaClinicaGeneralCardProps {
+interface Props {
   fields: Field[];
   hasEstado: boolean;
   activa?: boolean;
@@ -18,58 +19,39 @@ interface HistoriaClinicaGeneralCardProps {
 
 export default function HistoriaClinicaGeneralCard({
   fields,
-  
-}: HistoriaClinicaGeneralCardProps) {
+  hasEstado,
+  activa,
+}: Props) {
   return (
-    <CAccordionItem itemKey={1}>
-<CAccordionHeader className="p-0">
-  <div className="d-flex w-100 align-items-center gap-3 justify-content-between p-3">
-    <span className="d-flex align-items-center gap-2">
+    <CAccordionItem itemKey={1} className="hc-item">
+<CAccordionHeader className="hc-header d-flex align-items-center">
+ 
+    <span className="hc-title d-flex align-items-center gap-2">
       <BsJournalText />
       Datos clínicos generales
     </span>
 
     {/* {hasEstado && (
       <span
-        className={`badge rounded-pill px-3 py-2 ${
-          activa
-            ? "bg-success-subtle text-success"
-            : "bg-danger-subtle text-danger"
+        className={`hc-badge ms-auto ${
+          activa ? "hc-active" : "hc-inactive"
         }`}
       >
         {activa ? "Activa" : "Inactiva"}
       </span>
     )} */}
-  </div>
-</CAccordionHeader>
-
-      <CAccordionBody>
-        <div className="d-flex flex-column gap-3">
-  
-
-          {fields.length === 0 ? (
-            <div className="small text-muted">
-              No hay datos clínicos cargados para mostrar.
-            </div>
-          ) : (
-            <div className="d-flex flex-column gap-3">
-              {fields.map((field) => (
-                <div
-                  key={field.label}
-                  className="border-bottom pb-2"
-                >
-                  <div className="small text-muted">
-                    {field.label}
-                  </div>
-
-                  <div className="fw-semibold">
-                    {field.value}
-                  </div>
-                </div>
-              ))}
+          {hasEstado && (
+            <div className="ms-auto">
+              <span className="badge rounded-pill px-3 py-2 bg-success-subtle text-success">
+                {activa ? "Activa" : "Inactiva"}
+              </span>
             </div>
           )}
-        </div>
+ 
+</CAccordionHeader>
+
+      <CAccordionBody className="hc-body">
+        <InfoList fields={fields} />
       </CAccordionBody>
     </CAccordionItem>
   );

@@ -82,3 +82,222 @@
   font-size: 0.84rem;
 }
 
+/* ===== Base ===== */
+
+.paciente-accordion .accordion-button {
+  display: flex !important;
+  width: 100% !important;
+  align-items: center;
+}
+
+.paciente-accordion .accordion-body {
+  padding: 8px 16px !important;
+}
+
+/* ===== Header ===== */
+
+.hc-header {
+  border-bottom: 1px solid #dee2e6;
+}
+
+.hc-title {
+  font-weight: 600;
+  font-size: 19px; /* antes 13px */
+  /* color: #2c3e50; */
+    color: #2F6FB3; /* color SIPAC */
+}
+/* ===== Estado ===== */
+
+/* .hc-badge {
+  font-size: 15px; 
+  padding: 5px 12px;
+} */
+
+.hc-badge {
+  margin-left: auto;
+  margin-right: 8px; /* separa del borde */
+}
+
+.hc-active {
+  background: #e6f4ea;
+  color: #1e7e34;
+}
+
+.hc-inactive {
+  background: #fdecea;
+  color: #c82333;
+}
+
+/* ===== GRID CLÍNICO ===== */
+
+.hc-grid {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== Filas ===== */
+
+.hc-row {
+  /*display: contents;  clave para grilla limpia */
+    display: grid;
+  grid-template-columns: 300px 1fr;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid #eef1f4; /* línea tenue */
+}
+
+.hc-row:last-child {
+  border-bottom: none;
+}
+
+.hc-label {
+  font-size: 16px;
+  color: #6c757d;
+}
+
+.hc-value {
+  font-size: 16px;
+  font-weight: 500;
+  color: #212529;
+}
+
+/* .hc-label {
+  font-size: 16px; 
+  color: #6c757d;
+}
+
+.hc-value {
+  font-size: 16px;
+  color: #212529;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+} */
+
+/* ===== Separador suave ===== */
+
+.hc-grid > .hc-label {
+  border-bottom: 1px solid #f1f3f5;
+  padding-bottom: 4px;
+}
+
+.hc-grid > .hc-value {
+  border-bottom: 1px solid #f1f3f5;
+  padding-bottom: 4px;
+}
+
+/* ===== Empty ===== */
+
+.hc-empty {
+  font-size: 17px;
+}
+
+/* contenedor centrado */
+.hc-action {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+/* botón estilo sistema clínico */
+.hc-btn {
+  font-size: 14px;
+  padding: 6px 16px;
+  border-radius: 6px;
+
+  color: #2F6FB3; /* SIPAC */
+  border: 1px solid #2F6FB3;
+  background: transparent;
+
+  transition: all 0.2s ease;
+}
+
+/* hover profesional */
+.hc-btn:hover {
+  background: #2F6FB3;
+  color: #fff;
+}
+
+.hc-action-btn {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #2F6FB3; /* color SIPAC */
+  background-color: transparent;
+  border: 1px solid rgba(47, 111, 179, 0.25);
+  border-radius: 999px;
+  padding: 6px 14px;
+
+  transition: all 0.2s ease;
+}
+
+/* hover */
+.hc-action-btn:hover {
+  background-color: #E8F1FB;
+  border-color: #2F6FB3;
+  transform: translateY(-1px);
+}
+
+/* click */
+.hc-action-btn:active {
+  transform: scale(0.97);
+}
+
+/* focus accesible */
+.hc-action-btn:focus {
+  box-shadow: 0 0 0 2px rgba(47, 111, 179, 0.25);
+}
+
+/* BOTÓN */
+.hc-action-btn {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #2F6FB3;
+  background-color: transparent;
+  border: 1px solid rgba(47, 111, 179, 0.25);
+  border-radius: 999px;
+  padding: 6px 14px;
+
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+/* hover elegante */
+.hc-action-btn:hover:not(:disabled) {
+  background-color: #E8F1FB;
+  border-color: #2F6FB3;
+  transform: translateY(-1px);
+}
+
+/* click */
+.hc-action-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* disabled */
+.hc-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* focus accesible */
+.hc-action-btn:focus {
+  box-shadow: 0 0 0 2px rgba(47, 111, 179, 0.25);
+}
+
+/* icono */
+.hc-icon {
+  transition: transform 0.2s ease;
+}
+
+/* animación loading */
+.spin {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

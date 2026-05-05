@@ -194,96 +194,75 @@ export default function HistoriaClinicaPage() {
     }) ?? null;
 
   const diagnosticoFields: Array<{ label: string; value: string }> = (() => {
-  if (!diagnosticoPrincipal) return [];
+    if (!diagnosticoPrincipal) return [];
 
-  const item = diagnosticoPrincipal as Record<string, unknown>;
+    const item = diagnosticoPrincipal as Record<string, unknown>;
 
-  const descripcionTexto =
-    typeof item.descripcion === "string" &&
-    item.descripcion.trim()
-      ? item.descripcion
-      : null;
-
-  const evolucion =
-    typeof item.evolucion === "string" &&
-    item.evolucion.trim()
-      ? item.evolucion
-      : null;
-
-  const tratamiento =
-    typeof item.tratamiento === "string" &&
-    item.tratamiento.trim()
-      ? item.tratamiento
-      : null;
-
-  const fecha =
-    typeof item.fecha === "string"
-      ? formatDateTime(item.fecha)
-      : null;
-
-  const fechaFin =
-    typeof item.fechaFin === "string" &&
-    item.fechaFin.trim()
-      ? formatDateTime(item.fechaFin)
-      : typeof item.fecha_fin === "string" &&
-          item.fecha_fin.trim()
-        ? formatDateTime(item.fecha_fin)
+    const descripcionTexto =
+      typeof item.descripcion === "string" && item.descripcion.trim()
+        ? item.descripcion
         : null;
 
-  const cie10 =
-    item.cie10 && typeof item.cie10 === "object"
-      ? (item.cie10 as Record<string, unknown>)
-      : null;
+    const evolucion =
+      typeof item.evolucion === "string" && item.evolucion.trim()
+        ? item.evolucion
+        : null;
 
-  const cie10Codigo =
-    cie10 &&
-    typeof cie10.codigo === "string" &&
-    cie10.codigo.trim()
-      ? cie10.codigo
-      : null;
+    const tratamiento =
+      typeof item.tratamiento === "string" && item.tratamiento.trim()
+        ? item.tratamiento
+        : null;
 
-  const cie10Descripcion =
-    cie10 &&
-    typeof cie10.descripcion === "string" &&
-    cie10.descripcion.trim()
-      ? cie10.descripcion
-      : null;
+    const fecha =
+      typeof item.fecha === "string" ? formatDateTime(item.fecha) : null;
 
-  const cie10Label = [cie10Codigo, cie10Descripcion]
-    .filter(Boolean)
-    .join(" - ");
+    const fechaFin =
+      typeof item.fechaFin === "string" && item.fechaFin.trim()
+        ? formatDateTime(item.fechaFin)
+        : typeof item.fecha_fin === "string" && item.fecha_fin.trim()
+          ? formatDateTime(item.fecha_fin)
+          : null;
 
-  return [
-    ...(descripcionTexto
-      ? [
-          {
-            label: "Descripción clínica",
-            value: descripcionTexto,
-          },
-        ]
-      : []),
+    const cie10 =
+      item.cie10 && typeof item.cie10 === "object"
+        ? (item.cie10 as Record<string, unknown>)
+        : null;
 
-    ...(cie10Label
-      ? [{ label: "CIE-10", value: cie10Label }]
-      : []),
+    const cie10Codigo =
+      cie10 && typeof cie10.codigo === "string" && cie10.codigo.trim()
+        ? cie10.codigo
+        : null;
 
-    ...(fecha
-      ? [{ label: "Fecha", value: fecha }]
-      : []),
+    const cie10Descripcion =
+      cie10 && typeof cie10.descripcion === "string" && cie10.descripcion.trim()
+        ? cie10.descripcion
+        : null;
 
-    ...(fechaFin
-      ? [{ label: "Fecha fin", value: fechaFin }]
-      : []),
+    const cie10Label = [cie10Codigo, cie10Descripcion]
+      .filter(Boolean)
+      .join(" - ");
 
-    ...(evolucion
-      ? [{ label: "Evolución", value: evolucion }]
-      : []),
+    return [
+      ...(descripcionTexto
+        ? [
+            {
+              label: "Descripción clínica",
+              value: descripcionTexto,
+            },
+          ]
+        : []),
 
-    ...(tratamiento
-      ? [{ label: "Tratamiento", value: tratamiento }]
-      : []),
-  ];
-})();  
+      ...(cie10Label ? [{ label: "CIE-10", value: cie10Label }] : []),
+
+      ...(fecha ? [{ label: "Fecha", value: fecha }] : []),
+
+      ...(fechaFin ? [{ label: "Fecha fin", value: fechaFin }] : []),
+
+      ...(evolucion ? [{ label: "Evolución", value: evolucion }] : []),
+
+      ...(tratamiento ? [{ label: "Tratamiento", value: tratamiento }] : []),
+    ];
+  })();
 
   const handleDownloadPdf = () => {
     const buildInfoTable = (
@@ -477,7 +456,6 @@ export default function HistoriaClinicaPage() {
   return (
     <div className="p-3">
       <HistoriaClinicaHeader
-       
         pacienteNombre={pacienteNombre}
         onDownloadPdf={handleDownloadPdf}
         onDelete={() => {
@@ -512,28 +490,15 @@ export default function HistoriaClinicaPage() {
               hasEstado={hasEstado}
               activa={historia.activa}
             />
-         <CAccordionItem itemKey={2}>
-  <CAccordionHeader>
-    <span className="d-inline-flex align-items-center gap-2">
-      <span className="paciente-accordion-icon">
-        <GiBrain />
-      </span>
-      Diagnóstico principal
-    </span>
-  </CAccordionHeader>
-
-  <CAccordionBody>
-    <HistoriaClinicaDiagnosticoCard
-      diagnosticoPrincipal={diagnosticoPrincipal}
-      diagnosticoFields={diagnosticoFields}
-      onViewDiagnosticos={() => {
-        if (pacienteId) {
-          navigate(`/pacientes/${pacienteId}/diagnosticos`);
-        }
-      }}
-    />
-  </CAccordionBody>
-</CAccordionItem>
+            <HistoriaClinicaDiagnosticoCard
+              diagnosticoPrincipal={diagnosticoPrincipal}
+              diagnosticoFields={diagnosticoFields}
+              onViewDiagnosticos={() => {
+                if (pacienteId) {
+                  navigate(`/pacientes/${pacienteId}/diagnosticos`);
+                }
+              }}
+            />
           </CAccordion>
         </div>
       ) : (

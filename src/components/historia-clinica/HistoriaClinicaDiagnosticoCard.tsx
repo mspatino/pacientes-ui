@@ -1,91 +1,99 @@
-import { CButton } from "@coreui/react";
-
-interface DiagnosticoField {
+import {
+  CAccordionBody,
+  CAccordionHeader,
+  CAccordionItem,
+  CButton,
+} from "@coreui/react";
+import { GiBrain } from "react-icons/gi";
+import InfoList from "./InfoList";
+import { FiEye } from "react-icons/fi";
+import { useState } from "react";
+interface Field {
   label: string;
   value: string;
 }
 
-interface HistoriaClinicaDiagnosticoCardProps {
+interface Props {
   diagnosticoPrincipal: Record<string, unknown> | null;
-  diagnosticoFields: DiagnosticoField[];
-  
+  diagnosticoFields: Field[];
   onViewDiagnosticos: () => void;
 }
 
 export default function HistoriaClinicaDiagnosticoCard({
   diagnosticoPrincipal,
   diagnosticoFields,
-  
   onViewDiagnosticos,
-}: HistoriaClinicaDiagnosticoCardProps) {
-  if (!diagnosticoPrincipal) {
-    return (
-      <div className="border rounded p-3 bg-light-subtle">
-        <div className="fw-semibold text-body mb-1">
-          Sin diagnóstico principal
-        </div>
+}: Props) {
 
-        <div className="small text-muted">
-          El diagnóstico principal se gestiona desde la edición de la historia
-          clínica.
-        </div>
-      </div>
-    );
-  }
+     const [loading, setLoading] = useState(false);
 
+  const handleClick = async () => {
+    setLoading(true);
+    try {
+      await onViewDiagnosticos();
+    } finally {
+      setLoading(false);
+    }
+  }; 
   return (
-    <div className="d-flex flex-column gap-3">
-      <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
-        <div className="small text-muted">
-          Resumen del diagnóstico principal asociado a esta historia clínica.
-        </div>
-
-        <div className="small text-muted">
-          Tipo:{" "}
-          <span className="fw-semibold text-success">
-            Principal
+    <CAccordionItem itemKey={2}>
+      {/* HEADER IGUAL QUE GENERAL */}
+      <CAccordionHeader className="hc-header d-flex align-items-center">
+       
+          
+          {/* IZQUIERDA */}
+          <span className="hc-title d-flex align-items-center gap-2">
+            <GiBrain />
+            Diagnóstico
           </span>
-        </div>
-      </div>
 
-      <div className="row g-3">
-        {diagnosticoFields.length > 0 ? (
-          diagnosticoFields.map((field) => (
-            <div
-              key={field.label}
-              className="col-12 col-lg-6"
-            >
-              <div className="border rounded p-3 h-100 bg-light-subtle">
-                <div className="small text-muted mb-1">
-                  {field.label}
-                </div>
-
-                <div className="fw-semibold lh-sm">
-                  {field.value}
-                </div>
-              </div>
+          {/* DERECHA */}
+          {diagnosticoPrincipal && (
+            <div className="ms-auto">
+              <span className="badge rounded-pill px-3 py-2 bg-success-subtle text-success">
+                Principal
+              </span>
             </div>
-          ))
+          )}
+        
+      </CAccordionHeader>
+
+      {/* BODY IGUAL ESTRUCTURA QUE GENERAL */}
+      <CAccordionBody className="px-2 py-1">
+        {!diagnosticoPrincipal ? (
+          <div className="small text-muted">
+            Sin diagnóstico cargado.
+          </div>
         ) : (
-          <div className="col-12">
-            <div className="small text-muted">
-              No hay datos del diagnóstico principal para mostrar.
+          <div className="d-flex flex-column gap-3">
+
+            {/* SOLO DATOS */}
+            <InfoList
+              fields={diagnosticoFields}
+              emptyText="No hay datos del diagnóstico."
+            />
+
+            {/* ACCIÓN */}
+      {/* BOTÓN PRO */}
+            <div className="d-flex justify-content-end">
+              <button
+                className="hc-action-btn d-flex align-items-center gap-2"
+                onClick={handleClick}
+                disabled={loading}
+              >
+                <FiEye
+                  size={16}
+                  className={`hc-icon ${loading ? "spin" : ""}`}
+                />
+
+                <span>
+                  {loading ? "Cargando..." : "Ver diagnósticos"}
+                </span>
+              </button>
             </div>
           </div>
         )}
-      </div>
-
-      <div className="d-flex justify-content-end">
-        <CButton
-          color="secondary"
-          variant="outline"
-          size="sm"
-         
-          onClick={onViewDiagnosticos}
-        >
-          Ver diagnósticos
-        </CButton>
-      </div>
-    </div>
+      </CAccordionBody>
+    </CAccordionItem>
   );
 }

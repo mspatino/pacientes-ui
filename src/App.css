@@ -532,3 +532,11 @@ textarea {
   color: white;
   transform: translateY(-1px);
 }
+
+.accordion-button {
+  padding: 6px 12px !important;
+}
+
+.paciente-accordion .accordion-button {
+  padding: 0.25rem 1rem !important;
+}
