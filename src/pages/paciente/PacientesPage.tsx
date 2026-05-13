@@ -23,6 +23,7 @@ import PacientesFiltersCollapse, {
 } from "../../components/PacientesFiltersCollapse";
 
 import { formatEstadoCivil, formatDate , formatConviviente , formatNivelEducativo , asRecord , firstString , firstStringArray  } from "../../utils/pacienteFormatters";
+import { CSpinner } from "@coreui/react";
 
 pdfMake.addVirtualFileSystem(pdfFonts);
 
@@ -360,7 +361,10 @@ export default function PacientesPage() {
     }
   };
 
-  if (loading) return <p>Cargando pacientes...</p>;
+  if (loading) return <div className="d-flex align-items-center gap-2 text-muted">
+          <CSpinner size="sm" />
+          Cargando pacientes...
+        </div>;
 
   return (
     <div className="p-3">

@@ -2,7 +2,11 @@ import { CButton, CCard, CCardBody, CCardHeader } from "@coreui/react";
 import { BsPlusLg, BsTrashFill } from "react-icons/bs";
 import { GiBrain } from "react-icons/gi";
 import type { DiagnosticoDTO } from "../../api/pacientes";
-import { getDiagnosticoSummary, sipacBlue } from "./diagnosticoUtils";
+import {
+  getDiagnosticoSummary,
+  isDiagnosticoPrincipal,
+  sipacBlue,
+} from "./diagnosticoUtils";
 
 interface DiagnosticosListCardProps {
   diagnosticos: DiagnosticoDTO[];
@@ -59,7 +63,7 @@ export default function DiagnosticosListCard({
                   onClick={() => onSelect(index)}
                 >
                   <div className="text-truncate">
-                    {diagnostico.principal ? (
+                    {isDiagnosticoPrincipal(diagnostico) ? (
                       <span
                         className="badge rounded-pill me-2"
                         style={{

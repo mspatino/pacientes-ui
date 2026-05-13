@@ -6,10 +6,21 @@ export interface Cie10DTO {
   descripcion: string;
 }
 
+export type TipoDiagnostico = "PRINCIPAL" | "SECUNDARIO" | string;
+
+export interface EvolucionDiagnosticoResponseDTO {
+  id?: number;
+  fecha?: string;
+  evolucion?: string;
+  tratamiento?: string;
+  descripcion?: string;
+}
+
 export interface DiagnosticoDTO {
   descripcion: string;
   cie10Codigo?: string | null;
   principal: boolean;
+  tipo?: TipoDiagnostico;
   evolucion?: string;
   tratamiento?: string;
 }
@@ -20,6 +31,8 @@ export interface DiagnosticoResponseDTO {
   evolucion?: string;
   tratamiento?: string;
   principal: boolean;
+  tipo?: TipoDiagnostico;
+  evoluciones?: EvolucionDiagnosticoResponseDTO[];
   fecha: string;
   cie10?: Cie10DTO;
   historiaClinicaId?: number;

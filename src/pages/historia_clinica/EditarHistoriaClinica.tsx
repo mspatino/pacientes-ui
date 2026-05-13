@@ -1,11 +1,11 @@
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { CAlert, CForm, CSpinner } from "@coreui/react";
-import DatosClinicosGeneralesCard from "../components/historia-clinica/DatosClinicosGeneralesCard";
-import DiagnosticoModal from "../components/historia-clinica/DiagnosticoModal";
-import DiagnosticosListCard from "../components/historia-clinica/DiagnosticosListCard";
-import HistoriaClinicaEditorHeader from "../components/historia-clinica/HistoriaClinicaEditorHeader";
-import { createEmptyDiagnostico } from "../components/historia-clinica/diagnosticoUtils";
-import useHistoriaClinicaEditor from "../hooks/useHistoriaClinicaEditor";
+import DatosClinicosGeneralesCard from "../../components/historia_clinica/DatosClinicosGeneralesCard";
+import DiagnosticoModal from "../../components/historia_clinica/DiagnosticoModal";
+import DiagnosticosListCard from "../../components/historia_clinica/DiagnosticosListCard";
+import HistoriaClinicaEditorHeader from "../../components/historia_clinica/HistoriaClinicaEditorHeader";
+import { createEmptyDiagnostico } from "../../components/historia_clinica/diagnosticoUtils";
+import useHistoriaClinicaEditor from "../../hooks/useHistoriaClinicaEditor";
 
 interface HistoriaLocationState {
   mode?: "create";

@@ -38,6 +38,16 @@ export interface HistoriaClinicaDTO {
   diagnosticos?: Array<Record<string, unknown>>;
 }
 
+export type TipoDiagnostico = "PRINCIPAL" | "SECUNDARIO" | string;
+
+export interface EvolucionDiagnosticoDTO {
+  id?: number;
+  fecha?: string;
+  evolucion?: string;
+  tratamiento?: string;
+  descripcion?: string;
+}
+
 export interface DiagnosticoDTO {
   id?: number;
   descripcion?: string;
@@ -45,6 +55,8 @@ export interface DiagnosticoDTO {
   tratamiento?: string;
   cie10?: Cie10DTO;
   principal: boolean;
+  tipo?: TipoDiagnostico;
+  evoluciones?: EvolucionDiagnosticoDTO[];
   fechaFin?: string;
 }
 

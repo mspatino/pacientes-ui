@@ -21,7 +21,13 @@ import {
   BsSearch,
 } from "react-icons/bs";
 import { GiBrain } from "react-icons/gi";
-import { getHistoriaClinicaByPacienteId, getPacienteById, type PacienteResponseDTO } from "../api/pacientes";
+import { getHistoriaClinicaByPacienteId, getPacienteById, type PacienteResponseDTO } from "../../api/pacientes";
+import {
+  getDiagnosticoFechaFin,
+  getDiagnosticoText,
+  isDiagnosticoActivo,
+  isDiagnosticoPrincipal,
+} from "../../components/historia_clinica/diagnosticoUtils";
 
 const formatDateTime = (raw?: string | null): string => {
   if (!raw) return "";
@@ -39,25 +45,12 @@ const formatDateTime = (raw?: string | null): string => {
 };
 
 const getDiagnosticoFields = (diagnostico: Record<string, unknown>) => {
-  const descripcion =
-    typeof diagnostico.descripcion === "string" && diagnostico.descripcion.trim()
-      ? diagnostico.descripcion
-      : "";
-  const evolucion =
-    typeof diagnostico.evolucion === "string" && diagnostico.evolucion.trim()
-      ? diagnostico.evolucion
-      : "";
-  const tratamiento =
-    typeof diagnostico.tratamiento === "string" && diagnostico.tratamiento.trim()
-      ? diagnostico.tratamiento
-      : "";
+  const descripcion = getDiagnosticoText(diagnostico, "descripcion");
+  const evolucion = getDiagnosticoText(diagnostico, "evolucion");
+  const tratamiento = getDiagnosticoText(diagnostico, "tratamiento");
   const fecha = typeof diagnostico.fecha === "string" ? formatDateTime(diagnostico.fecha) : "";
-  const fechaFin =
-    typeof diagnostico.fechaFin === "string" && diagnostico.fechaFin.trim()
-      ? formatDateTime(diagnostico.fechaFin)
-      : typeof diagnostico.fecha_fin === "string" && diagnostico.fecha_fin.trim()
-        ? formatDateTime(diagnostico.fecha_fin)
-      : "";
+  const fechaFinRaw = getDiagnosticoFechaFin(diagnostico);
+  const fechaFin = fechaFinRaw ? formatDateTime(fechaFinRaw) : "";
   const cie10 =
     diagnostico.cie10 && typeof diagnostico.cie10 === "object"
       ? (diagnostico.cie10 as Record<string, unknown>)
@@ -76,7 +69,7 @@ const getDiagnosticoFields = (diagnostico: Record<string, unknown>) => {
     fecha,
     fechaFin,
     cie10Label,
-    principal: diagnostico.principal === true,
+    principal: isDiagnosticoPrincipal(diagnostico),
   };
 };
 
@@ -165,16 +158,8 @@ export default function DiagnosticosPacientePage() {
   );
 
   const totalDiagnosticos = diagnosticos.length;
-  const principales = diagnosticos.filter((item) => item.principal === true).length;
-  const activos = diagnosticos.filter((item) => {
-    const fechaFin =
-      typeof item.fechaFin === "string"
-        ? item.fechaFin.trim()
-        : typeof item.fecha_fin === "string"
-          ? item.fecha_fin.trim()
-          : "";
-    return !fechaFin;
-  }).length;
+  const principales = diagnosticos.filter((item) => isDiagnosticoPrincipal(item)).length;
+  const activos = diagnosticos.filter((item) => isDiagnosticoActivo(item)).length;
 
   if (loading) {
     return (

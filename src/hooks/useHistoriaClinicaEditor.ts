@@ -12,7 +12,12 @@ import {
   getPacienteById,
   updateHistoriaClinica,
 } from "../api/pacientes";
-import { createEmptyDiagnostico } from "../components/historia-clinica/diagnosticoUtils";
+import {
+  createEmptyDiagnostico,
+  getDiagnosticoFechaFin,
+  getDiagnosticoText,
+  isDiagnosticoPrincipal,
+} from "../components/historia_clinica/diagnosticoUtils";
 //import { SlSocialYoutube } from "react-icons/sl";
 
 interface UseHistoriaClinicaEditorOptions {
@@ -28,9 +33,13 @@ interface DiagnosticoPayloadCompat {
   tratamiento: string;
   cie10?: Cie10DTO;
   principal: boolean;
+  tipo?: string;
   fechaFin?: string;
   fecha_fin?: string;
 }
+
+const getTipoFromPrincipal = (principal: boolean) =>
+  principal ? "PRINCIPAL" : "SECUNDARIO";
 
 const normalizeLocalDateTime = (value?: string) => {
   const trimmed = value?.trim() ?? "";
@@ -110,22 +119,18 @@ export default function useHistoriaClinicaEditor({
                         ? Number(diagnostico.id)
                         : undefined,
                   descripcion:
-                    typeof diagnostico.descripcion === "string" ? diagnostico.descripcion : "",
-                  evolucion:
-                    typeof diagnostico.evolucion === "string" ? diagnostico.evolucion : "",
+                    getDiagnosticoText(diagnostico, "descripcion"),
+                  evolucion: getDiagnosticoText(diagnostico, "evolucion"),
                   tratamiento:
-                    typeof diagnostico.tratamiento === "string" ? diagnostico.tratamiento : "",
+                    getDiagnosticoText(diagnostico, "tratamiento"),
                   cie10:
                     diagnostico.cie10 && typeof diagnostico.cie10 === "object"
                       ? (diagnostico.cie10 as Cie10DTO)
                       : undefined,
-                  principal: diagnostico.principal === true,
-                  fechaFin:
-                    typeof diagnostico.fechaFin === "string"
-                      ? diagnostico.fechaFin
-                      : typeof diagnostico.fecha_fin === "string"
-                        ? diagnostico.fecha_fin
-                        : "",
+                  principal: isDiagnosticoPrincipal(diagnostico),
+                  tipo:
+                    typeof diagnostico.tipo === "string" ? diagnostico.tipo : undefined,
+                  fechaFin: getDiagnosticoFechaFin(diagnostico),
                 };
               })
             : [],
@@ -181,37 +186,61 @@ export default function useHistoriaClinicaEditor({
     setDiagnosticoDraft((prev) => ({
       ...(prev ?? createEmptyDiagnostico()),
       [field]: value,
+      ...(field === "principal"
+        ? {
+            tipo: getTipoFromPrincipal(Boolean(value)),
+            fechaFin: value === true ? "" : prev?.fechaFin,
+          }
+        : {}),
     }));
   };
+
+  const normalizeDiagnosticosPrincipal = (
+    diagnosticos: DiagnosticoDTO[],
+    principalIndex: number | null,
+  ) =>
+    diagnosticos.map((diag, index) => {
+      const isPrincipal = principalIndex !== null && index === principalIndex;
+      return {
+        ...diag,
+        principal: isPrincipal,
+        tipo: getTipoFromPrincipal(isPrincipal),
+      };
+    });
 
   const applyDiagnosticoDraftToForm = (
     currentForm: HistoriaClinicaPayload,
     draft: DiagnosticoDTO,
   ): HistoriaClinicaPayload => {
     if (selectedIndex === null || isNewDiagnostico) {
-      const nextDiagnosticos = [...currentForm.diagnosticos, { ...draft }];
+      const nextDiagnosticos = [
+        ...currentForm.diagnosticos,
+        {
+          ...draft,
+          tipo: getTipoFromPrincipal(Boolean(draft.principal)),
+        },
+      ];
       return {
         ...currentForm,
         diagnosticos: draft.principal
-          ? nextDiagnosticos.map((diag, index) => ({
-              ...diag,
-              principal: index === nextDiagnosticos.length - 1,
-            }))
+          ? normalizeDiagnosticosPrincipal(nextDiagnosticos, nextDiagnosticos.length - 1)
           : nextDiagnosticos,
       };
     }
 
     const nextDiagnosticos = currentForm.diagnosticos.map((diag, index) =>
-      index === selectedIndex ? { ...draft } : diag,
+      index === selectedIndex
+        ? {
+            ...draft,
+            tipo: getTipoFromPrincipal(Boolean(draft.principal)),
+          }
+        : diag,
     );
 
     return {
       ...currentForm,
       diagnosticos: draft.principal
-        ? nextDiagnosticos.map((diag, index) => ({
-            ...diag,
-            principal: index === selectedIndex,
-          }))
+        ? normalizeDiagnosticosPrincipal(nextDiagnosticos, selectedIndex)
         : nextDiagnosticos,
     };
   };
@@ -234,6 +263,7 @@ export default function useHistoriaClinicaEditor({
                 }
               : undefined,
           principal: Boolean(diag.principal),
+          tipo: getTipoFromPrincipal(Boolean(diag.principal)),
           fechaFin: fechaFin || undefined,
           fecha_fin: fechaFin || undefined,
         };
@@ -276,7 +306,7 @@ export default function useHistoriaClinicaEditor({
     }
 
     if (payload.diagnosticos.length > 0 && !payload.diagnosticos.some((diag) => diag.principal)) {
-      setSubmitError("Si cargás diagnósticos, uno debe quedar marcado como principal.");
+      setSubmitError("Actualmente no hay diagnóstico principal activo.");
       return;
     }
 
@@ -337,7 +367,11 @@ export default function useHistoriaClinicaEditor({
     setForm((prev) => {
       const next = prev.diagnosticos.filter((_, currentIndex) => currentIndex !== index);
       if (next.length === 1 && !next.some((diag) => diag.principal)) {
-        next[0] = { ...next[0], principal: true };
+        next[0] = {
+          ...next[0],
+          principal: true,
+          tipo: getTipoFromPrincipal(true),
+        };
       }
       return {
         ...prev,

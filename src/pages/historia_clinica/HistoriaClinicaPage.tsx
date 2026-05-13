@@ -2,9 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   CAccordion,
-  CAccordionBody,
-  CAccordionHeader,
-  CAccordionItem,
   CAlert,
   CButton,
   CCard,
@@ -17,7 +14,6 @@ import {
   CSpinner,
 } from "@coreui/react";
 import { BsClipboard2Pulse, BsPlusLg } from "react-icons/bs";
-import { GiBrain } from "react-icons/gi";
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import type { TDocumentDefinitions } from "pdfmake/interfaces";
@@ -26,17 +22,34 @@ import {
   getPacienteById,
   type HistoriaClinicaDTO,
   type PacienteResponseDTO,
-} from "../api/pacientes";
+} from "../../api/pacientes";
 
-import HistoriaClinicaHeader from "../components/historia-clinica/HistoriaClinicaHeader";
-import HistoriaClinicaGeneralCard from "../components/historia-clinica/HisoriaClinicaGeneralCard";
-import HistoriaClinicaDiagnosticoCard from "../components/historia-clinica/HistoriaClinicaDiagnosticoCard";
+import HistoriaClinicaHeader from "../../components/historia_clinica/HistoriaClinicaHeader";
+import HistoriaClinicaGeneralCard from "../../components/historia_clinica/HisoriaClinicaGeneralCard";
+import HistoriaClinicaDiagnosticoCard from "../../components/historia_clinica/HistoriaClinicaDiagnosticoCard";
+import {
+  getDiagnosticoFechaFin,
+  getDiagnosticoPrincipal,
+  getDiagnosticoText,
+} from "../../components/historia_clinica/diagnosticoUtils";
+import { getEstadoTratamiento } from "../helpers/diagnosticoEstadoUtils";
 
 pdfMake.addVirtualFileSystem(pdfFonts);
 
 interface HistoriaLocationState {
   mode?: "create";
 }
+
+interface EvolucionItem {
+  fecha: string;
+  nota: string;
+}
+
+interface DiagnosticoPrincipal {
+  evoluciones?: EvolucionItem[];
+}
+
+
 
 const formatDateTime = (raw?: string): string => {
   if (!raw) return "-";
@@ -79,6 +92,9 @@ export default function HistoriaClinicaPage() {
   const [actionError, setActionError] = useState("");
   const sipacBlue = "#2F6FB3";
   const sipacSoftBlue = "#E8F1FB";
+ // const [activeItems, setActiveItems] = useState([1, 2]);
+
+
 
   const pacienteId = useMemo(() => {
     if (!id) return null;
@@ -187,41 +203,30 @@ export default function HistoriaClinicaPage() {
   const diagnosticos = Array.isArray(historiaData?.diagnosticos)
     ? historiaData.diagnosticos
     : [];
-  const diagnosticoPrincipal =
-    diagnosticos.find((item) => {
-      const diag = item as Record<string, unknown>;
-      return diag.principal === true;
-    }) ?? null;
+  
+  const diagnosticoPrincipal = getDiagnosticoPrincipal(diagnosticos);
+
+  const diagnosticoPrincipalTyped = diagnosticoPrincipal as DiagnosticoPrincipal | null;
+
+  const estadoTratamiento =  getEstadoTratamiento(diagnosticos);
 
   const diagnosticoFields: Array<{ label: string; value: string }> = (() => {
     if (!diagnosticoPrincipal) return [];
 
     const item = diagnosticoPrincipal as Record<string, unknown>;
 
-    const descripcionTexto =
-      typeof item.descripcion === "string" && item.descripcion.trim()
-        ? item.descripcion
-        : null;
+    const descripcionTexto = getDiagnosticoText(item, "descripcion") || null;
 
-    const evolucion =
-      typeof item.evolucion === "string" && item.evolucion.trim()
-        ? item.evolucion
-        : null;
+    const evolucion = getDiagnosticoText(item, "evolucion") || null;
 
-    const tratamiento =
-      typeof item.tratamiento === "string" && item.tratamiento.trim()
-        ? item.tratamiento
-        : null;
+    const tratamiento = getDiagnosticoText(item, "tratamiento") || null;
 
     const fecha =
       typeof item.fecha === "string" ? formatDateTime(item.fecha) : null;
 
-    const fechaFin =
-      typeof item.fechaFin === "string" && item.fechaFin.trim()
-        ? formatDateTime(item.fechaFin)
-        : typeof item.fecha_fin === "string" && item.fecha_fin.trim()
-          ? formatDateTime(item.fecha_fin)
-          : null;
+    const fechaFin = getDiagnosticoFechaFin(item)
+      ? formatDateTime(getDiagnosticoFechaFin(item))
+      : null;
 
     const cie10 =
       item.cie10 && typeof item.cie10 === "object"
@@ -320,26 +325,14 @@ export default function HistoriaClinicaPage() {
       if (!diagnosticoPrincipal) return [];
 
       const item = diagnosticoPrincipal as Record<string, unknown>;
-      const descripcionTexto =
-        typeof item.descripcion === "string" && item.descripcion.trim()
-          ? item.descripcion
-          : null;
-      const evolucion =
-        typeof item.evolucion === "string" && item.evolucion.trim()
-          ? item.evolucion
-          : null;
-      const tratamiento =
-        typeof item.tratamiento === "string" && item.tratamiento.trim()
-          ? item.tratamiento
-          : null;
+      const descripcionTexto = getDiagnosticoText(item, "descripcion") || null;
+      const evolucion = getDiagnosticoText(item, "evolucion") || null;
+      const tratamiento = getDiagnosticoText(item, "tratamiento") || null;
       const fecha =
         typeof item.fecha === "string" ? formatDateTime(item.fecha) : null;
-      const fechaFin =
-        typeof item.fechaFin === "string" && item.fechaFin.trim()
-          ? formatDateTime(item.fechaFin)
-          : typeof item.fecha_fin === "string" && item.fecha_fin.trim()
-            ? formatDateTime(item.fecha_fin)
-            : null;
+      const fechaFin = getDiagnosticoFechaFin(item)
+        ? formatDateTime(getDiagnosticoFechaFin(item))
+        : null;
       const cie10 =
         item.cie10 && typeof item.cie10 === "object"
           ? (item.cie10 as Record<string, unknown>)
@@ -469,6 +462,45 @@ export default function HistoriaClinicaPage() {
           }
         }}
       />
+
+      {historia && (
+  <div className="d-flex gap-2 flex-wrap mb-3">
+
+    {/* Estado administrativo */}
+    {historia.activa ? (
+      <span className="badge bg-primary-subtle text-primary px-3 py-2">
+        Historia activa
+      </span>
+    ) : (
+      <span className="badge bg-secondary-subtle text-secondary px-3 py-2">
+        Historia archivada
+      </span>
+    )}
+
+    {/* Estado clínico */}
+    {estadoTratamiento === "EN_TRATAMIENTO" && (
+      <span className="badge bg-success-subtle text-success px-3 py-2">
+        En tratamiento
+      </span>
+    )}
+
+    {estadoTratamiento === "ALTA_TERAPEUTICA" && (
+      <span className="badge bg-info-subtle text-info px-3 py-2">
+        Alta terapéutica
+      </span>
+    )}
+
+    {estadoTratamiento === "SIN_DIAGNOSTICO" && (
+      // <span className="badge bg-light text-dark px-3 py-2 border">
+         <span className="badge bg-warning-subtle text-secondary px-3 py-2">
+        Sin diagnóstico 
+      </span>
+    )}
+
+  </div>
+)}  
+
+
       {loading ? (
         <div className="d-flex align-items-center gap-2 text-muted">
           <CSpinner size="sm" />
@@ -480,19 +512,19 @@ export default function HistoriaClinicaPage() {
         </CAlert>
       ) : historia && !notFound ? (
         <div className="d-flex flex-column gap-3">
-          <CAccordion
-            activeItemKey={1}
-            alwaysOpen
-            className="paciente-accordion w-100"
-          >
+          <CAccordion activeItemKey={1} className="paciente-accordion w-100">
             <HistoriaClinicaGeneralCard
               fields={fields}
-              hasEstado={hasEstado}
-              activa={historia.activa}
+              // hasEstado={hasEstado}
+              // activa={historia.activa}
             />
+          </CAccordion>
+
+          <CAccordion activeItemKey={2} className="paciente-accordion w-100">
             <HistoriaClinicaDiagnosticoCard
-              diagnosticoPrincipal={diagnosticoPrincipal}
+              // diagnosticoPrincipal={diagnosticoPrincipal}
               diagnosticoFields={diagnosticoFields}
+              evoluciones={diagnosticoPrincipalTyped?.evoluciones ?? []}
               onViewDiagnosticos={() => {
                 if (pacienteId) {
                   navigate(`/pacientes/${pacienteId}/diagnosticos`);

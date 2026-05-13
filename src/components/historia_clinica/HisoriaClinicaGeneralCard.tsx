@@ -13,14 +13,14 @@ interface Field {
 
 interface Props {
   fields: Field[];
-  hasEstado: boolean;
-  activa?: boolean;
+  // hasEstado: boolean;
+  // activa?: boolean;
 }
 
 export default function HistoriaClinicaGeneralCard({
   fields,
-  hasEstado,
-  activa,
+  // hasEstado,
+  // activa,
 }: Props) {
   return (
     <CAccordionItem itemKey={1} className="hc-item">
@@ -40,13 +40,13 @@ export default function HistoriaClinicaGeneralCard({
         {activa ? "Activa" : "Inactiva"}
       </span>
     )} */}
-          {hasEstado && (
+          {/* {hasEstado && (
             <div className="ms-auto">
               <span className="badge rounded-pill px-3 py-2 bg-success-subtle text-success">
                 {activa ? "Activa" : "Inactiva"}
               </span>
             </div>
-          )}
+          )} */}
  
 </CAccordionHeader>
 
