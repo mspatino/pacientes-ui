@@ -12,6 +12,7 @@ import {
   BsClipboard2Pulse,
 } from "react-icons/bs";
 import { FaFilePdf } from "react-icons/fa";
+import { BsCaretUpFill, BsCaretDownFill, BsCardList } from "react-icons/bs";
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import type { TDocumentDefinitions } from "pdfmake/interfaces";
@@ -22,7 +23,15 @@ import PacientesFiltersCollapse, {
   type SexoFilter,
 } from "../../components/PacientesFiltersCollapse";
 
-import { formatEstadoCivil, formatDate , formatConviviente , formatNivelEducativo , asRecord , firstString , firstStringArray  } from "../../utils/pacienteFormatters";
+import {
+  formatEstadoCivil,
+  formatDate,
+  formatConviviente,
+  formatNivelEducativo,
+  asRecord,
+  firstString,
+  firstStringArray,
+} from "../../utils/pacienteFormatters";
 import { CSpinner } from "@coreui/react";
 
 pdfMake.addVirtualFileSystem(pdfFonts);
@@ -37,7 +46,6 @@ export default function PacientesPage() {
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [diagnosticoTerm, setDiagnosticoTerm] = useState("");
   const [sexoFilter, setSexoFilter] = useState<SexoFilter>("");
   const [sortField, setSortField] = useState<SortField>("apellido");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
@@ -61,13 +69,12 @@ export default function PacientesPage() {
   };
 
   const normalizedSearch = searchTerm.trim().toLowerCase();
-  const normalizedDiagnostico = diagnosticoTerm.trim().toLowerCase();
   const normalizedSexo = sexoFilter.toLowerCase();
 
   const filteredPacientes = pacientes.filter((p) => {
     const fullName = `${p.apellido} ${p.nombre}`.toLowerCase();
     const dni = (p.dni ?? "").toString().toLowerCase();
-    const diagnostico = (p.diagnostico ?? "").toLowerCase();
+
     const sexo = (p.sexo ?? "").toString().toLowerCase();
 
     const matchesSearch =
@@ -75,12 +82,9 @@ export default function PacientesPage() {
       dni.includes(normalizedSearch) ||
       fullName.includes(normalizedSearch);
 
-    const matchesDiagnostico =
-      !normalizedDiagnostico || diagnostico.includes(normalizedDiagnostico);
-
     const matchesSexo = !sexoFilter || sexo === normalizedSexo;
 
-    return matchesSearch && matchesDiagnostico && matchesSexo;
+    return matchesSearch && matchesSexo;
   });
 
   const sortedPacientes = [...filteredPacientes].sort((a, b) => {
@@ -118,7 +122,7 @@ export default function PacientesPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, diagnosticoTerm, sexoFilter, sortField, sortOrder]);
+  }, [searchTerm, sexoFilter, sortField, sortOrder]);
 
   const totalPages = Math.max(1, Math.ceil(sortedPacientes.length / PAGE_SIZE));
   const safeCurrentPage = Math.min(currentPage, totalPages);
@@ -127,11 +131,6 @@ export default function PacientesPage() {
     pageStartIndex,
     pageStartIndex + PAGE_SIZE,
   );
-
-  const sortIndicator = (field: SortField): string => {
-    if (sortField !== field) return "△";
-    return sortOrder === "asc" ? "▲" : "▼";
-  };
 
   const formatFechaAlta = (paciente: Paciente): string => {
     const rawFecha = paciente.fechaAlta ?? paciente.fecha_alta;
@@ -213,40 +212,79 @@ export default function PacientesPage() {
       const detalle: PacienteResponseDTO = await getPacienteById(paciente.id);
       const pacienteData = asRecord(detalle);
 
-      const apellido = firstString(pacienteData, ["apellido"]) || paciente.apellido || "";
-      const nombre = firstString(pacienteData, ["nombre", "nombres"]) || paciente.nombre || "";
-      const nombreCompleto = `${apellido} ${nombre}`.trim() || `Paciente #${paciente.id}`;
+      const apellido =
+        firstString(pacienteData, ["apellido"]) || paciente.apellido || "";
+      const nombre =
+        firstString(pacienteData, ["nombre", "nombres"]) ||
+        paciente.nombre ||
+        "";
+      const nombreCompleto =
+        `${apellido} ${nombre}`.trim() || `Paciente #${paciente.id}`;
 
       const identificacionContactoFields: Array<[string, string]> = [
-        ["DNI", firstString(pacienteData, ["dni", "documento"]) || paciente.dni?.toString() || "-"],
+        [
+          "DNI",
+          firstString(pacienteData, ["dni", "documento"]) ||
+            paciente.dni?.toString() ||
+            "-",
+        ],
         [
           "Fecha de nacimiento",
-          formatDate(firstString(pacienteData, ["fechaNacimiento", "fecha_nacimiento"])),
+          formatDate(
+            firstString(pacienteData, ["fechaNacimiento", "fecha_nacimiento"]),
+          ),
         ],
-        ["Teléfono", firstString(pacienteData, ["telefono", "teléfono", "celular"]) || "-"],
+        [
+          "Teléfono",
+          firstString(pacienteData, ["telefono", "teléfono", "celular"]) || "-",
+        ],
         ["Email", firstString(pacienteData, ["email", "correo"]) || "-"],
-        ["Ocupación", firstString(pacienteData, ["ocupacion", "ocupación"]) || "-"],
-        ["Dirección", firstString(pacienteData, ["direccion", "dirección", "domicilio"]) || "-"],
-        ["Fecha de alta", formatDate(firstString(pacienteData, ["fechaAlta", "fecha_alta"]))],
+        [
+          "Ocupación",
+          firstString(pacienteData, ["ocupacion", "ocupación"]) || "-",
+        ],
+        [
+          "Dirección",
+          firstString(pacienteData, ["direccion", "dirección", "domicilio"]) ||
+            "-",
+        ],
+        [
+          "Fecha de alta",
+          formatDate(firstString(pacienteData, ["fechaAlta", "fecha_alta"])),
+        ],
       ];
 
       const estadoConvivenciaFields: Array<[string, string]> = [
         [
           "Estado civil",
           formatEstadoCivil(
-            firstString(pacienteData, ["estadoCivil", "estado_civil", "civilStatus"]),
+            firstString(pacienteData, [
+              "estadoCivil",
+              "estado_civil",
+              "civilStatus",
+            ]),
           ),
         ],
-        ["Sexo", firstString(pacienteData, ["sexo", "genero", "género"]) || "-"],
-        ["Ocupación", firstString(pacienteData, ["ocupacion", "ocupación"]) || "-"],
+        [
+          "Sexo",
+          firstString(pacienteData, ["sexo", "genero", "género"]) || "-",
+        ],
+        [
+          "Ocupación",
+          firstString(pacienteData, ["ocupacion", "ocupación"]) || "-",
+        ],
         [
           "Nivel educativo",
-          formatNivelEducativo(firstString(pacienteData, ["nivelEducativo", "nivel_educativo"])),
+          formatNivelEducativo(
+            firstString(pacienteData, ["nivelEducativo", "nivel_educativo"]),
+          ),
         ],
         [
           "Convivientes",
           (() => {
-            const convivientes = firstStringArray(pacienteData, ["convivientes"]);
+            const convivientes = firstStringArray(pacienteData, [
+              "convivientes",
+            ]);
             return convivientes.length > 0
               ? convivientes.map(formatConviviente).join(", ")
               : "-";
@@ -263,7 +301,10 @@ export default function PacientesPage() {
         paddingBottom: () => 8,
       };
 
-      const buildInfoTable = (title: string, fields: Array<[string, string]>) => ({
+      const buildInfoTable = (
+        title: string,
+        fields: Array<[string, string]>,
+      ) => ({
         stack: [
           { text: title, style: "sectionTitle" },
           {
@@ -279,26 +320,37 @@ export default function PacientesPage() {
         ],
       });
 
-      const pacienteHeader: TDocumentDefinitions["content"] extends Array<infer T> ? T : never = {
+      const pacienteHeader: TDocumentDefinitions["content"] extends Array<
+        infer T
+      >
+        ? T
+        : never = {
         table: {
           widths: [52, "*"],
-          body: [[
-            {
-              text: "P",
-              alignment: "center",
-              color: sipacBlue,
-              bold: true,
-              fillColor: sipacSoftBlue,
-              margin: [0, 10, 0, 10] as [number, number, number, number],
-            },
-            {
-              stack: [
-                { text: "Paciente", style: "eyebrow" },
-                { text: nombreCompleto, style: "header" },
-              ],
-              border: [false, false, false, false] as [boolean, boolean, boolean, boolean],
-            },
-          ]],
+          body: [
+            [
+              {
+                text: "P",
+                alignment: "center",
+                color: sipacBlue,
+                bold: true,
+                fillColor: sipacSoftBlue,
+                margin: [0, 10, 0, 10] as [number, number, number, number],
+              },
+              {
+                stack: [
+                  { text: "Paciente", style: "eyebrow" },
+                  { text: nombreCompleto, style: "header" },
+                ],
+                border: [false, false, false, false] as [
+                  boolean,
+                  boolean,
+                  boolean,
+                  boolean,
+                ],
+              },
+            ],
+          ],
         },
         layout: {
           hLineWidth: () => 0,
@@ -321,7 +373,10 @@ export default function PacientesPage() {
             text: "",
             margin: [0, 8, 0, 0] as [number, number, number, number],
           },
-          buildInfoTable("Estado personal y convivencia", estadoConvivenciaFields),
+          buildInfoTable(
+            "Estado personal y convivencia",
+            estadoConvivenciaFields,
+          ),
         ],
         styles: {
           eyebrow: {
@@ -355,22 +410,27 @@ export default function PacientesPage() {
         },
       };
 
-      pdfMake.createPdf(docDefinition).download(`Paciente-${paciente.apellido+", "+paciente.nombre}.pdf`);
+      pdfMake
+        .createPdf(docDefinition)
+        .download(`Paciente-${paciente.apellido + ", " + paciente.nombre}.pdf`);
     } catch (error) {
       console.error("No se pudo generar el PDF del paciente", error);
     }
   };
 
-  if (loading) return <div className="d-flex align-items-center gap-2 text-muted">
-          <CSpinner size="sm" />
-          Cargando pacientes...
-        </div>;
+  if (loading)
+    return (
+      <div className="d-flex align-items-center gap-2 text-muted">
+        <CSpinner size="sm" />
+        Cargando pacientes...
+      </div>
+    );
 
   return (
     <div className="p-3">
-      <div className="border rounded bg-white p-3 mb-4">
+      <div className="pacientes-card border-0 mb-4">
         <div
-          className="d-flex align-items-center gap-2 mb-2"
+          className="d-flex align-items-center justify-content-between mb-3"
           role="button"
           tabIndex={0}
           onClick={() => setShowFilters((prev) => !prev)}
@@ -382,302 +442,246 @@ export default function PacientesPage() {
           }}
           style={{ cursor: "pointer" }}
         >
-          <BsSliders2 style={{ color: sipacBlue }} />
-          <h1 className="h5 fw-bold mb-0">
-            Filtros{" "}
-            <span style={{ fontSize: "0.7rem", lineHeight: 1 }}>
-              {showFilters ? "▲" : "▼"}
+          <div className="d-flex align-items-center gap-2">
+            <span
+              className="paciente-accordion-icon"
+              style={{ color: "#1e4f85" }}
+            >
+              <BsSliders2 size={17} />
             </span>
-          </h1>
+
+            <h1 className="h5 fw-bold mb-0" style={{ color: "#1e4f85" }}>
+              Filtros
+            </h1>
+          </div>
+
+          <button
+            type="button"
+            className="table-sort-btn"
+            style={{
+              color: "#1e4f85",
+              fontSize: "0.9rem",
+            }}
+          >
+            {showFilters ? <BsCaretUpFill /> : <BsCaretDownFill />}
+          </button>
         </div>
+
         <PacientesFiltersCollapse
           showFilters={showFilters}
           searchTerm={searchTerm}
           onSearchTermChange={setSearchTerm}
-          diagnosticoTerm={diagnosticoTerm}
-          onDiagnosticoTermChange={setDiagnosticoTerm}
           sexoFilter={sexoFilter}
           onSexoFilterChange={setSexoFilter}
         />
       </div>
 
-      <div className="border-0 rounded-4 bg-white p-4 shadow-sm">
+      <div className="pacientes-card">
         <div className="d-flex align-items-center justify-content-between mb-3">
           <div className="d-flex align-items-center gap-2">
-            <BsListUl style={{ color: sipacBlue }} />
-            <h1 className="h5 fw-bold mb-0">Pacientes</h1>
+            <span
+              className="paciente-accordion-icon"
+              style={{ color: "#1e4f85" }}
+            >
+              <BsCardList size={18} />
+            </span>
+
+            <h1 className="h5 fw-bold mb-0" style={{ color: "#1e4f85" }}>
+              Pacientes
+            </h1>
           </div>
           <div className="d-flex gap-2">
-         
             <button
               type="button"
-              className="btn btn-primary btn-sm d-inline-flex align-items-center gap-2"
+              className="sipac-toolbar-btn"
               onClick={() => navigate("/pacientes/nuevo")}
             >
               <BsFillPersonPlusFill />
-              Nuevo
+              <span>Nuevo</span>
             </button>
-               <button
+
+            <button
               type="button"
-              className="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-2"
+              className="sipac-toolbar-btn"
               onClick={handleDownloadListaPdf}
             >
               <FaFilePdf />
-              Pacientes 
+              <span>Pacientes</span>
             </button>
           </div>
         </div>
-
-        {/* <div className="table-responsive">
-          <table className="table table-bordered table-hover align-middle mb-0 paciente-table">
-            <thead className="paciente-table-head">
+        <div className="table-responsive">
+          <table className="table align-middle mb-0 paciente-table">
+            <thead className="paciente-table-head-soft">
               <tr>
-              <th style={{ width: "25%" }}>
-                <div className="d-flex align-items-center justify-content-between gap-2">
-                  <span>Apellido</span>
-                  <button
-                    type="button"
-                    className="btn btn-sm p-0 border-0 bg-transparent text-white d-inline-flex align-items-center gap-1"
-                    onClick={() => toggleSort("apellido")}
-                    title="Ordenar por apellido"
-                  >
-                    {sortIndicator("apellido")}
-                  </button>
-                </div>
-              </th>
-              <th style={{ width: "25%" }}>
-                <div className="d-flex align-items-center justify-content-between gap-2">
-                  <span>Nombres</span>
-                  <button
-                    type="button"
-                    className="btn btn-sm p-0 border-0 bg-transparent text-white"
-                    onClick={() => toggleSort("nombre")}
-                  >
-                    {sortIndicator("nombre")}
-                  </button>
-                </div>
-              </th>
-              <th style={{ width: "20%" }}>Documento</th>
-              <th style={{ width: "18%", whiteSpace: "nowrap" }}>
-                <div className="d-flex align-items-center justify-content-between gap-2">
-                  <span>Fecha de alta</span>
-                  <button
-                    type="button"
-                    className="btn btn-sm p-0 border-0 bg-transparent text-white"
-                    onClick={() => toggleSort("fechaAlta")}
-                  >
-                    {sortIndicator("fechaAlta")}
-                  </button>
-                </div>
-              </th>
-              <th style={{ width: "12%", whiteSpace: "nowrap" }}>Detalle</th>
+                <th className="text-center" style={{ width: "25%" }}>
+                  <div className="d-flex align-items-center justify-content-between gap-2">
+                    <span>Apellido</span>
+
+                    <button
+                      type="button"
+                      className="table-sort-btn"
+                      onClick={() => toggleSort("apellido")}
+                      title="Ordenar por apellido"
+                    >
+                      {sortField === "apellido" ? (
+                        sortOrder === "asc" ? (
+                          <BsCaretUpFill size={12} />
+                        ) : (
+                          <BsCaretDownFill />
+                        )
+                      ) : (
+                        <BsCaretDownFill style={{ opacity: 0.35 }} />
+                      )}
+                    </button>
+                  </div>
+                </th>
+
+                <th className="text-center" style={{ width: "25%" }}>
+                  <div className="d-flex align-items-center justify-content-between gap-2">
+                    <span>Nombres</span>
+
+                    <button
+                      type="button"
+                      className="table-sort-btn"
+                      onClick={() => toggleSort("nombre")}
+                    >
+                      {/* {sortIndicator("nombre")} */}
+                      {sortField === "nombre" ? (
+                        sortOrder === "asc" ? (
+                          <BsCaretUpFill size={12} />
+                        ) : (
+                          <BsCaretDownFill />
+                        )
+                      ) : (
+                        <BsCaretDownFill style={{ opacity: 0.35 }} />
+                      )}
+                    </button>
+                  </div>
+                </th>
+
+                <th className="text-center" style={{ width: "20%" }}>
+                  Documento
+                </th>
+
+                <th style={{ width: "18%", whiteSpace: "nowrap" }}>
+                  <div className="d-flex align-items-center justify-content-between gap-2">
+                    <span>Fecha alta</span>
+
+                    <button
+                      type="button"
+                      className="table-sort-btn"
+                      onClick={() => toggleSort("fechaAlta")}
+                    >
+                      {sortField === "fechaAlta" ? (
+                        sortOrder === "asc" ? (
+                          <BsCaretUpFill size={12} />
+                        ) : (
+                          <BsCaretDownFill />
+                        )
+                      ) : (
+                        <BsCaretDownFill style={{ opacity: 0.35 }} />
+                      )}
+                    </button>
+                  </div>
+                </th>
+
+                <th
+                  className="text-center"
+                  style={{
+                    width: "12%",
+                    textAlign: "center",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Acciones
+                </th>
               </tr>
             </thead>
 
             <tbody>
               {paginatedPacientes.length > 0 ? (
                 paginatedPacientes.map((p) => (
-                  <tr key={p.id}>
-                    <td>{p.apellido}</td>
+                  <tr
+                    key={p.id}
+                    className="paciente-row"
+                    onClick={() =>
+                      navigate(`/pacientes/${p.id}`, {
+                        state: { paciente: p },
+                      })
+                    }
+                  >
+                    <td>
+                      <div className="paciente-apellido">{p.apellido}</div>
+                    </td>
+
                     <td>{p.nombre}</td>
-                    <td>{p.dni}</td>
-                    <td className="text-nowrap">{formatFechaAlta(p)}</td>
+
+                    <td className="text-center">
+                      <span className="paciente-dni">{p.dni}</span>
+                    </td>
+
+                    <td>
+                      <span className="paciente-dni">{formatFechaAlta(p)}</span>
+                    </td>
+
                     <td>
                       <div className="d-flex gap-2 justify-content-center">
-                        <span
-                          role="button"
-                          tabIndex={0}
-                          title="Ver detalle del paciente"
-                          aria-label="Ver detalle del paciente"
-                          className="d-inline-flex align-items-center"
-                          style={{ cursor: "pointer", fontSize: "1.1rem", color: "#2F6FB3" }}
-                          onClick={() =>
-                            navigate(`/pacientes/${p.id}`, { state: { paciente: p } })
-                          }
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ") {
-                              e.preventDefault();
-                              navigate(`/pacientes/${p.id}`, { state: { paciente: p } });
-                            }
+                        <button
+                          type="button"
+                          className="action-icon-btn"
+                          title="Ver detalle"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/pacientes/${p.id}`, {
+                              state: { paciente: p },
+                            })
                           }}
                         >
                           <BsFillEyeFill />
-                        </span>
-                        <span
-                          role="button"
-                          tabIndex={0}
-                          title="Ver historia clínica"
-                          aria-label="Ver historia clínica"
-                          className="d-inline-flex align-items-center"
-                          style={{ cursor: "pointer", fontSize: "1.1rem", color: "#2F6FB3" }}
-                          onClick={() => navigate(`/pacientes/${p.id}/historia-clinica`)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ") {
-                              e.preventDefault();
-                              navigate(`/pacientes/${p.id}/historia-clinica`);
-                            }
+                        </button>
+
+                        <button
+                          type="button"
+                          className="action-icon-btn"
+                          title="Historia clínica"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/pacientes/${p.id}/historia-clinica`)
                           }}
                         >
                           <BsClipboard2Pulse />
-                        </span>
-                        <span
-                          role="button"
-                          tabIndex={0}
-                          title="Imprimir planilla en PDF"
-                          aria-label="Imprimir planilla en PDF"
-                          className="d-inline-flex align-items-center"
-                          style={{ cursor: "pointer", fontSize: "1.1rem", color: "#2F6FB3" }}
-                          onClick={() => handlePrintPaciente(p)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ") {
-                              e.preventDefault();
-                              handlePrintPaciente(p);
-                            }
-                          }}
+                        </button>
+
+                        <button
+                          type="button"
+                          className="action-icon-btn"
+                          title="Exportar PDF"
+                          onClick={(e) => {e.stopPropagation();
+                            handlePrintPaciente(p)}}
                         >
                           <FaFilePdf />
-                        </span>
+                        </button>
                       </div>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="text-center text-muted py-3">
-                    No se encontraron pacientes con esos filtros.
+                  <td colSpan={5} className="text-center py-5">
+                    <div className="d-flex flex-column align-items-center gap-2">
+                      <BsListUl size={28} className="text-muted" />
+
+                      <div className="text-muted">
+                        No se encontraron pacientes.
+                      </div>
+                    </div>
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
-        </div> */}
-        <div className="table-responsive">
-  <table className="table align-middle mb-0 paciente-table">
-    <thead className="paciente-table-head">
-      <tr>
-        <th style={{ width: "25%" }}>
-          <div className="d-flex align-items-center justify-content-between gap-2">
-            <span>Apellido</span>
-
-            <button
-              type="button"
-              className="table-sort-btn"
-              onClick={() => toggleSort("apellido")}
-              title="Ordenar por apellido"
-            >
-              {sortIndicator("apellido")}
-            </button>
-          </div>
-        </th>
-
-        <th style={{ width: "25%" }}>
-          <div className="d-flex align-items-center justify-content-between gap-2">
-            <span>Nombres</span>
-
-            <button
-              type="button"
-              className="table-sort-btn"
-              onClick={() => toggleSort("nombre")}
-            >
-              {sortIndicator("nombre")}
-            </button>
-          </div>
-        </th>
-
-        <th style={{ width: "20%" }}>Documento</th>
-
-        <th style={{ width: "18%", whiteSpace: "nowrap" }}>
-          <div className="d-flex align-items-center justify-content-between gap-2">
-            <span>Fecha alta</span>
-
-            <button
-              type="button"
-              className="table-sort-btn"
-              onClick={() => toggleSort("fechaAlta")}
-            >
-              {sortIndicator("fechaAlta")}
-            </button>
-          </div>
-        </th>
-
-        <th
-          style={{
-            width: "12%",
-            textAlign: "center",
-            whiteSpace: "nowrap",
-          }}
-        >
-          Acciones
-        </th>
-      </tr>
-    </thead>
-
-    <tbody>
-      {paginatedPacientes.length > 0 ? (
-        paginatedPacientes.map((p) => (
-          <tr key={p.id}>
-            <td>
-              <div className="fw-semibold text-dark">{p.apellido}</div>
-            </td>
-
-            <td>{p.nombre}</td>
-
-            <td>
-              <span className="text-muted">{p.dni}</span>
-            </td>
-
-            <td className="text-nowrap text-muted">
-              {formatFechaAlta(p)}
-            </td>
-
-            <td>
-              <div className="d-flex gap-2 justify-content-center">
-                <button
-                  type="button"
-                  className="action-icon-btn"
-                  title="Ver detalle"
-                  onClick={() =>
-                    navigate(`/pacientes/${p.id}`, {
-                      state: { paciente: p },
-                    })
-                  }
-                >
-                  <BsFillEyeFill />
-                </button>
-
-                <button
-                  type="button"
-                  className="action-icon-btn"
-                  title="Historia clínica"
-                  onClick={() =>
-                    navigate(`/pacientes/${p.id}/historia-clinica`)
-                  }
-                >
-                  <BsClipboard2Pulse />
-                </button>
-
-                <button
-                  type="button"
-                  className="action-icon-btn"
-                  title="Exportar PDF"
-                  onClick={() => handlePrintPaciente(p)}
-                >
-                  <FaFilePdf />
-                </button>
-              </div>
-            </td>
-          </tr>
-        ))
-      ) : (
-        <tr>
-          <td colSpan={5} className="text-center text-muted py-5">
-            No se encontraron pacientes.
-          </td>
-        </tr>
-      )}
-    </tbody>
-  </table>
-</div>
+        </div>
       </div>
 
       {sortedPacientes.length > 0 ? (
@@ -713,7 +717,9 @@ export default function PacientesPage() {
               className="btn btn-sm border-0"
               style={{ color: sipacBlue, backgroundColor: sipacSoftBlue }}
               disabled={safeCurrentPage === totalPages}
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
               aria-label="Página siguiente"
               title="Página siguiente"
             >

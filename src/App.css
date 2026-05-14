@@ -389,23 +389,25 @@ textarea {
 .paciente-table {
   border-collapse: separate;
   border-spacing: 0;
-  overflow: hidden;
-  border-radius: 0.5rem;
 }
 
 .paciente-table-head th {
-  background: linear-gradient(180deg, #e8f1fb 0%, #dce9f8 100%);
-  color: #1f2937 !important;
-  font-family: var(--sipac-font-family);
+  background: linear-gradient(180deg, #2F6FB3 0%, #255D96 100%);
+  color: white;
+  font-size: 0.82rem;
   font-weight: 600;
-  border-color: #c7daef;
+  letter-spacing: 0.3px;
+  padding: 14px 16px;
+  border: none;
   vertical-align: middle;
 }
 
-.paciente-table-head th span,
-.paciente-table-head th button {
-  color: #1f2937 !important;
-  font-family: var(--sipac-font-family);
+.paciente-table-head th:first-child {
+  border-top-left-radius: 14px;
+}
+
+.paciente-table-head th:last-child {
+  border-top-right-radius: 14px;
 }
 
 .paciente-table tbody tr:nth-child(even) {
@@ -419,6 +421,15 @@ textarea {
 .paciente-table td,
 .paciente-table th {
   border-color: #dce6f5;
+}
+
+.paciente-dni {
+  background: #F4F7FA;
+  color: #4B6178;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 500;
 }
 
 .hc-status-badge {
@@ -484,52 +495,64 @@ textarea {
 
 .paciente-table tbody tr {
   transition:
-    background-color 0.15s ease,
-    transform 0.15s ease;
+    background-color 0.18s ease,
+    transform 0.12s ease;
 }
 
 .paciente-table tbody tr:hover {
-  background-color: #f8fbff;
+  background-color: #F7FAFD;
 }
 
-.paciente-table td {
-  padding: 0.9rem 1rem;
+
+.paciente-table tbody td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #EEF3F8;
   vertical-align: middle;
-  border-bottom: 1px solid #eef2f7;
+  font-size: 0.92rem;
 }
 
 .table-sort-btn {
   border: none;
   background: transparent;
-  color: rgba(255, 255, 255, 0.85);
+  color: #4B6178;
+  font-size: 0.72rem;
   padding: 0;
-  font-size: 0.8rem;
   display: flex;
   align-items: center;
+  justify-content: center;
+  transition:
+    opacity 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
 }
 
 .table-sort-btn:hover {
-  color: white;
+  opacity: 1;
+  color: #2F6FB3;
+  transform: scale(1.08);
 }
 
 .action-icon-btn {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
   border: none;
-  background: #eef4fb;
-  color: #2f6fb3;
+  background: transparent;
+  color: #2F6FB3;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  transition: all 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.1s ease;
 }
 
 .action-icon-btn:hover {
-  background: #2f6fb3;
-  color: white;
+  background: #E8F1FB;
+  color: #255D96;
   transform: translateY(-1px);
 }
 
@@ -539,4 +562,131 @@ textarea {
 
 .paciente-accordion .accordion-button {
   padding: 0.25rem 1rem !important;
+}
+
+.paciente-chip {
+  background: #F4F7FA;
+  color: #4B6178;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.paciente-apellido {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1F2D3D;
+  letter-spacing: 0.2px;
+}
+
+.paciente-table-head-soft th {
+  background: linear-gradient(180deg, #F4F7FA 0%, #E8F1FB 100%);
+  color: #4B6178;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0.4px;
+  border-bottom: 1px solid #DCE6F5;
+  padding-top: 14px;
+  padding-bottom: 14px;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.paciente-table-head-soft th:first-child {
+  border-top-left-radius: 12px;
+}
+
+.pacientes-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid #E4ECF5;
+  box-shadow: 0 2px 10px rgba(15, 35, 55, 0.04);
+}
+
+.sipac-toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+
+  border: none;
+  border-radius: 12px;
+
+  padding: 0.55rem 0.9rem;
+
+  background: #E8F1FB;
+  color: #2F6FB3;
+
+  font-size: 0.88rem;
+  font-weight: 600;
+
+  transition:
+    background-color 0.15s ease,
+    transform 0.12s ease,
+    box-shadow 0.15s ease;
+
+  box-shadow: 0 1px 2px rgba(47, 111, 179, 0.08);
+}
+
+.sipac-toolbar-btn:hover {
+  background: #D9EAFE;
+  color: #255D96;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(47, 111, 179, 0.15);
+}
+
+.sipac-toolbar-btn:active {
+  transform: translateY(0);
+}
+
+.sipac-toolbar-btn:focus-visible {
+  outline: 2px solid #2F6FB3;
+  outline-offset: 2px;
+}
+
+.sipac-toolbar-btn svg {
+  font-size: 0.95rem;
+}
+
+.sipac-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+
+  border: 1px solid #d6e4f4;
+  border-radius: 0.6rem;
+
+  padding: 0.45rem 0.9rem;
+
+  background: #eef5fc;
+  color: #1e4f85;
+
+  font-size: 0.875rem;
+  font-weight: 600;
+
+  transition: all 0.18s ease;
+}
+
+.sipac-action-btn:hover {
+  background: #dbeafb;
+  border-color: #b8d3ee;
+}
+
+.sipac-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.sipac-action-btn.success {
+  background: #e8f7ee;
+  border-color: #ccebd7;
+  color: #1f7a45;
+}
+
+.sipac-action-btn.success:hover {
+  background: #d9f1e3;
 }

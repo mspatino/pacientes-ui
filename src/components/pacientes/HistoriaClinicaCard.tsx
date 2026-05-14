@@ -1,6 +1,3 @@
-import { BsClipboard2Pulse, BsJournalText, BsPlusLg } from "react-icons/bs";
-import { CButton } from "@coreui/react";
-
 interface HistoriaClinicaCardProps {
   hasHistoriaClinica: boolean;
   pacienteId: number | null;
@@ -13,34 +10,40 @@ export default function HistoriaClinicaCard({
   onOpenHistoriaClinica,
 }: HistoriaClinicaCardProps) {
   return (
-    <div className="border rounded p-3 bg-light-subtle">
+    <div className="col-12 col-md-6">
+    <div className="border rounded p-3 bg-light-subtle shadow-sm">
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
-        <div className="d-flex flex-column gap-1">
-          <div className="d-inline-flex align-items-center gap-2 fw-semibold text-primary">
-            <BsClipboard2Pulse />
-            Historia clínica
-          </div>
+        <div>
+          {/* <div className="fw-semibold">
+        Historia clínica
+      </div> */}
 
-          <div className="small text-muted">
+          <span
+            className={`small ${
+              hasHistoriaClinica 
+              ? "text-success" 
+              : "text-muted"
+            }`}
+          >
             {hasHistoriaClinica
-              ? "La historia clínica ya está disponible para este paciente."
-              : "Este paciente todavía no tiene historia clínica cargada."}
-          </div>
+              ? "Historia clínica disponible."
+              : "Sin historia clínica registrada."}
+          </span>
         </div>
 
-        <CButton
-          color="primary"
-          size="sm"
-          className="d-inline-flex align-items-center gap-2"
-          title={hasHistoriaClinica ? "Abrir historia clínica" : "Crear historia clínica"}
-          aria-label={hasHistoriaClinica ? "Abrir historia clínica" : "Crear historia clínica"}
+        <button
+          type="button"
+          className={`sipac-action-btn ${
+          !hasHistoriaClinica ? "success" : ""
+        }`}
+          
           onClick={onOpenHistoriaClinica}
           disabled={!pacienteId}
         >
-          {hasHistoriaClinica ? <BsJournalText /> : <BsPlusLg />}
           {hasHistoriaClinica ? "Abrir" : "Crear"}
-        </CButton>
+        </button>
       </div>
+    </div>
     </div>
   );
 }
