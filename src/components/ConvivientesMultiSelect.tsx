@@ -13,6 +13,7 @@ interface ConvivientesMultiSelectProps {
   options?: string[];
   selected: string[];
   onChange: (nextValues: string[]) => void;
+  className?: string;
 }
 
 export default function ConvivientesMultiSelect({
@@ -20,6 +21,7 @@ export default function ConvivientesMultiSelect({
   options = CONVIVIENTE_OPTIONS,
   selected,
   onChange,
+  className,
 }: ConvivientesMultiSelectProps) {
   const [open, setOpen] = useState(false);
 
@@ -34,7 +36,14 @@ export default function ConvivientesMultiSelect({
   };
 
   return (
-    <div className="position-relative">
+    <div
+  className={[
+    "position-relative",
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ")}
+>
       <CFormLabel>{label}</CFormLabel>
       <div
         role="button"

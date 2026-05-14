@@ -524,6 +524,7 @@ export default function HistoriaClinicaPage() {
             <HistoriaClinicaDiagnosticoCard
               // diagnosticoPrincipal={diagnosticoPrincipal}
               diagnosticoFields={diagnosticoFields}
+              diagnosticos={diagnosticos}
               evoluciones={diagnosticoPrincipalTyped?.evoluciones ?? []}
               onViewDiagnosticos={() => {
                 if (pacienteId) {

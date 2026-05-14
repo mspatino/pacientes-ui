@@ -409,7 +409,7 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
 
   return (
     <div className="p-3">
-      <div className="d-flex align-items-center justify-content-between mb-3">
+      {/* <div className="d-flex align-items-center justify-content-between mb-3">
         <h1 className="h4 fw-bold mb-0">
           {isEditMode ? "Editar paciente" : "Alta paciente"}
         </h1>
@@ -420,7 +420,32 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
         >
           Volver
         </CButton>
-      </div>
+      </div> */}
+      <div className="sipac-page-header mb-4">
+  <div>
+    <div className="sipac-page-eyebrow">
+      Pacientes
+    </div>
+
+    <h1 className="sipac-page-title">
+      {isEditMode ? "Editar paciente" : "Alta paciente"}
+    </h1>
+
+    <div className="sipac-page-subtitle">
+      Datos personales y contexto social
+    </div>
+  </div>
+
+  <div className="d-flex gap-2">
+    <CButton
+      color="secondary"
+      variant="ghost"
+      onClick={() => navigate(-1)}
+    >
+      Volver
+    </CButton>
+  </div>
+</div>
 
       <CCard className="mx-auto sipac-form-card">
         <CCardBody>
@@ -432,11 +457,12 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
 
           <div className="row g-3">
             <div className="col-12 col-lg-6">
-              <div className="border rounded p-3 bg-light-subtle h-100">
+              <div className="sipac-section-card h-100">
                 <div className="row g-3">
                   <div className="col-12 col-md-6">
-                    <CFormLabel>Apellido</CFormLabel>
+                    <CFormLabel className="sipac-label">Apellido</CFormLabel>
                     <CFormInput
+                      className="sipac-input"
                       value={form.apellido}
                       invalid={!!fieldErrors.apellido}
                       onChange={(e) => handleChange("apellido", e.target.value)}
@@ -448,8 +474,9 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
                     )}
                   </div>
                   <div className="col-12 col-md-6">
-                    <CFormLabel>Nombre</CFormLabel>
+                    <CFormLabel className="sipac-label">Nombre</CFormLabel>
                     <CFormInput
+                      className="sipac-input"
                       value={form.nombre}
                       invalid={!!fieldErrors.nombre}
                       onChange={(e) => handleChange("nombre", e.target.value)}
@@ -461,8 +488,9 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
                     )}
                   </div>
                   <div className="col-12 col-md-6">
-                    <CFormLabel>DNI</CFormLabel>
+                    <CFormLabel className="sipac-label">DNI</CFormLabel>
                     <CFormInput
+                      className="sipac-input"
                       value={form.dni}
                       invalid={!!fieldErrors.dni}
                       onChange={(e) => handleChange("dni", e.target.value)}
@@ -489,8 +517,9 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
                     )}
                   </div>
                   <div className="col-12 col-md-6">
-                    <CFormLabel>Sexo</CFormLabel>
+                    <CFormLabel className="sipac-label">Sexo</CFormLabel>
                     <CFormSelect
+                    className="sipac-select"
                       value={form.sexo}
                       invalid={!!fieldErrors.sexo}
                       onChange={(e) => handleChange("sexo", e.target.value)}
@@ -503,8 +532,9 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
                     />
                   </div>
                   <div className="col-12 col-md-6">
-                    <CFormLabel>Estado civil</CFormLabel>
+                    <CFormLabel className="sipac-label">Estado civil</CFormLabel>
                     <CFormSelect
+                    className="sipac-select"
                       value={form.estadoCivil}
                       invalid={!!fieldErrors.estadoCivil}
                       onChange={(e) =>
@@ -524,9 +554,10 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
                     />
                   </div>
                   <div className="col-12 col-md-6">
-  <CFormLabel>Nivel educativo</CFormLabel>
+  <CFormLabel className="sipac-label">Nivel educativo</CFormLabel>
 
   <CFormSelect
+    className="sipac-select"
     value={form.nivelEducativo}
     invalid={!!fieldErrors.nivelEducativo}
     onChange={(e) =>
@@ -551,17 +582,18 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
   )}
 </div>
                   <div className="col-12 col-md-4">
-                    <CFormLabel>Teléfono</CFormLabel>
+                    <CFormLabel className="sipac-label">Teléfono</CFormLabel>
                     <CFormInput
-                      className="sipac-phone-input"
+                      className="sipac-input"
                       value={form.telefono}
                       invalid={!!fieldErrors.telefono}
                       onChange={(e) => handleChange("telefono", e.target.value)}
                     />
                   </div>
                   <div className="col-12 col-md-8">
-                    <CFormLabel>Email</CFormLabel>
+                    <CFormLabel className="sipac-label">Email</CFormLabel>
                     <CFormInput
+                      className="sipac-input"
                       value={form.email}
                       invalid={!!fieldErrors.email}
                       onChange={(e) => handleChange("email", e.target.value)}
@@ -572,11 +604,12 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
             </div>
 
             <div className="col-12 col-lg-6">
-              <div className="border rounded p-3 bg-light-subtle h-100">
+              <div className="sipac-section-card h-100">
                 <div className="row g-3">
                   <div className="col-12">
-                    <CFormLabel>Dirección</CFormLabel>
+                    <CFormLabel className="sipac-label">Dirección</CFormLabel>
                     <CFormInput
+                      className="sipac-input"
                       value={form.direccion}
                       invalid={!!fieldErrors.direccion}
                       onChange={(e) =>
@@ -585,8 +618,9 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
                     />
                   </div>
                   <div className="col-12">
-                    <CFormLabel>Ocupación</CFormLabel>
+                    <CFormLabel className="sipac-label">Ocupación</CFormLabel>
                     <CFormInput
+                      className="sipac-input"
                       value={form.ocupacion}
                       invalid={!!fieldErrors.ocupacion}
                       onChange={(e) =>
@@ -594,7 +628,7 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
                       }
                     />
                   </div>
-                  <div className="col-12">
+                  {/* <div className="col-12">
                     <ConvivientesMultiSelect
                       label="Con quién vive?"
                       options={CONVIVIENTE_OPTIONS}
@@ -615,7 +649,53 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
                         {fieldErrors.convivientes}
                       </div>
                     ) : null}
-                  </div>
+                  </div> */}
+<div className="col-12">
+
+  <div className="sipac-field-block">
+
+    <div className="sipac-label d-flex align-items-center gap-2 mb-2">
+      <span>Con quién vive</span>
+
+      {form.convivientes.length > 0 && (
+        <span className="sipac-counter-badge">
+          {form.convivientes.length}
+        </span>
+      )}
+    </div>
+
+    <ConvivientesMultiSelect
+      label=""
+      className="sipac-convivientes"
+      options={CONVIVIENTE_OPTIONS}
+      selected={form.convivientes}
+      onChange={(nextValues) => {
+        setForm((prev) => ({
+          ...prev,
+          convivientes: nextValues,
+        }));
+
+        setFieldErrors((prev) => ({
+          ...prev,
+          convivientes: undefined,
+        }));
+      }}
+    />
+
+    {fieldErrors.convivientes && (
+      <div className="sipac-field-error">
+        {fieldErrors.convivientes}
+      </div>
+    )}
+
+    {!fieldErrors.convivientes &&
+      form.convivientes.length > 0 && (
+        <div className="sipac-field-helper">
+          Información útil para contexto familiar y social.
+        </div>
+      )}
+  </div>
+</div>
                 </div>
               </div>
             </div>

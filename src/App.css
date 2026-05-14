@@ -690,3 +690,83 @@ textarea {
 .sipac-action-btn.success:hover {
   background: #d9f1e3;
 }
+
+.sipac-section-card {
+  background: #fff;
+  border: 1px solid #e7edf5;
+  border-radius: 18px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+}
+
+.sipac-input,
+.sipac-select {
+  border-radius: 12px !important;
+  border: 1px solid #dbe4f0 !important;
+  min-height: 46px;
+  background: #fcfdff;
+}
+
+.sipac-input:focus,
+.sipac-select:focus {
+  border-color: #2f6fb3 !important;
+  box-shadow: 0 0 0 0.18rem rgba(47, 111, 179, 0.12) !important;
+}
+
+.sipac-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #607085;
+  margin-bottom: 0.45rem;
+}
+
+.sipac-field-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.sipac-convivientes-wrapper {
+  border: 1px solid #dbe4f0;
+  border-radius: 14px;
+  padding: 0.85rem;
+  background: #fcfdff;
+  transition: all 0.18s ease;
+}
+
+.sipac-convivientes-wrapper:focus-within {
+  border-color: #2f6fb3;
+  box-shadow: 0 0 0 0.18rem rgba(47, 111, 179, 0.12);
+}
+
+.sipac-field-error {
+  font-size: 0.78rem;
+  color: #dc3545;
+  margin-top: 0.15rem;
+}
+
+.sipac-field-helper {
+  font-size: 0.76rem;
+  color: #7a8797;
+}
+
+.sipac-counter-badge {
+  background: #e8f1fb;
+  color: #2f6fb3;
+  border-radius: 999px;
+  padding: 0.1rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.sipac-multiselect {
+  border: 1px solid #dbe4f0;
+  border-radius: 14px;
+  padding: 0.85rem;
+  background: #fcfdff;
+}
+
+.sipac-multiselect:focus-within {
+  border-color: #2f6fb3;
+  box-shadow: 0 0 0 0.18rem rgba(47,111,179,.12);
+}
