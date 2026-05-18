@@ -36,15 +36,8 @@ export default function ConvivientesMultiSelect({
   };
 
   return (
-    <div
-  className={[
-    "position-relative",
-    className,
-  ]
-    .filter(Boolean)
-    .join(" ")}
->
-      <CFormLabel>{label}</CFormLabel>
+    <div className={["position-relative", className].filter(Boolean).join(" ")}>
+      {label?.trim() && <CFormLabel className="mb-1">{label}</CFormLabel>}
       <div
         role="button"
         tabIndex={0}
@@ -87,19 +80,21 @@ export default function ConvivientesMultiSelect({
           </span>
           <span className="conviviente-pick-zone" />
         </span>
-        <span style={{ fontSize: "0.75rem", marginTop: "0.2rem" }}>{open ? "▲" : "▼"}</span>
+        <span style={{ fontSize: "0.75rem", marginTop: "0.2rem" }}>
+          {open ? "▲" : "▼"}
+        </span>
       </div>
 
       {open ? (
         <div
           className="position-absolute z-3 w-100 border rounded bg-white p-1 mt-1"
-          style={{ maxHeight: "120px", overflowY: "auto" }}
+          style={{ maxHeight: "360px", overflowY: "auto" }}
         >
           <div className="row g-0">
             {options.map((option) => (
               <div key={option} className="col-12 col-sm-6 col-md-4">
                 <CFormCheck
-                  className="mb-1 conviviente-option-check"
+                  className="mb-0 conviviente-option-check"
                   type="checkbox"
                   id={`conviviente-option-${option}`}
                   label={formatConviviente(option)}

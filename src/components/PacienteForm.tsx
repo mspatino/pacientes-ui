@@ -20,7 +20,7 @@ import {
 import ConvivientesMultiSelect from "./ConvivientesMultiSelect";
 import SipacDateInput from "./SipacDateInput";
 import { CONVIVIENTE_OPTIONS } from "../constants/convivientes";
-import { asRecord , firstString } from "../utils/pacienteFormatters";
+import { asRecord, firstString } from "../utils/pacienteFormatters";
 
 type Mode = "create" | "edit";
 
@@ -80,9 +80,6 @@ const ESTADO_CIVIL_OPTIONS: EstadoCivilValue[] = [
 //   "OTRO",
 //   "SIN_ESCOLARIDAD",
 // ];
-
-
-
 
 const firstStringArray = (
   source: Record<string, unknown>,
@@ -422,30 +419,28 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
         </CButton>
       </div> */}
       <div className="sipac-page-header mb-4">
-  <div>
-    <div className="sipac-page-eyebrow">
-      Pacientes
-    </div>
+        <div>
+          <div className="sipac-page-eyebrow">Pacientes</div>
 
-    <h1 className="sipac-page-title">
-      {isEditMode ? "Editar paciente" : "Alta paciente"}
-    </h1>
+          <h1 className="sipac-page-title">
+            {isEditMode ? "Editar paciente" : "Alta paciente"}
+          </h1>
 
-    <div className="sipac-page-subtitle">
-      Datos personales y contexto social
-    </div>
-  </div>
+          <div className="sipac-page-subtitle">
+            Datos personales y contexto social
+          </div>
+        </div>
 
-  <div className="d-flex gap-2">
-    <CButton
-      color="secondary"
-      variant="ghost"
-      onClick={() => navigate(-1)}
-    >
-      Volver
-    </CButton>
-  </div>
-</div>
+        <div className="d-flex gap-2">
+          <CButton
+            color="secondary"
+            variant="ghost"
+            onClick={() => navigate(-1)}
+          >
+            Volver
+          </CButton>
+        </div>
+      </div>
 
       <CCard className="mx-auto sipac-form-card">
         <CCardBody>
@@ -519,7 +514,7 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
                   <div className="col-12 col-md-6">
                     <CFormLabel className="sipac-label">Sexo</CFormLabel>
                     <CFormSelect
-                    className="sipac-select"
+                      className="sipac-select"
                       value={form.sexo}
                       invalid={!!fieldErrors.sexo}
                       onChange={(e) => handleChange("sexo", e.target.value)}
@@ -532,9 +527,11 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
                     />
                   </div>
                   <div className="col-12 col-md-6">
-                    <CFormLabel className="sipac-label">Estado civil</CFormLabel>
+                    <CFormLabel className="sipac-label">
+                      Estado civil
+                    </CFormLabel>
                     <CFormSelect
-                    className="sipac-select"
+                      className="sipac-select"
                       value={form.estadoCivil}
                       invalid={!!fieldErrors.estadoCivil}
                       onChange={(e) =>
@@ -554,33 +551,34 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
                     />
                   </div>
                   <div className="col-12 col-md-6">
-  <CFormLabel className="sipac-label">Nivel educativo</CFormLabel>
+                    <CFormLabel className="sipac-label">
+                      Nivel educativo
+                    </CFormLabel>
 
-  <CFormSelect
-    className="sipac-select"
-    value={form.nivelEducativo}
-    invalid={!!fieldErrors.nivelEducativo}
-    onChange={(e) =>
-      handleChange("nivelEducativo", e.target.value)
-    }
-    options={[
-      { label: "Seleccione...", value: "" },
-      { label: "Sin escolaridad", value: "SIN_ESCOLARIDAD" },
-      { label: "Primario", value: "PRIMARIO" },
-      { label: "Secundario", value: "SECUNDARIO" },
-      { label: "Terciario", value: "TERCIARIO" },
-      { label: "Universitario", value: "UNIVERSITARIO" },
-      { label: "Otro", value: "OTRO" },
+                    <CFormSelect
+                      className="sipac-select"
+                      value={form.nivelEducativo}
+                      invalid={!!fieldErrors.nivelEducativo}
+                      onChange={(e) =>
+                        handleChange("nivelEducativo", e.target.value)
+                      }
+                      options={[
+                        { label: "Seleccione...", value: "" },
+                        { label: "Sin escolaridad", value: "SIN_ESCOLARIDAD" },
+                        { label: "Primario", value: "PRIMARIO" },
+                        { label: "Secundario", value: "SECUNDARIO" },
+                        { label: "Terciario", value: "TERCIARIO" },
+                        { label: "Universitario", value: "UNIVERSITARIO" },
+                        { label: "Otro", value: "OTRO" },
+                      ]}
+                    />
 
-    ]}
-  />
-
-  {fieldErrors.nivelEducativo && (
-    <div className="text-danger small mt-1">
-      {fieldErrors.nivelEducativo}
-    </div>
-  )}
-</div>
+                    {fieldErrors.nivelEducativo && (
+                      <div className="text-danger small mt-1">
+                        {fieldErrors.nivelEducativo}
+                      </div>
+                    )}
+                  </div>
                   <div className="col-12 col-md-4">
                     <CFormLabel className="sipac-label">Teléfono</CFormLabel>
                     <CFormInput
@@ -628,74 +626,50 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
                       }
                     />
                   </div>
-                  {/* <div className="col-12">
-                    <ConvivientesMultiSelect
-                      label="Con quién vive?"
-                      options={CONVIVIENTE_OPTIONS}
-                      selected={form.convivientes}
-                      onChange={(nextValues) => {
-                        setForm((prev) => ({
-                          ...prev,
-                          convivientes: nextValues,
-                        }));
-                        setFieldErrors((prev) => ({
-                          ...prev,
-                          convivientes: undefined,
-                        }));
-                      }}
-                    />
-                    {fieldErrors.convivientes ? (
-                      <div className="text-danger small mt-1">
-                        {fieldErrors.convivientes}
+                  <div className="col-12">
+                    <div className="sipac-field-block">
+                      <div className="sipac-label d-flex align-items-center gap-2 mb-0">
+                        <span>Con quién vive</span>
+
+                        {form.convivientes.length > 0 && (
+                          <span className="sipac-counter-badge">
+                            {form.convivientes.length}
+                          </span>
+                        )}
                       </div>
-                    ) : null}
-                  </div> */}
-<div className="col-12">
 
-  <div className="sipac-field-block">
+                      <ConvivientesMultiSelect
+                        label=""
+                        className="sipac-convivientes"
+                        options={CONVIVIENTE_OPTIONS}
+                        selected={form.convivientes}
+                        onChange={(nextValues) => {
+                          setForm((prev) => ({
+                            ...prev,
+                            convivientes: nextValues,
+                          }));
 
-    <div className="sipac-label d-flex align-items-center gap-2 mb-2">
-      <span>Con quién vive</span>
+                          setFieldErrors((prev) => ({
+                            ...prev,
+                            convivientes: undefined,
+                          }));
+                        }}
+                      />
 
-      {form.convivientes.length > 0 && (
-        <span className="sipac-counter-badge">
-          {form.convivientes.length}
-        </span>
-      )}
-    </div>
+                      {fieldErrors.convivientes && (
+                        <div className="sipac-field-error">
+                          {fieldErrors.convivientes}
+                        </div>
+                      )}
 
-    <ConvivientesMultiSelect
-      label=""
-      className="sipac-convivientes"
-      options={CONVIVIENTE_OPTIONS}
-      selected={form.convivientes}
-      onChange={(nextValues) => {
-        setForm((prev) => ({
-          ...prev,
-          convivientes: nextValues,
-        }));
-
-        setFieldErrors((prev) => ({
-          ...prev,
-          convivientes: undefined,
-        }));
-      }}
-    />
-
-    {fieldErrors.convivientes && (
-      <div className="sipac-field-error">
-        {fieldErrors.convivientes}
-      </div>
-    )}
-
-    {!fieldErrors.convivientes &&
-      form.convivientes.length > 0 && (
-        <div className="sipac-field-helper">
-          Información útil para contexto familiar y social.
-        </div>
-      )}
-  </div>
-</div>
+                      {!fieldErrors.convivientes &&
+                        form.convivientes.length > 0 && (
+                          <div className="sipac-field-helper">
+                            Información útil para contexto familiar y social.
+                          </div>
+                        )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

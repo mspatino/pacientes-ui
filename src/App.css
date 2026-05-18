@@ -770,3 +770,31 @@ textarea {
   border-color: #2f6fb3;
   box-shadow: 0 0 0 0.18rem rgba(47,111,179,.12);
 }
+
+.sipac-field-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sipac-convivientes .dropdown-menu {
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.sipac-convivientes .dropdown-item,
+.sipac-convivientes .form-check {
+  padding-top: 0.35rem;
+  padding-bottom: 0.35rem;
+  margin-bottom: 0;
+}
+
+.conviviente-option-check .form-check-label {
+  font-size: 0.82rem;
+}
+
+.conviviente-option-check {
+  min-height: auto;
+  padding-top: 0.1rem;
+  padding-bottom: 0.1rem;
+}
