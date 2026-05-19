@@ -13,8 +13,8 @@ import {
   CRow,
 } from "@coreui/react";
 import { useEffect, useRef } from "react";
-import type { Cie10DTO, DiagnosticoDTO } from "../../api/pacientes";
-import DiagnosticoAutocompleteFields from "../diagnostico/DiagnosticoAutocompleteFields";
+import type { Cie10DTO, DiagnosticoDTO } from "../../../api/pacientes";
+import DiagnosticoAutocompleteFields from "../../diagnostico/DiagnosticoAutocompleteFields";
 import {
   autoResizeTextarea,
   sipacBlue,

@@ -449,6 +449,11 @@ textarea {
   border-color: #edc2c2;
 }
 
+.hc-container {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
 .sipac-form-card {
   width: 82%;
   max-width: 1400px;

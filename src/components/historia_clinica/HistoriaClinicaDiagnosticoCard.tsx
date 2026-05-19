@@ -8,7 +8,7 @@ import { GiBrain } from "react-icons/gi";
 import InfoList from "./InfoList";
 import { FiEye , FiClock } from "react-icons/fi";
 import { useState } from "react";
-import { getDiagnosticoPrincipal } from "./diagnosticoUtils";
+import { getDiagnosticoPrincipal } from "./diagnosticos/diagnosticoUtils";
 
 
 interface Field {

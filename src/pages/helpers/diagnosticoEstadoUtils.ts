@@ -1,7 +1,7 @@
 import {
   getDiagnosticoFechaFin,
   isDiagnosticoPrincipal,
-} from "../../components/historia_clinica/diagnosticoUtils";
+} from "../../components/historia_clinica/diagnosticos/diagnosticoUtils";
 
 export const tieneTratamientoActivo = (
   diagnosticos: unknown[],

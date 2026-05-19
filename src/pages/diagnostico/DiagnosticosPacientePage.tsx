@@ -27,7 +27,7 @@ import {
   getDiagnosticoText,
   isDiagnosticoActivo,
   isDiagnosticoPrincipal,
-} from "../../components/historia_clinica/diagnosticoUtils";
+} from "../../components/historia_clinica/diagnosticos/diagnosticoUtils";
 
 const formatDateTime = (raw?: string | null): string => {
   if (!raw) return "";

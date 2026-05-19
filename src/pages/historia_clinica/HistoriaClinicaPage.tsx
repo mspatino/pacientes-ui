@@ -31,7 +31,7 @@ import {
   getDiagnosticoFechaFin,
   getDiagnosticoPrincipal,
   getDiagnosticoText,
-} from "../../components/historia_clinica/diagnosticoUtils";
+} from "../../components/historia_clinica/diagnosticos/diagnosticoUtils";
 import { getEstadoTratamiento } from "../helpers/diagnosticoEstadoUtils";
 
 pdfMake.addVirtualFileSystem(pdfFonts);

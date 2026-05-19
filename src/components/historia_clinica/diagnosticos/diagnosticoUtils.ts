@@ -1,4 +1,4 @@
-import type { DiagnosticoDTO } from "../../api/pacientes";
+import type { DiagnosticoDTO } from "../../../api/pacientes";
 
 export const sipacBlue = "#2F6FB3";
 

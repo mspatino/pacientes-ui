@@ -17,7 +17,7 @@ import {
   getDiagnosticoFechaFin,
   getDiagnosticoText,
   isDiagnosticoPrincipal,
-} from "../components/historia_clinica/diagnosticoUtils";
+} from "../components/historia_clinica/diagnosticos/diagnosticoUtils";
 //import { SlSocialYoutube } from "react-icons/sl";
 
 interface UseHistoriaClinicaEditorOptions {

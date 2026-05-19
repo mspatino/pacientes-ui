@@ -1,0 +1,27 @@
+.hc-form-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+
+  border-top: 1px solid #e9eef5;
+}
+
+.hc-form-footer-sticky {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+
+  padding: 1rem 0;
+
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(6px);
+
+  border-top: 1px solid #e9eef5;
+}

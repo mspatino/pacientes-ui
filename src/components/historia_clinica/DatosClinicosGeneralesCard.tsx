@@ -10,7 +10,7 @@ import {
   CRow,
 } from "@coreui/react";
 import type { HistoriaClinicaPayload } from "../../api/pacientes";
-import { autoResizeTextarea } from "./diagnosticoUtils";
+import { autoResizeTextarea } from "./diagnosticos/diagnosticoUtils";
 
 interface DatosClinicosGeneralesCardProps {
   form: HistoriaClinicaPayload;

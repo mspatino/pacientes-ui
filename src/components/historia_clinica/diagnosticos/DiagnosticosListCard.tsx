@@ -1,7 +1,8 @@
-import { CButton, CCard, CCardBody, CCardHeader } from "@coreui/react";
+import { CButton } from "@coreui/react";
 import { BsPlusLg, BsTrashFill } from "react-icons/bs";
 import { GiBrain } from "react-icons/gi";
-import type { DiagnosticoDTO } from "../../api/pacientes";
+import type { DiagnosticoDTO } from "../../../api/pacientes";
+import SectionCard from "../shared/SectionCard";
 import {
   getDiagnosticoSummary,
   isDiagnosticoPrincipal,
@@ -25,27 +26,29 @@ export default function DiagnosticosListCard({
   onView,
   onRemove,
 }: DiagnosticosListCardProps) {
+  const headerAction = (
+    <CButton
+      type="button"
+      color="primary"
+      size="sm"
+      className="d-inline-flex align-items-center gap-2"
+      onClick={onAdd}
+    >
+      <BsPlusLg />
+      Agregar
+    </CButton>
+  );
+
   return (
-    <CCard className="sipac-form-card">
-      <CCardHeader>
-        <div className="d-flex justify-content-between align-items-center gap-2">
-          <span className="d-inline-flex align-items-center gap-2">
-            <GiBrain />
-            Diagnósticos
-          </span>
-          <CButton
-            type="button"
-            color="primary"
-            size="sm"
-            className="d-inline-flex align-items-center gap-2"
-            onClick={onAdd}
-          >
-            <BsPlusLg />
-            Agregar
-          </CButton>
-        </div>
-      </CCardHeader>
-      <CCardBody>
+    <SectionCard
+      title={
+        <span className="d-inline-flex align-items-center gap-2">
+          <GiBrain />
+          Diagnósticos
+        </span>
+      }
+      headerAction={headerAction}
+    >
         {diagnosticos.length === 0 ? (
           <div className="small text-muted">
             Todavía no hay diagnósticos cargados para esta historia clínica.
@@ -111,7 +114,6 @@ export default function DiagnosticosListCard({
             </div>
           </div>
         )}
-      </CCardBody>
-    </CCard>
+    </SectionCard>
   );
 }

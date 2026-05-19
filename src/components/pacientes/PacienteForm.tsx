@@ -426,241 +426,256 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
   return (
     <div className="p-3">
       <div className="mx-auto sipac-form-card">
-      <PacienteFormHeader isEditMode={isEditMode} onBack={() => navigate(-1)} />
-      <CCard>
-        <CCardBody>
-          {error ? (
-            <CAlert color="danger" className="mb-3">
-              {error}
-            </CAlert>
-          ) : null}
+        <PacienteFormHeader
+          isEditMode={isEditMode}
+          onBack={() => navigate(-1)}
+        />
+        <CCard>
+          <CCardBody>
+            {error ? (
+              <CAlert color="danger" className="mb-3">
+                {error}
+              </CAlert>
+            ) : null}
 
-          <div className="row g-3">
-            <div className="col-12 col-lg-6">
-              <div className="sipac-section-card h-100">
-                <div className="row g-3">
-                  <div className="col-12 col-md-6">
-                    <CFormLabel className="sipac-label">Apellido</CFormLabel>
-                    <CFormInput
-                      className="sipac-input"
-                      value={form.apellido}
-                      invalid={!!fieldErrors.apellido}
-                      onChange={(e) => handleChange("apellido", e.target.value)}
-                    />
-                    {fieldErrors.apellido && (
-                      <div className="text-danger small mt-1">
-                        {fieldErrors.apellido}
-                      </div>
-                    )}
-                  </div>
-                  <div className="col-12 col-md-6">
-                    <CFormLabel className="sipac-label">Nombre</CFormLabel>
-                    <CFormInput
-                      className="sipac-input"
-                      value={form.nombre}
-                      invalid={!!fieldErrors.nombre}
-                      onChange={(e) => handleChange("nombre", e.target.value)}
-                    />
-                    {fieldErrors.nombre && (
-                      <div className="text-danger small mt-1">
-                        {fieldErrors.nombre}
-                      </div>
-                    )}
-                  </div>
-                  <div className="col-12 col-md-6">
-                    <CFormLabel className="sipac-label">DNI</CFormLabel>
-                    <CFormInput
-                      className="sipac-input"
-                      value={form.dni}
-                      invalid={!!fieldErrors.dni}
-                      onChange={(e) => handleChange("dni", e.target.value)}
-                    />
-                    {fieldErrors.dni && (
-                      <div className="text-danger small mt-1">
-                        {fieldErrors.dni}
-                      </div>
-                    )}
-                  </div>
-                  <div className="col-12 col-md-6">
-                    <SipacDateInput
-                      label="Fecha de nacimiento"
-                      value={form.fechaNacimiento}
-                      invalid={!!fieldErrors.fechaNacimiento}
-                      onValueChange={(value) =>
-                        handleChange("fechaNacimiento", value)
-                      }
-                    />
-                    {fieldErrors.fechaNacimiento && (
-                      <div className="text-danger small mt-1">
-                        {fieldErrors.fechaNacimiento}
-                      </div>
-                    )}
-                  </div>
-                  <div className="col-12 col-md-6">
-                    <CFormLabel className="sipac-label">Sexo</CFormLabel>
-                    <CFormSelect
-                      className="sipac-select"
-                      value={form.sexo}
-                      invalid={!!fieldErrors.sexo}
-                      onChange={(e) => handleChange("sexo", e.target.value)}
-                      options={[
-                        { label: "Seleccione...", value: "" },
-                        { label: "Masculino", value: "Masculino" },
-                        { label: "Femenino", value: "Femenino" },
-                        { label: "Otro", value: "Otro" },
-                      ]}
-                    />
-                  </div>
-                  <div className="col-12 col-md-6">
-                    <CFormLabel className="sipac-label">
-                      Estado civil
-                    </CFormLabel>
-                    <CFormSelect
-                      className="sipac-select"
-                      value={form.estadoCivil}
-                      invalid={!!fieldErrors.estadoCivil}
-                      onChange={(e) =>
-                        handleChange("estadoCivil", e.target.value)
-                      }
-                      options={[
-                        { label: "Seleccione...", value: "" },
-                        { label: "Soltero/a", value: "SOLTERO" },
-                        { label: "Casado/a", value: "CASADO" },
-                        { label: "Divorciado/a", value: "DIVORCIADO" },
-                        { label: "Viudo/a", value: "VIUDO" },
-                        {
-                          label: "Unión convivencial",
-                          value: "UNION_CONVIVENCIAL",
-                        },
-                      ]}
-                    />
-                  </div>
-                  <div className="col-12 col-md-6">
-                    <CFormLabel className="sipac-label">
-                      Nivel educativo
-                    </CFormLabel>
+            <div className="row g-3">
+              <div className="col-12 col-lg-6">
+                <div className="sipac-section-card h-100">
+                  <div className="row g-3">
+                    <div className="col-12 col-md-6">
+                      <CFormLabel className="sipac-label">Apellido</CFormLabel>
+                      <CFormInput
+                        className="sipac-input"
+                        value={form.apellido}
+                        invalid={!!fieldErrors.apellido}
+                        onChange={(e) =>
+                          handleChange("apellido", e.target.value)
+                        }
+                      />
+                      {fieldErrors.apellido && (
+                        <div className="text-danger small mt-1">
+                          {fieldErrors.apellido}
+                        </div>
+                      )}
+                    </div>
+                    <div className="col-12 col-md-6">
+                      <CFormLabel className="sipac-label">Nombre</CFormLabel>
+                      <CFormInput
+                        className="sipac-input"
+                        value={form.nombre}
+                        invalid={!!fieldErrors.nombre}
+                        onChange={(e) => handleChange("nombre", e.target.value)}
+                      />
+                      {fieldErrors.nombre && (
+                        <div className="text-danger small mt-1">
+                          {fieldErrors.nombre}
+                        </div>
+                      )}
+                    </div>
+                    <div className="col-12 col-md-6">
+                      <CFormLabel className="sipac-label">DNI</CFormLabel>
+                      <CFormInput
+                        className="sipac-input"
+                        value={form.dni}
+                        invalid={!!fieldErrors.dni}
+                        onChange={(e) => handleChange("dni", e.target.value)}
+                      />
+                      {fieldErrors.dni && (
+                        <div className="text-danger small mt-1">
+                          {fieldErrors.dni}
+                        </div>
+                      )}
+                    </div>
+                    <div className="col-12 col-md-6">
+                      <CFormLabel className="sipac-label">
+                        Fecha de Nacimiento
+                      </CFormLabel>
 
-                    <CFormSelect
-                      className="sipac-select"
-                      value={form.nivelEducativo}
-                      invalid={!!fieldErrors.nivelEducativo}
-                      onChange={(e) =>
-                        handleChange("nivelEducativo", e.target.value)
-                      }
-                      options={[
-                        { label: "Seleccione...", value: "" },
-                        { label: "Sin escolaridad", value: "SIN_ESCOLARIDAD" },
-                        { label: "Primario", value: "PRIMARIO" },
-                        { label: "Secundario", value: "SECUNDARIO" },
-                        { label: "Terciario", value: "TERCIARIO" },
-                        { label: "Universitario", value: "UNIVERSITARIO" },
-                        { label: "Otro", value: "OTRO" },
-                      ]}
-                    />
+                      <SipacDateInput
+                        label=""
+                        className="sipac-input"
+                        value={form.fechaNacimiento}
+                        invalid={!!fieldErrors.fechaNacimiento}
+                        onValueChange={(value) =>
+                          handleChange("fechaNacimiento", value)
+                        }
+                      />
+                      {fieldErrors.fechaNacimiento && (
+                        <div className="text-danger small mt-1">
+                          {fieldErrors.fechaNacimiento}
+                        </div>
+                      )}
+                    </div>
+                    <div className="col-12 col-md-6">
+                      <CFormLabel className="sipac-label">Sexo</CFormLabel>
+                      <CFormSelect
+                        className="sipac-select"
+                        value={form.sexo}
+                        invalid={!!fieldErrors.sexo}
+                        onChange={(e) => handleChange("sexo", e.target.value)}
+                        options={[
+                          { label: "Seleccione...", value: "" },
+                          { label: "Masculino", value: "Masculino" },
+                          { label: "Femenino", value: "Femenino" },
+                          { label: "Otro", value: "Otro" },
+                        ]}
+                      />
+                    </div>
+                    <div className="col-12 col-md-6">
+                      <CFormLabel className="sipac-label">
+                        Estado civil
+                      </CFormLabel>
+                      <CFormSelect
+                        className="sipac-select"
+                        value={form.estadoCivil}
+                        invalid={!!fieldErrors.estadoCivil}
+                        onChange={(e) =>
+                          handleChange("estadoCivil", e.target.value)
+                        }
+                        options={[
+                          { label: "Seleccione...", value: "" },
+                          { label: "Soltero/a", value: "SOLTERO" },
+                          { label: "Casado/a", value: "CASADO" },
+                          { label: "Divorciado/a", value: "DIVORCIADO" },
+                          { label: "Viudo/a", value: "VIUDO" },
+                          {
+                            label: "Unión convivencial",
+                            value: "UNION_CONVIVENCIAL",
+                          },
+                        ]}
+                      />
+                    </div>
+                    <div className="col-12 col-md-6">
+                      <CFormLabel className="sipac-label">
+                        Nivel educativo
+                      </CFormLabel>
 
-                    {fieldErrors.nivelEducativo && (
-                      <div className="text-danger small mt-1">
-                        {fieldErrors.nivelEducativo}
-                      </div>
-                    )}
-                  </div>
-                  <div className="col-12 col-md-6">
-                    <CFormLabel className="sipac-label">Teléfono</CFormLabel>
-                    <CFormInput
-                      className="sipac-input"
-                      value={form.telefono}
-                      invalid={!!fieldErrors.telefono}
-                      onChange={(e) => handleChange("telefono", e.target.value)}
-                    />
-                  </div>
-                  <div className="col-12 col-md-8">
-                    <CFormLabel className="sipac-label">Email</CFormLabel>
-                    <CFormInput
-                      className="sipac-input"
-                      value={form.email}
-                      invalid={!!fieldErrors.email}
-                      onChange={(e) => handleChange("email", e.target.value)}
-                    />
+                      <CFormSelect
+                        className="sipac-select"
+                        value={form.nivelEducativo}
+                        invalid={!!fieldErrors.nivelEducativo}
+                        onChange={(e) =>
+                          handleChange("nivelEducativo", e.target.value)
+                        }
+                        options={[
+                          { label: "Seleccione...", value: "" },
+                          {
+                            label: "Sin escolaridad",
+                            value: "SIN_ESCOLARIDAD",
+                          },
+                          { label: "Primario", value: "PRIMARIO" },
+                          { label: "Secundario", value: "SECUNDARIO" },
+                          { label: "Terciario", value: "TERCIARIO" },
+                          { label: "Universitario", value: "UNIVERSITARIO" },
+                          { label: "Otro", value: "OTRO" },
+                        ]}
+                      />
+
+                      {fieldErrors.nivelEducativo && (
+                        <div className="text-danger small mt-1">
+                          {fieldErrors.nivelEducativo}
+                        </div>
+                      )}
+                    </div>
+                    <div className="col-12 col-md-6">
+                      <CFormLabel className="sipac-label">Teléfono</CFormLabel>
+                      <CFormInput
+                        className="sipac-input"
+                        value={form.telefono}
+                        invalid={!!fieldErrors.telefono}
+                        onChange={(e) =>
+                          handleChange("telefono", e.target.value)
+                        }
+                      />
+                    </div>
+                    <div className="col-12 col-md-8">
+                      <CFormLabel className="sipac-label">Email</CFormLabel>
+                      <CFormInput
+                        className="sipac-input"
+                        value={form.email}
+                        invalid={!!fieldErrors.email}
+                        onChange={(e) => handleChange("email", e.target.value)}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="col-12 col-lg-6">
-              <div className="sipac-section-card h-100">
-                <div className="row g-3">
-                  <div className="col-12">
-                    <CFormLabel className="sipac-label">Dirección</CFormLabel>
-                    <CFormInput
-                      className="sipac-input"
-                      value={form.direccion}
-                      invalid={!!fieldErrors.direccion}
-                      onChange={(e) =>
-                        handleChange("direccion", e.target.value)
-                      }
-                    />
-                  </div>
-                  <div className="col-12">
-                    <CFormLabel className="sipac-label">Ocupación</CFormLabel>
-                    <CFormInput
-                      className="sipac-input"
-                      value={form.ocupacion}
-                      invalid={!!fieldErrors.ocupacion}
-                      onChange={(e) =>
-                        handleChange("ocupacion", e.target.value)
-                      }
-                    />
-                  </div>
-                  <div className="col-12">
-                    <div className="sipac-field-block">
-                      <div className="sipac-label d-flex align-items-center gap-2 mb-0">
-                        <span>Con quién vive</span>
-
-                        {form.convivientes.length > 0 && (
-                          <span className="sipac-counter-badge">
-                            {form.convivientes.length}
-                          </span>
-                        )}
-                      </div>
-
-                      <ConvivientesMultiSelect
-                        label=""
-                        className="sipac-convivientes"
-                        options={CONVIVIENTE_OPTIONS}
-                        selected={form.convivientes}
-                        onChange={(nextValues) => {
-                          setForm((prev) => ({
-                            ...prev,
-                            convivientes: nextValues,
-                          }));
-
-                          setFieldErrors((prev) => ({
-                            ...prev,
-                            convivientes: undefined,
-                          }));
-                        }}
+              <div className="col-12 col-lg-6">
+                <div className="sipac-section-card h-100">
+                  <div className="row g-3">
+                    <div className="col-12">
+                      <CFormLabel className="sipac-label">Dirección</CFormLabel>
+                      <CFormInput
+                        className="sipac-input"
+                        value={form.direccion}
+                        invalid={!!fieldErrors.direccion}
+                        onChange={(e) =>
+                          handleChange("direccion", e.target.value)
+                        }
                       />
+                    </div>
+                    <div className="col-12">
+                      <CFormLabel className="sipac-label">Ocupación</CFormLabel>
+                      <CFormInput
+                        className="sipac-input"
+                        value={form.ocupacion}
+                        invalid={!!fieldErrors.ocupacion}
+                        onChange={(e) =>
+                          handleChange("ocupacion", e.target.value)
+                        }
+                      />
+                    </div>
+                    <div className="col-12">
+                      <div className="sipac-field-block">
+                        <div className="sipac-label d-flex align-items-center gap-2 mb-0">
+                          <span>Con quién vive</span>
 
-                      {fieldErrors.convivientes && (
-                        <div className="sipac-field-error">
-                          {fieldErrors.convivientes}
+                          {form.convivientes.length > 0 && (
+                            <span className="sipac-counter-badge">
+                              {form.convivientes.length}
+                            </span>
+                          )}
                         </div>
-                      )}
 
-                      {!fieldErrors.convivientes &&
-                        form.convivientes.length > 0 && (
-                          <div className="sipac-field-helper">
-                            Información útil para contexto familiar y social.
+                        <ConvivientesMultiSelect
+                          label=""
+                          className="sipac-convivientes"
+                          options={CONVIVIENTE_OPTIONS}
+                          selected={form.convivientes}
+                          onChange={(nextValues) => {
+                            setForm((prev) => ({
+                              ...prev,
+                              convivientes: nextValues,
+                            }));
+
+                            setFieldErrors((prev) => ({
+                              ...prev,
+                              convivientes: undefined,
+                            }));
+                          }}
+                        />
+
+                        {fieldErrors.convivientes && (
+                          <div className="sipac-field-error">
+                            {fieldErrors.convivientes}
                           </div>
                         )}
+
+                        {!fieldErrors.convivientes &&
+                          form.convivientes.length > 0 && (
+                            <div className="sipac-field-helper">
+                              Información útil para contexto familiar y social.
+                            </div>
+                          )}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* <div className="d-flex gap-2 mt-4">
+            {/* <div className="d-flex gap-2 mt-4">
             <CButton color="primary" onClick={handleSave} disabled={saving}>
               {saving ? "Guardando..." : "Guardar"}
             </CButton>
@@ -672,26 +687,26 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
               Cancelar
             </CButton>
           </div> */}
-          <div className="sipac-form-footer">
-            <button
-              type="button"
-              className="sipac-toolbar-btn"
-              onClick={handleSave}
-              disabled={saving}
-            >
-              {saving ? "Guardando..." : "Guardar"}
-            </button>
+            <div className="sipac-form-footer">
+              <button
+                type="button"
+                className="sipac-toolbar-btn"
+                onClick={handleSave}
+                disabled={saving}
+              >
+                {saving ? "Guardando..." : "Guardar"}
+              </button>
 
-            <button
-              type="button"
-              className="sipac-toolbar-btn"
-              onClick={() => navigate(-1)}
-            >
-              Cancelar
-            </button>
-          </div>
-        </CCardBody>
-      </CCard>
+              <button
+                type="button"
+                className="sipac-toolbar-btn"
+                onClick={() => navigate(-1)}
+              >
+                Cancelar
+              </button>
+            </div>
+          </CCardBody>
+        </CCard>
       </div>
     </div>
   );

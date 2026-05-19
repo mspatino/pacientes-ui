@@ -9,12 +9,14 @@ type BaseInputProps = Omit<
 interface SipacDateInputProps extends BaseInputProps {
   label: string;
   value: string;
+  invalid?: boolean;
   onValueChange: (value: string) => void;
 }
 
 export default function SipacDateInput({
   label,
   value,
+  invalid,
   onValueChange,
   ...rest
 }: SipacDateInputProps) {
@@ -25,6 +27,7 @@ export default function SipacDateInput({
         {...rest}
         type="date"
         value={value}
+        invalid={invalid}
         onChange={(event) => onValueChange(event.target.value)}
       />
     </>
