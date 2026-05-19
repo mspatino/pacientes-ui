@@ -1,6 +1,6 @@
 import { CFormCheck, CFormLabel } from "@coreui/react";
 import { useMemo, useState } from "react";
-import { CONVIVIENTE_OPTIONS } from "../constants/convivientes";
+import { CONVIVIENTE_OPTIONS } from "../../constants/convivientes";
 
 const formatConviviente = (value: string): string =>
   value

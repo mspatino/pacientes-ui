@@ -127,11 +127,6 @@ export default function PacientePage() {
         value: firstString(pacienteData ?? {}, ["email", "correo"]) || "-",
       },
       {
-        label: "Ocupación",
-        value:
-          firstString(pacienteData ?? {}, ["ocupacion", "ocupación"]) || "-",
-      },
-      {
         label: "Dirección",
         value:
           firstString(pacienteData ?? {}, [

@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   CAlert,
-  CButton,
   CCard,
   CCardBody,
   CFormInput,
@@ -16,11 +15,12 @@ import {
   getPacienteById,
   updatePaciente,
   type PacienteResponseDTO,
-} from "../api/pacientes";
+} from "../../api/pacientes";
 import ConvivientesMultiSelect from "./ConvivientesMultiSelect";
-import SipacDateInput from "./SipacDateInput";
-import { CONVIVIENTE_OPTIONS } from "../constants/convivientes";
-import { asRecord, firstString } from "../utils/pacienteFormatters";
+import SipacDateInput from "../SipacDateInput";
+import { CONVIVIENTE_OPTIONS } from "../../constants/convivientes";
+import { asRecord, firstString } from "../../utils/pacienteFormatters";
+import PacienteFormHeader from "./PacienteFormHeader";
 
 type Mode = "create" | "edit";
 
@@ -62,24 +62,24 @@ const ESTADO_CIVIL_OPTIONS: EstadoCivilValue[] = [
   "VIUDO",
   "UNION_CONVIVENCIAL",
 ];
-// type NivelEducativoValue =
-//   | ""
-//   | "PRIMARIO"
-//   | "SECUNDARIO"
-//   | "TERCIARIO"
-//   | "UNIVERSITARIO"
-//   | "OTRO"
-//   | "SIN_ESCOLARIDAD";
+type NivelEducativoValue =
+  | ""
+  | "PRIMARIO"
+  | "SECUNDARIO"
+  | "TERCIARIO"
+  | "UNIVERSITARIO"
+  | "OTRO"
+  | "SIN_ESCOLARIDAD";
 
-// const NIVEL_EDUCATIVO_OPTIONS: NivelEducativoValue[] = [
-//   "",
-//   "PRIMARIO",
-//   "SECUNDARIO",
-//   "TERCIARIO",
-//   "UNIVERSITARIO",
-//   "OTRO",
-//   "SIN_ESCOLARIDAD",
-// ];
+const NIVEL_EDUCATIVO_OPTIONS: NivelEducativoValue[] = [
+  "",
+  "PRIMARIO",
+  "SECUNDARIO",
+  "TERCIARIO",
+  "UNIVERSITARIO",
+  "OTRO",
+  "SIN_ESCOLARIDAD",
+];
 
 const firstStringArray = (
   source: Record<string, unknown>,
@@ -133,6 +133,24 @@ const normalizeEstadoCivil = (value: string): EstadoCivilValue => {
     .replace(/\s+/g, "_");
   if (ESTADO_CIVIL_OPTIONS.includes(normalized as EstadoCivilValue)) {
     return normalized as EstadoCivilValue;
+  }
+  return "";
+};
+
+const normalizeNivelEducativo = (value: string): NivelEducativoValue => {
+  if (!value) return "";
+  const normalized = value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, "_");
+
+  if (normalized === "SIN_ESCOLARIDAD") return "SIN_ESCOLARIDAD";
+  if (normalized === "PRIMARIA") return "PRIMARIO";
+  if (normalized === "SECUNDARIA") return "SECUNDARIO";
+  if (NIVEL_EDUCATIVO_OPTIONS.includes(normalized as NivelEducativoValue)) {
+    return normalized as NivelEducativoValue;
   }
   return "";
 };
@@ -285,8 +303,9 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
               "civilStatus",
             ]) || "",
           ),
-          nivelEducativo:
+          nivelEducativo: normalizeNivelEducativo(
             firstString(source, ["nivelEducativo", "nivel_educativo"]) || "",
+          ),
           convivientes: firstStringArray(source, ["convivientes"])
             .map(normalizeConviviente)
             .filter((value) => CONVIVIENTE_OPTIONS.includes(value)),
@@ -406,43 +425,9 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
 
   return (
     <div className="p-3">
-      {/* <div className="d-flex align-items-center justify-content-between mb-3">
-        <h1 className="h4 fw-bold mb-0">
-          {isEditMode ? "Editar paciente" : "Alta paciente"}
-        </h1>
-        <CButton
-          color="secondary"
-          variant="outline"
-          onClick={() => navigate(-1)}
-        >
-          Volver
-        </CButton>
-      </div> */}
-      <div className="sipac-page-header mb-4">
-        <div>
-          <div className="sipac-page-eyebrow">Pacientes</div>
-
-          <h1 className="sipac-page-title">
-            {isEditMode ? "Editar paciente" : "Alta paciente"}
-          </h1>
-
-          <div className="sipac-page-subtitle">
-            Datos personales y contexto social
-          </div>
-        </div>
-
-        <div className="d-flex gap-2">
-          <CButton
-            color="secondary"
-            variant="ghost"
-            onClick={() => navigate(-1)}
-          >
-            Volver
-          </CButton>
-        </div>
-      </div>
-
-      <CCard className="mx-auto sipac-form-card">
+      <div className="mx-auto sipac-form-card">
+      <PacienteFormHeader isEditMode={isEditMode} onBack={() => navigate(-1)} />
+      <CCard>
         <CCardBody>
           {error ? (
             <CAlert color="danger" className="mb-3">
@@ -579,7 +564,7 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
                       </div>
                     )}
                   </div>
-                  <div className="col-12 col-md-4">
+                  <div className="col-12 col-md-6">
                     <CFormLabel className="sipac-label">Teléfono</CFormLabel>
                     <CFormInput
                       className="sipac-input"
@@ -675,7 +660,7 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
             </div>
           </div>
 
-          <div className="d-flex gap-2 mt-4">
+          {/* <div className="d-flex gap-2 mt-4">
             <CButton color="primary" onClick={handleSave} disabled={saving}>
               {saving ? "Guardando..." : "Guardar"}
             </CButton>
@@ -686,9 +671,28 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
             >
               Cancelar
             </CButton>
+          </div> */}
+          <div className="sipac-form-footer">
+            <button
+              type="button"
+              className="sipac-toolbar-btn"
+              onClick={handleSave}
+              disabled={saving}
+            >
+              {saving ? "Guardando..." : "Guardar"}
+            </button>
+
+            <button
+              type="button"
+              className="sipac-toolbar-btn"
+              onClick={() => navigate(-1)}
+            >
+              Cancelar
+            </button>
           </div>
         </CCardBody>
       </CCard>
+      </div>
     </div>
   );
 }

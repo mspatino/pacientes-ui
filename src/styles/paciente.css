@@ -301,3 +301,17 @@
     transform: rotate(360deg);
   }
 }
+
+.sipac-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.sipac-form-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #2F6FB3;
+  margin: 0;
+}
