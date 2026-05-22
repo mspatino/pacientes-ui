@@ -448,7 +448,7 @@ export default function HistoriaClinicaPage() {
   };
 
   return (
-    <div className="p-3">
+    <div className="p-3 paciente-page-container">
       <HistoriaClinicaHeader
         pacienteNombre={pacienteNombre}
         onDownloadPdf={handleDownloadPdf}
@@ -536,41 +536,61 @@ export default function HistoriaClinicaPage() {
           </CAccordion>
         </div>
       ) : (
-        <CCard className="mx-auto sipac-form-card">
-          <CCardBody>
-            <div className="border rounded p-3 bg-light-subtle d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
-              <span className="small text-muted">
-                Este paciente todavía no tiene historia clínica.
-              </span>
-              <CButton
-                color="primary"
-                size="sm"
-                className="d-inline-flex align-items-center gap-2"
-                title="Agregar historia clínica"
-                aria-label="Agregar historia clínica"
-                onClick={() => {
-                  if (pacienteId) {
-                    navigate(
-                      `/pacientes/${pacienteId}/historia-clinica/editar`,
-                      {
-                        state: { mode: "create" },
-                      },
-                    );
-                  }
-                }}
-              >
-                <BsClipboard2Pulse />
-                <BsPlusLg />
-                Alta
-              </CButton>
+        <CCard className="mx-auto sipac-form-card border-0 shadow-sm">
+  <CCardBody className="p-4">
+
+    <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+
+      {/* LEFT */}
+      <div className="d-flex align-items-center gap-3">
+
+        <div className="sipac-empty-icon">
+          <BsClipboard2Pulse />
+        </div>
+
+        <div>
+          <h5 className="mb-1 hc-title">
+            Historia clínica no registrada
+          </h5>
+
+          <div className="text-muted small">
+            Este paciente todavía no posee una historia clínica cargada.
+          </div>
+
+          {state.mode === "create" ? (
+            <div className="small text-muted mt-1">
+              Modo alta solicitado desde detalle del paciente.
             </div>
-            {state.mode === "create" ? (
-              <div className="small text-muted mt-2">
-                Modo alta solicitado desde detalle de paciente.
-              </div>
-            ) : null}
-          </CCardBody>
-        </CCard>
+          ) : null}
+        </div>
+
+      </div>
+
+      {/* RIGHT */}
+      <div className="d-flex align-items-center">
+        <button
+          type="button"
+          className="sipac-toolbar-btn"
+          onClick={() => {
+            if (pacienteId) {
+              navigate(
+                `/pacientes/${pacienteId}/historia-clinica/editar`,
+                {
+                  state: { mode: "create" },
+                },
+              );
+            }
+          }}
+        >
+          <BsPlusLg />
+          Crear
+        </button>
+      </div>
+
+    </div>
+
+  </CCardBody>
+</CCard>
       )}
 
       <CModal

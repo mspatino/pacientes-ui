@@ -15,6 +15,7 @@ interface DiagnosticosListCardProps {
   onOpen: (index: number) => void;
   onAdd: () => void;
   onRemove: (index: number) => void;
+  readOnly?: boolean;
 }
 
 export default function DiagnosticosListCard({
@@ -22,8 +23,9 @@ export default function DiagnosticosListCard({
   onOpen,
   onAdd,
   onRemove,
+  readOnly = false,
 }: DiagnosticosListCardProps) {
-  const headerAction = (
+  const headerAction = readOnly ? null : (
     <CButton
       type="button"
       color="primary"
@@ -106,21 +108,23 @@ export default function DiagnosticosListCard({
                       ) : null}
                     </div>
 
-                    <CButton
-                      type="button"
-                      size="sm"
-                      color="danger"
-                      variant="outline"
-                      className="flex-shrink-0"
-                      aria-label="Eliminar diagnóstico"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onRemove(index);
-                      }}
-                      onKeyDown={(e) => e.stopPropagation()}
-                    >
-                      <BsTrashFill />
-                    </CButton>
+                    {!readOnly ? (
+                      <CButton
+                        type="button"
+                        size="sm"
+                        color="danger"
+                        variant="outline"
+                        className="flex-shrink-0"
+                        aria-label="Eliminar diagnóstico"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onRemove(index);
+                        }}
+                        onKeyDown={(e) => e.stopPropagation()}
+                      >
+                        <BsTrashFill />
+                      </CButton>
+                    ) : null}
                   </div>
                 </div>
               );

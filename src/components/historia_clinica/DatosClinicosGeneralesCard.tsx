@@ -4,8 +4,8 @@ import {
   CCardBody,
   CCardHeader,
   CCol,
-  CFormCheck,
   CFormLabel,
+  CFormSwitch,
   CFormTextarea,
   CRow,
 } from "@coreui/react";
@@ -68,13 +68,25 @@ export default function DatosClinicosGeneralesCard({
             />
           </CCol>
           <CCol md={2} className="d-flex align-items-center pt-4">
-            <CFormCheck
+            {/* <CFormCheck
               id="historiaActiva"
               label="Activa"
               checked={Boolean(form.activa)}
               onChange={(e) =>
                 setForm((prev) => ({ ...prev, activa: e.target.checked }))
               }
+            /> */}
+            <CFormSwitch
+              id="historiaActiva"
+              label={form.activa ? "Activa" : "Inactiva"}
+              checked={Boolean(form.activa)}
+              onChange={(e) =>
+                setForm((prev) => ({
+                  ...prev,
+                  activa: e.target.checked,
+                }))
+              }
+              className="sipac-switch"
             />
           </CCol>
 

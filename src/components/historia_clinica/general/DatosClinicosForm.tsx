@@ -1,4 +1,4 @@
-import { CCol, CFormCheck, CRow } from "@coreui/react";
+import { CCol, CFormSwitch, CRow } from "@coreui/react";
 import type { HistoriaClinicaPayload } from "../../../api/pacientes";
 
 import SipacTextarea from "../../SipacTextarea";
@@ -32,13 +32,14 @@ export default function DatosClinicosForm({
         </CCol>
       </CCol>
       <CCol md={2} className="d-flex align-items-center pt-4">
-        <CFormCheck
+        <CFormSwitch
           id="historiaActiva"
-          label="Activa"
+          label={form.activa ? "Activa" : "Inactiva"}
           checked={Boolean(form.activa)}
           onChange={(e) =>
             setForm((prev) => ({ ...prev, activa: e.target.checked }))
           }
+          className="sipac-switch"
         />
       </CCol>
 

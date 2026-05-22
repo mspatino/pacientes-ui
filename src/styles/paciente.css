@@ -484,3 +484,77 @@
   height: 44px;
   font-size: 1.1rem;
 }
+
+.sipac-section-header {
+  background: #fff;
+  border-bottom: 1px solid #eef1f4;
+  padding: 0.85rem 1.25rem;
+}
+
+.sipac-section-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #355070;
+  letter-spacing: 0.2px;
+}
+
+.sipac-switch {
+  margin-top: 1.2rem;
+}
+
+.sipac-switch .form-check-input {
+  width: 2rem;
+  height: 1rem;
+  cursor: pointer;
+
+  background-color: #dbe3ea;
+  border: 1px solid #c7d2de;
+
+  transition: all 0.2s ease;
+}
+
+.sipac-switch .form-check-input:focus {
+  box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, 0.15);
+  border-color: #0d6efd;
+}
+
+.sipac-switch .form-check-input:checked {
+  background-color: #2f80ed;
+  border-color: #2f80ed;
+}
+
+.sipac-switch .form-check-label {
+  margin-left: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #607085;
+  user-select: none;
+  margin-bottom: 0.45rem;
+}
+
+.sipac-empty-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: #E8F1FB;
+  color: #2F6FB3;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 1.3rem;
+
+  border: 1px solid rgba(47, 111, 179, 0.15);
+}
+
+.sipac-form-card {
+  border-radius: 18px;
+}
+
+.hc-title {
+  font-weight: 700;
+  color: #16324F;
+}
+  
+  

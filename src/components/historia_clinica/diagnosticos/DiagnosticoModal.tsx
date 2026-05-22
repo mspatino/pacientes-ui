@@ -49,6 +49,7 @@ interface DiagnosticoModalProps {
   ) => void;
   onSave: () => void;
   onRemove: () => void;
+  readOnly?: boolean;
 }
 
 export default function DiagnosticoModal({
@@ -61,10 +62,11 @@ export default function DiagnosticoModal({
   onDraftChange,
   onSave,
   onRemove,
+  readOnly = false,
 }: DiagnosticoModalProps) {
   const evolucionRef = useRef<HTMLTextAreaElement>(null);
   const tratamientoRef = useRef<HTMLTextAreaElement>(null);
-  const isEditing = mode === "edit" || mode === "create";
+  const isEditing = !readOnly && (mode === "edit" || mode === "create");
   const fieldId = editingIndex ?? "nuevo";
 
   useEffect(() => {
@@ -217,14 +219,14 @@ export default function DiagnosticoModal({
       </CModalBody>
       <CModalFooter className="d-flex justify-content-between">
         <div className="d-flex gap-2">
-          {mode === "edit" ? (
+          {!readOnly && mode === "edit" ? (
             <CButton type="button" color="danger" variant="outline" onClick={onRemove}>
               Eliminar diagnóstico
             </CButton>
           ) : null}
         </div>
         <div className="d-flex gap-2">
-          {mode === "view" ? (
+          {!readOnly && mode === "view" ? (
             <CButton type="button" color="primary" variant="outline" onClick={onStartEdit}>
               Editar
             </CButton>

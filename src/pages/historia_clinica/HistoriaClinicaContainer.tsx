@@ -47,6 +47,8 @@ export default function HistoriaClinicaContainer({
     onSaved,
   });
 
+  const readOnlyDiagnosticos = form.activa === false;
+
   if (loading) {
     return (
       <div className="p-3 d-flex align-items-center gap-2 text-muted">
@@ -93,6 +95,7 @@ export default function HistoriaClinicaContainer({
                   onOpen={openDiagnosticoModal}
                   onAdd={addDiagnostico}
                   onRemove={removeDiagnostico}
+                  readOnly={readOnlyDiagnosticos}
                 />
               </div>
 
@@ -128,6 +131,7 @@ export default function HistoriaClinicaContainer({
         onDraftChange={handleDiagnosticoDraftChange}
         onSave={saveDiagnosticoDraft}
         onRemove={removeActiveDiagnostico}
+        readOnly={readOnlyDiagnosticos}
       />
     </div>
   );
