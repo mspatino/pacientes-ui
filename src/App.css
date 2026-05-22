@@ -820,3 +820,47 @@ textarea {
 
   border-top: 1px solid #E4ECF5;
 }
+
+.sipac-diagnostico-item {
+  border: 1px solid #dee7f2;
+  border-radius: 12px;
+  padding: 1rem;
+  cursor: pointer;
+  background: #ffffff;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.12s ease;
+}
+
+.sipac-diagnostico-item:hover {
+  border-color: #2f6fb3;
+  background: #f8fbff;
+  box-shadow: 0 2px 8px rgba(47, 111, 179, 0.12);
+  transform: translateY(-1px);
+}
+
+.sipac-diagnostico-item:focus-visible {
+  outline: 2px solid #2f6fb3;
+  outline-offset: 2px;
+}
+
+.sipac-diagnostico-status {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+  background: #eef4f8;
+  color: #536273;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.sipac-diagnostico-preview {
+  display: -webkit-box;
+  margin-top: 0.35rem;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}

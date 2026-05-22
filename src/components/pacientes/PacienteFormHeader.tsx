@@ -1,35 +1,55 @@
+import type { ReactNode } from "react";
 import { FaArrowLeft } from "react-icons/fa";
 
 interface PacienteFormHeaderProps {
-  isEditMode?: boolean;
+  title: string;
+  subtitle: string;
+  icon: ReactNode;
   onBack: () => void;
 }
 
 export default function PacienteFormHeader({
-  isEditMode = false,
+  title,
+  subtitle,
+  icon,
   onBack,
 }: PacienteFormHeaderProps) {
   return (
-    <div className="d-flex align-items-center gap-2 mb-4">
-      <button
-        type="button"
-        className="action-icon-btn"
-        onClick={onBack}
-      >
-        <FaArrowLeft />
-      </button>
+    <div className="sipac-page-header">
 
-      <div>
-        <h3 className="hc-title mb-0">
-          {isEditMode ? "Editar Paciente" : "Alta Paciente"}
-        </h3>
+      {/* LEFT */}
+      <div className="d-flex align-items-center gap-3">
 
-        <div className="text-muted small">
-          {isEditMode
-            ? "Modificá los datos del paciente"
-            : "Completá los datos del paciente"}
+        <div className="sipac-header-icon">
+          {icon}
         </div>
+
+        <div>
+          <h3 className="hc-title mb-0">
+            {title}
+          </h3>
+
+          <div className="text-muted small">
+            {subtitle}
+          </div>
+        </div>
+
       </div>
+
+      {/* RIGHT TOOLBAR */}
+      <div className="sipac-header-actions">
+
+        <button
+          type="button"
+          className="sipac-toolbar-btn"
+          onClick={onBack}
+        >
+          <FaArrowLeft />
+          Volver
+        </button>
+
+      </div>
+
     </div>
   );
 }

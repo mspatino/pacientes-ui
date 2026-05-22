@@ -2,6 +2,8 @@ import type { DiagnosticoDTO } from "../../../api/pacientes";
 
 export const sipacBlue = "#2F6FB3";
 
+export type DiagnosticoModalMode = "view" | "edit" | "create";
+
 export const createEmptyDiagnostico = (): DiagnosticoDTO => ({
   descripcion: "",
   evolucion: "",

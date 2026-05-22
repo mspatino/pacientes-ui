@@ -33,6 +33,7 @@ import {
   getDiagnosticoText,
 } from "../../components/historia_clinica/diagnosticos/diagnosticoUtils";
 import { getEstadoTratamiento } from "../helpers/diagnosticoEstadoUtils";
+import "../../styles/paciente.css";
 
 pdfMake.addVirtualFileSystem(pdfFonts);
 

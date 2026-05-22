@@ -21,6 +21,7 @@ import SipacDateInput from "../SipacDateInput";
 import { CONVIVIENTE_OPTIONS } from "../../constants/convivientes";
 import { asRecord, firstString } from "../../utils/pacienteFormatters";
 import PacienteFormHeader from "./PacienteFormHeader";
+import { FaUserEdit, FaUserPlus } from "react-icons/fa";
 
 type Mode = "create" | "edit";
 
@@ -424,10 +425,16 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
   }
 
   return (
-    <div className="p-3">
+    <div className="p-3 paciente-page-container sipac-form-compact">
       <div className="mx-auto sipac-form-card">
         <PacienteFormHeader
-          isEditMode={isEditMode}
+          title={isEditMode ? "Editar paciente" : "Nuevo paciente"}
+          subtitle={
+            isEditMode
+              ? "Actualizá los datos personales y de contacto"
+              : "Cargá los datos personales y de contacto"
+          }
+          icon={isEditMode ? <FaUserEdit /> : <FaUserPlus />}
           onBack={() => navigate(-1)}
         />
         <CCard>

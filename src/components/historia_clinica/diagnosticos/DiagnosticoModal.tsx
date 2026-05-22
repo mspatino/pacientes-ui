@@ -17,6 +17,7 @@ import type { Cie10DTO, DiagnosticoDTO } from "../../../api/pacientes";
 import DiagnosticoAutocompleteFields from "../../diagnostico/DiagnosticoAutocompleteFields";
 import {
   autoResizeTextarea,
+  type DiagnosticoModalMode,
   sipacBlue,
 } from "./diagnosticoUtils";
 
@@ -37,8 +38,8 @@ const formatDateTime = (raw?: string): string => {
 
 interface DiagnosticoModalProps {
   activeDiagnostico: DiagnosticoDTO | null;
-  diagnosticoEditMode: boolean;
-  selectedIndex: number | null;
+  editingIndex: number | null;
+  mode: DiagnosticoModalMode;
   visible: boolean;
   onClose: () => void;
   onStartEdit: () => void;
@@ -52,8 +53,8 @@ interface DiagnosticoModalProps {
 
 export default function DiagnosticoModal({
   activeDiagnostico,
-  diagnosticoEditMode,
-  selectedIndex,
+  editingIndex,
+  mode,
   visible,
   onClose,
   onStartEdit,
@@ -63,21 +64,29 @@ export default function DiagnosticoModal({
 }: DiagnosticoModalProps) {
   const evolucionRef = useRef<HTMLTextAreaElement>(null);
   const tratamientoRef = useRef<HTMLTextAreaElement>(null);
+  const isEditing = mode === "edit" || mode === "create";
+  const fieldId = editingIndex ?? "nuevo";
 
   useEffect(() => {
-    if (!diagnosticoEditMode) return;
+    if (!isEditing) return;
 
     [evolucionRef.current, tratamientoRef.current].forEach((element) => {
       if (element) {
         autoResizeTextarea(element);
       }
     });
-  }, [diagnosticoEditMode, activeDiagnostico?.evolucion, activeDiagnostico?.tratamiento]);
+  }, [isEditing, activeDiagnostico?.evolucion, activeDiagnostico?.tratamiento]);
 
   return (
     <CModal visible={visible && Boolean(activeDiagnostico)} onClose={onClose} size="lg">
       <CModalHeader>
-        <CModalTitle>{diagnosticoEditMode ? "Editar diagnóstico" : "Diagnóstico"}</CModalTitle>
+        <CModalTitle>
+          {mode === "create"
+            ? "Nuevo diagnóstico"
+            : mode === "edit"
+              ? "Editar diagnóstico"
+              : "Diagnóstico"}
+        </CModalTitle>
       </CModalHeader>
       <CModalBody>
         {activeDiagnostico ? (
@@ -97,11 +106,11 @@ export default function DiagnosticoModal({
               ) : null}
             </div>
 
-            {diagnosticoEditMode ? (
+            {isEditing ? (
               <CRow className="g-3">
                 <CCol md={12}>
                   <CFormCheck
-                    id={`principal-${selectedIndex}`}
+                    id={`principal-${fieldId}`}
                     label="Diagnóstico principal"
                     checked={Boolean(activeDiagnostico.principal)}
                     onChange={(e) => onDraftChange("principal", e.target.checked)}
@@ -123,10 +132,10 @@ export default function DiagnosticoModal({
                 </CCol>
 
                 <CCol md={6}>
-                  <CFormLabel htmlFor={`evolucion-${selectedIndex}`}>Evolución</CFormLabel>
+                  <CFormLabel htmlFor={`evolucion-${fieldId}`}>Evolución</CFormLabel>
                   <CFormTextarea
                     ref={evolucionRef}
-                    id={`evolucion-${selectedIndex}`}
+                    id={`evolucion-${fieldId}`}
                     rows={1}
                     style={{ resize: "none", overflow: "hidden" }}
                     value={activeDiagnostico.evolucion || ""}
@@ -136,9 +145,9 @@ export default function DiagnosticoModal({
                 </CCol>
 
                 <CCol md={6}>
-                  <CFormLabel htmlFor={`fechaFin-${selectedIndex}`}>Fecha fin</CFormLabel>
+                  <CFormLabel htmlFor={`fechaFin-${fieldId}`}>Fecha fin</CFormLabel>
                   <CFormInput
-                    id={`fechaFin-${selectedIndex}`}
+                    id={`fechaFin-${fieldId}`}
                     type="datetime-local"
                     value={activeDiagnostico.fechaFin || ""}
                     onChange={(e) => onDraftChange("fechaFin", e.target.value)}
@@ -146,10 +155,10 @@ export default function DiagnosticoModal({
                 </CCol>
 
                 <CCol md={6}>
-                  <CFormLabel htmlFor={`tratamiento-${selectedIndex}`}>Tratamiento</CFormLabel>
+                  <CFormLabel htmlFor={`tratamiento-${fieldId}`}>Tratamiento</CFormLabel>
                   <CFormTextarea
                     ref={tratamientoRef}
-                    id={`tratamiento-${selectedIndex}`}
+                    id={`tratamiento-${fieldId}`}
                     rows={1}
                     style={{ resize: "none", overflow: "hidden" }}
                     value={activeDiagnostico.tratamiento || ""}
@@ -208,19 +217,19 @@ export default function DiagnosticoModal({
       </CModalBody>
       <CModalFooter className="d-flex justify-content-between">
         <div className="d-flex gap-2">
-          {diagnosticoEditMode ? (
+          {mode === "edit" ? (
             <CButton type="button" color="danger" variant="outline" onClick={onRemove}>
               Eliminar diagnóstico
             </CButton>
           ) : null}
         </div>
         <div className="d-flex gap-2">
-          {!diagnosticoEditMode ? (
+          {mode === "view" ? (
             <CButton type="button" color="primary" variant="outline" onClick={onStartEdit}>
               Editar
             </CButton>
           ) : null}
-          {diagnosticoEditMode ? (
+          {isEditing ? (
             <CButton type="button" color="primary" onClick={onSave}>
               Guardar
             </CButton>

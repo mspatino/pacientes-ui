@@ -1,9 +1,9 @@
-import { CAlert, CForm, CSpinner } from "@coreui/react";
+import { CAlert, CCard, CCardBody, CForm, CSpinner } from "@coreui/react";
+import { BsClipboard2Pulse } from "react-icons/bs";
 import DatosClinicosGeneralesCard from "../../components/historia_clinica/general/DatosClinicosGeneralesCard";
 import DiagnosticoModal from "../../components/historia_clinica/diagnosticos/DiagnosticoModal";
 import DiagnosticosListCard from "../../components/historia_clinica/diagnosticos/DiagnosticosListCard";
-import HistoriaClinicaEditorHeader from "../../components/historia_clinica/header/HistoriaClinicaEditorHeader";
-import { createEmptyDiagnostico } from "../../components/historia_clinica/diagnosticos/diagnosticoUtils";
+import PacienteFormHeader from "../../components/pacientes/PacienteFormHeader";
 import useHistoriaClinicaEditor from "../../hooks/useHistoriaClinicaEditor";
 
 interface HistoriaClinicaContainerProps {
@@ -23,26 +23,23 @@ export default function HistoriaClinicaContainer({
     activeDiagnostico,
     addDiagnostico,
     closeDiagnosticoModal,
-    diagnosticoEditMode,
     diagnosticoModalVisible,
+    editingIndex,
     error,
-    exists,
     form,
     handleDiagnosticoDraftChange,
     handleSubmit,
     loading,
+    modalMode,
     openDiagnosticoModal,
     pageTitle,
     pacienteNombre,
+    removeActiveDiagnostico,
     removeDiagnostico,
     saveDiagnosticoDraft,
     saving,
-    selectedDiagnostico,
-    selectedIndex,
-    setDiagnosticoDraft,
-    setDiagnosticoEditMode,
     setForm,
-    setSelectedIndex,
+    startDiagnosticoEdit,
     submitError,
   } = useHistoriaClinicaEditor({
     patientIdParam: patientId,
@@ -71,79 +68,66 @@ export default function HistoriaClinicaContainer({
 
   return (
     <div className="p-3">
-      <div className="hc-container">
-        <HistoriaClinicaEditorHeader
-          exists={exists}
-          pacienteNombre={pacienteNombre}
-          pageTitle={pageTitle}
+      <div className="mx-auto sipac-form-card">
+        <PacienteFormHeader
+          title={pageTitle}
+          subtitle={`Paciente: ${pacienteNombre}`}
+          icon={<BsClipboard2Pulse />}
           onBack={onBack}
         />
 
-        <CForm id="historia-clinica-form" onSubmit={handleSubmit}>
-          <div className="d-flex flex-column gap-3">
+        <CCard>
+          <CCardBody>
             {submitError ? (
-              <CAlert color="danger" className="mb-0">
+              <CAlert color="danger" className="mb-3">
                 {submitError}
               </CAlert>
             ) : null}
 
-            <DatosClinicosGeneralesCard form={form} setForm={setForm} />
+            <CForm id="historia-clinica-form" onSubmit={handleSubmit}>
+              <div className="d-flex flex-column gap-3">
+                <DatosClinicosGeneralesCard form={form} setForm={setForm} />
 
-            <DiagnosticosListCard
-              diagnosticos={form.diagnosticos}
-              selectedIndex={selectedIndex}
-              onSelect={setSelectedIndex}
-              onAdd={addDiagnostico}
-              onView={(index) => openDiagnosticoModal(index, false)}
-              onRemove={(index) => {
-                removeDiagnostico(index);
-                if (selectedIndex === index) setSelectedIndex(null);
-              }}
-            />
-          </div>
-        </CForm>
-        <CForm id="historia-clinica-form" onSubmit={handleSubmit}>
-          <div className="d-flex flex-column gap-3">...</div>
+                <DiagnosticosListCard
+                  diagnosticos={form.diagnosticos}
+                  onOpen={openDiagnosticoModal}
+                  onAdd={addDiagnostico}
+                  onRemove={removeDiagnostico}
+                />
+              </div>
 
-          <div className="hc-form-footer-sticky">
-            <button
-              type="button"
-              className="sipac-toolbar-btn"
-              onClick={onBack}
-            >
-              Cancelar
-            </button>
+              <div className="sipac-form-footer">
+                <button
+                  type="submit"
+                  className="sipac-toolbar-btn"
+                  disabled={saving}
+                >
+                  {saving ? "Guardando..." : "Guardar"}
+                </button>
 
-            <button
-              type="submit"
-              className="sipac-toolbar-btn"
-              disabled={saving}
-            >
-              {saving ? "Guardando..." : "Guardar"}
-            </button>
-          </div>
-        </CForm>
+                <button
+                  type="button"
+                  className="sipac-toolbar-btn"
+                  onClick={onBack}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </CForm>
+          </CCardBody>
+        </CCard>
       </div>
 
       <DiagnosticoModal
         activeDiagnostico={activeDiagnostico}
-        diagnosticoEditMode={diagnosticoEditMode}
-        selectedIndex={selectedIndex}
+        editingIndex={editingIndex}
+        mode={modalMode}
         visible={diagnosticoModalVisible}
         onClose={closeDiagnosticoModal}
-        onStartEdit={() => {
-          setDiagnosticoDraft({
-            ...(selectedDiagnostico ?? createEmptyDiagnostico()),
-          });
-          setDiagnosticoEditMode(true);
-        }}
+        onStartEdit={startDiagnosticoEdit}
         onDraftChange={handleDiagnosticoDraftChange}
         onSave={saveDiagnosticoDraft}
-        onRemove={() => {
-          if (selectedIndex !== null) {
-            removeDiagnostico(selectedIndex);
-          }
-        }}
+        onRemove={removeActiveDiagnostico}
       />
     </div>
   );

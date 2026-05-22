@@ -14,6 +14,7 @@ import {
 } from "../api/pacientes";
 import {
   createEmptyDiagnostico,
+  type DiagnosticoModalMode,
   getDiagnosticoFechaFin,
   getDiagnosticoText,
   isDiagnosticoPrincipal,
@@ -59,11 +60,10 @@ export default function useHistoriaClinicaEditor({
   const [submitError, setSubmitError] = useState("");
   const [pacienteNombre, setPacienteNombre] = useState("Paciente");
   const [exists, setExists] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [diagnosticoModalVisible, setDiagnosticoModalVisible] = useState(false);
-  const [diagnosticoEditMode, setDiagnosticoEditMode] = useState(false);
+  const [modalMode, setModalMode] = useState<DiagnosticoModalMode>("view");
   const [diagnosticoDraft, setDiagnosticoDraft] = useState<DiagnosticoDTO | null>(null);
-  const [isNewDiagnostico, setIsNewDiagnostico] = useState(false);
   const [form, setForm] = useState<HistoriaClinicaPayload>({
     motivoConsulta: "",
     activa: true,
@@ -135,20 +135,18 @@ export default function useHistoriaClinicaEditor({
               })
             : [],
         });
-        setSelectedIndex(
-          Array.isArray(data.diagnosticos) && data.diagnosticos.length > 0 ? 0 : null,
-        );
+        setEditingIndex(null);
       } catch (historiaError) {
         if (mode === "create") {
           setExists(false);
-          setSelectedIndex(null);
+          setEditingIndex(null);
         } else {
           console.warn(
             "No se encontró historia clínica previa, se habilita modo alta",
             historiaError,
           );
           setExists(false);
-          setSelectedIndex(null);
+          setEditingIndex(null);
         }
       } finally {
         setLoading(false);
@@ -161,22 +159,26 @@ export default function useHistoriaClinicaEditor({
   const pageTitle = exists ? "Editar historia clínica" : "Alta de historia clínica";
 
   const selectedDiagnostico =
-    selectedIndex !== null ? form.diagnosticos[selectedIndex] ?? null : null;
-  const activeDiagnostico = diagnosticoEditMode ? diagnosticoDraft : selectedDiagnostico;
+    editingIndex !== null ? form.diagnosticos[editingIndex] ?? null : null;
+  const activeDiagnostico = modalMode === "view" ? selectedDiagnostico : diagnosticoDraft;
 
-  const openDiagnosticoModal = (index: number, editMode = false) => {
-    setSelectedIndex(index);
+  const openDiagnosticoModal = (index: number) => {
+    setEditingIndex(index);
     setDiagnosticoDraft({ ...(form.diagnosticos[index] ?? createEmptyDiagnostico()) });
-    setIsNewDiagnostico(false);
-    setDiagnosticoEditMode(editMode);
+    setModalMode("view");
     setDiagnosticoModalVisible(true);
   };
 
   const closeDiagnosticoModal = () => {
     setDiagnosticoModalVisible(false);
-    setDiagnosticoEditMode(false);
+    setModalMode("view");
     setDiagnosticoDraft(null);
-    setIsNewDiagnostico(false);
+    setEditingIndex(null);
+  };
+
+  const startDiagnosticoEdit = () => {
+    setDiagnosticoDraft({ ...(selectedDiagnostico ?? createEmptyDiagnostico()) });
+    setModalMode(editingIndex === null ? "create" : "edit");
   };
 
   const handleDiagnosticoDraftChange = (
@@ -212,7 +214,7 @@ export default function useHistoriaClinicaEditor({
     currentForm: HistoriaClinicaPayload,
     draft: DiagnosticoDTO,
   ): HistoriaClinicaPayload => {
-    if (selectedIndex === null || isNewDiagnostico) {
+    if (modalMode === "create" || editingIndex === null) {
       const nextDiagnosticos = [
         ...currentForm.diagnosticos,
         {
@@ -229,7 +231,7 @@ export default function useHistoriaClinicaEditor({
     }
 
     const nextDiagnosticos = currentForm.diagnosticos.map((diag, index) =>
-      index === selectedIndex
+      index === editingIndex
         ? {
             ...draft,
             tipo: getTipoFromPrincipal(Boolean(draft.principal)),
@@ -240,7 +242,7 @@ export default function useHistoriaClinicaEditor({
     return {
       ...currentForm,
       diagnosticos: draft.principal
-        ? normalizeDiagnosticosPrincipal(nextDiagnosticos, selectedIndex)
+        ? normalizeDiagnosticosPrincipal(nextDiagnosticos, editingIndex)
         : nextDiagnosticos,
     };
   };
@@ -337,10 +339,6 @@ export default function useHistoriaClinicaEditor({
     const nextForm = applyDiagnosticoDraftToForm(form, diagnosticoDraft);
     setForm(nextForm);
 
-    if (selectedIndex === null || isNewDiagnostico) {
-      setSelectedIndex(form.diagnosticos.length);
-    }
-
     if (exists) {
       try {
         await persistHistoriaClinica(nextForm, { redirectOnSuccess: false });
@@ -353,13 +351,12 @@ export default function useHistoriaClinicaEditor({
   };
 
   const addDiagnostico = () => {
-    setSelectedIndex(null);
+    setEditingIndex(null);
     setDiagnosticoDraft({
       ...createEmptyDiagnostico(),
       principal: form.diagnosticos.length === 0,
     });
-    setIsNewDiagnostico(true);
-    setDiagnosticoEditMode(true);
+    setModalMode("create");
     setDiagnosticoModalVisible(true);
   };
 
@@ -378,18 +375,26 @@ export default function useHistoriaClinicaEditor({
         diagnosticos: next,
       };
     });
-    setSelectedIndex((prev) => {
+    setEditingIndex((prev) => {
       if (prev === null) return null;
       if (prev === index) return null;
       if (prev > index) return prev - 1;
       return prev;
     });
-    if (selectedIndex === index) {
+    if (editingIndex === index) {
       setDiagnosticoModalVisible(false);
-      setDiagnosticoEditMode(false);
+      setModalMode("view");
       setDiagnosticoDraft(null);
-      setIsNewDiagnostico(false);
     }
+  };
+
+  const removeActiveDiagnostico = () => {
+    if (editingIndex === null) {
+      closeDiagnosticoModal();
+      return;
+    }
+
+    removeDiagnostico(editingIndex);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -403,15 +408,15 @@ export default function useHistoriaClinicaEditor({
     addDiagnostico,
     closeDiagnosticoModal,
     diagnosticoDraft,
-    diagnosticoEditMode,
     diagnosticoModalVisible,
+    editingIndex,
     error,
     exists,
     form,
     handleDiagnosticoDraftChange,
     handleSubmit,
-    isNewDiagnostico,
     loading,
+    modalMode,
     openDiagnosticoModal,
     pageTitle,
     pacienteId,
@@ -420,11 +425,11 @@ export default function useHistoriaClinicaEditor({
     saveDiagnosticoDraft,
     saving,
     selectedDiagnostico,
-    selectedIndex,
     setDiagnosticoDraft,
-    setDiagnosticoEditMode,
     setForm,
-    setSelectedIndex,
+    setModalMode,
+    startDiagnosticoEdit,
+    removeActiveDiagnostico,
     submitError,
   };
 }
