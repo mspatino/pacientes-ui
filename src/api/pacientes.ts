@@ -38,11 +38,17 @@ export interface HistoriaClinicaDTO {
   diagnosticos?: Array<Record<string, unknown>>;
 }
 
-export type TipoDiagnostico = "PRINCIPAL" | "SECUNDARIO" | string;
+export type TipoDiagnostico =
+  | "PRINCIPAL"
+  | "SECUNDARIO"
+  | "FACTOR_PSICOSOCIAL"
+  | "EVENTO_RIESGO"
+  | "SINTOMA";
 
 export interface EvolucionDiagnosticoDTO {
   id?: number;
   fecha?: string;
+  nota?: string;
   evolucion?: string;
   tratamiento?: string;
   descripcion?: string;
@@ -51,12 +57,11 @@ export interface EvolucionDiagnosticoDTO {
 export interface DiagnosticoDTO {
   id?: number;
   descripcion?: string;
-  evolucion?: string;
   tratamiento?: string;
   cie10?: Cie10DTO;
-  principal: boolean;
   tipo?: TipoDiagnostico;
   evoluciones?: EvolucionDiagnosticoDTO[];
+  fechaInicio?: string;
   fechaFin?: string;
 }
 
@@ -170,3 +175,13 @@ export const createPaciente = async (
   const res = await api.post("/pacientes", payload);
   return res.data;
 };
+
+export async function crearEvolucionDiagnostico(
+  diagnosticoId: number,
+  nota: string,
+) {
+  return api.post(
+    `/diagnosticos/${diagnosticoId}/evoluciones`,
+    { nota },
+  );
+}

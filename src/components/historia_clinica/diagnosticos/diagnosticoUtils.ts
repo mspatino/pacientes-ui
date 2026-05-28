@@ -1,4 +1,5 @@
 import type { DiagnosticoDTO } from "../../../api/pacientes";
+import type { TipoDiagnostico } from "../../../api/pacientes";
 
 export const sipacBlue = "#2F6FB3";
 
@@ -6,12 +7,110 @@ export type DiagnosticoModalMode = "view" | "edit" | "create";
 
 export const createEmptyDiagnostico = (): DiagnosticoDTO => ({
   descripcion: "",
-  evolucion: "",
   tratamiento: "",
   cie10: undefined,
-  principal: false,
+  tipo: "SECUNDARIO",
+  evoluciones: [],
+  fechaInicio: "",
   fechaFin: "",
 });
+
+export const isDiagnosticoPrincipal = (
+  diagnostico?: Pick<DiagnosticoDTO, "tipo"> | null,
+) => {
+  return diagnostico?.tipo === "PRINCIPAL";
+};
+
+
+export const isTipoDiagnostico = (value: unknown): value is TipoDiagnostico =>
+  value === "PRINCIPAL" ||
+  value === "SECUNDARIO" ||
+  value === "FACTOR_PSICOSOCIAL" ||
+  value === "EVENTO_RIESGO" ||
+  value === "SINTOMA";
+
+export const normalizeTipoDiagnostico = (tipo: unknown): TipoDiagnostico => {
+  const normalized = getNormalizedTipo(tipo);
+  return isTipoDiagnostico(normalized) ? normalized : "SECUNDARIO";
+};
+
+export const resolverTipoAutomatico = (codigo?: string | null): TipoDiagnostico => {
+  if (!codigo?.trim()) return "SECUNDARIO";
+
+  const upper = codigo.toUpperCase();
+
+  if (upper.startsWith("F")) return "PRINCIPAL";
+  if (upper.startsWith("Z")) return "FACTOR_PSICOSOCIAL";
+  if (upper.startsWith("X")) return "EVENTO_RIESGO";
+  if (upper.startsWith("R")) return "SINTOMA";
+
+  return "SECUNDARIO";
+};
+
+export const getDiagnosticoTipoLabel = (tipo?: unknown): string => {
+  const normalized = normalizeTipoDiagnostico(tipo);
+
+  switch (normalized) {
+    case "PRINCIPAL":
+      return "Principal";
+
+    case "SECUNDARIO":
+      return "Secundario";
+
+    case "FACTOR_PSICOSOCIAL":
+      return "Factor psicosocial";
+
+    case "EVENTO_RIESGO":
+      return "Evento de riesgo";
+
+    case "SINTOMA":
+      return "Síntoma";
+
+    default:
+      return "Secundario";
+  }
+};
+
+export const getDiagnosticoTipoBadgeStyle = (tipo?: unknown) => {
+  const normalized = normalizeTipoDiagnostico(tipo);
+
+  switch (normalized) {
+    case "PRINCIPAL":
+      return {
+        backgroundColor: "#E8F1FB",
+        color: sipacBlue,
+        border: `1px solid ${sipacBlue}33`,
+      };
+
+    case "FACTOR_PSICOSOCIAL":
+      return {
+        backgroundColor: "#FFF4E5",
+        color: "#B26A00",
+        border: "1px solid #B26A0033",
+      };
+
+    case "EVENTO_RIESGO":
+      return {
+        backgroundColor: "#FDECEC",
+        color: "#C62828",
+        border: "1px solid #C6282833",
+      };
+
+    case "SINTOMA":
+      return {
+        backgroundColor: "#F3E8FD",
+        color: "#7B1FA2",
+        border: "1px solid #7B1FA233",
+      };
+
+    default:
+      return {
+        backgroundColor: "#F1F3F5",
+        color: "#495057",
+        border: "1px solid #49505722",
+      };
+  }
+};
 
 export const autoResizeTextarea = (element: HTMLTextAreaElement) => {
   element.style.height = "auto";
@@ -40,37 +139,39 @@ const getNormalizedTipo = (tipo: unknown) => {
   return "";
 };
 
-export const isDiagnosticoPrincipal = (
-  diagnostico?: Pick<DiagnosticoDTO, "principal" | "tipo"> | Record<string, unknown> | null,
+export const getDiagnosticoFechaFin = (
+  diagnostico: DiagnosticoDTO,
 ) => {
-  if (!diagnostico) return false;
 
-  if (diagnostico.principal === true) return true;
-
-  return getNormalizedTipo(diagnostico.tipo).includes("PRINCIPAL");
+  return typeof diagnostico.fechaFin === "string"
+    ? diagnostico.fechaFin.trim()
+    : "";
 };
 
-export const getDiagnosticoFechaFin = (diagnostico: Record<string, unknown>) => {
-  const fechaFin =
-    typeof diagnostico.fechaFin === "string"
-      ? diagnostico.fechaFin.trim()
-      : typeof diagnostico.fecha_fin === "string"
-        ? diagnostico.fecha_fin.trim()
-        : "";
+export const getDiagnosticoFechaInicio = (
+  diagnostico: DiagnosticoDTO,
+) => {
 
-  return fechaFin;
+  return typeof diagnostico.fechaInicio === "string"
+    ? diagnostico.fechaInicio.trim()
+    : "";
 };
 
-export const isDiagnosticoActivo = (diagnostico: Record<string, unknown>) =>
+export const isDiagnosticoActivo = (diagnostico: DiagnosticoDTO) =>
   !getDiagnosticoFechaFin(diagnostico);
 
-export const getDiagnosticoPrincipal = (diagnosticos: Record<string, unknown>[]) => {
-  const principales = diagnosticos.filter((diagnostico) =>
-    isDiagnosticoPrincipal(diagnostico),
+export const getDiagnosticoPrincipal = (
+  diagnosticos: DiagnosticoDTO[],
+): DiagnosticoDTO | null => {
+
+  const principales = diagnosticos.filter(
+    (diagnostico) => diagnostico.tipo === "PRINCIPAL",
   );
 
   return (
-    principales.find((diagnostico) => isDiagnosticoActivo(diagnostico)) ??
+    principales.find(
+      (diagnostico) => !diagnostico.fechaFin,
+    ) ??
     principales[0] ??
     null
   );
@@ -91,19 +192,69 @@ export const getLatestEvolucionDiagnostico = (
 };
 
 export const getDiagnosticoText = (
-  diagnostico: Record<string, unknown>,
-  field: "evolucion" | "tratamiento" | "descripcion",
+  diagnostico: DiagnosticoDTO,
+  field: "descripcion" | "tratamiento",
 ) => {
-  const value = diagnostico[field];
-  if (typeof value === "string" && value.trim()) return value;
 
-  const latestEvolucion = getLatestEvolucionDiagnostico(diagnostico);
-  const evolucionValue = latestEvolucion?.[field];
-  return typeof evolucionValue === "string" && evolucionValue.trim() ? evolucionValue : "";
+  const value = diagnostico[field];
+
+  return typeof value === "string"
+    ? value.trim()
+    : "";
 };
 
-export const getDiagnosticoSummary = (diagnostico: DiagnosticoDTO): string => {
-  const cie10 = getCie10Label(diagnostico.cie10);
-  const descripcion = diagnostico.descripcion?.trim() || cie10.trim() || "";
-  return descripcion || "Sin diagnóstico";
+export const getDiagnosticoUltimaEvolucion = (
+  diagnostico: DiagnosticoDTO,
+): string => {
+
+  const ultimaEvolucion = [...(diagnostico.evoluciones ?? [])]
+    .sort(
+      (a, b) =>
+        new Date(b.fecha ?? "").getTime() -
+        new Date(a.fecha ?? "").getTime(),
+    )[0];
+
+  return ultimaEvolucion?.nota?.trim() ?? "";
+};
+
+// export const getDiagnosticoText = (
+//   diagnostico: Record<string, unknown>,
+//   field: "evolucion" | "tratamiento" | "descripcion",
+// ) => {
+//   const value = diagnostico[field];
+//   if (typeof value === "string" && value.trim()) return value;
+
+//   const latestEvolucion = getLatestEvolucionDiagnostico(diagnostico);
+//   const evolucionValue = latestEvolucion?.[field];
+//   return typeof evolucionValue === "string" && evolucionValue.trim() ? evolucionValue : "";
+// };
+
+// export const getDiagnosticoSummary = (diagnostico: DiagnosticoDTO): string => {
+//   const cie10 = getCie10Label(diagnostico.cie10);
+//   const descripcion = diagnostico.descripcion?.trim() || cie10.trim() || "";
+//   return descripcion || "Sin diagnóstico";
+// };
+export const getDiagnosticoSummary = (
+  diagnostico: DiagnosticoDTO,
+): string => {
+  return diagnostico.descripcion?.trim() || "Sin diagnóstico";
+};
+
+export const formatFechaHora = (value?: string | null) => {
+  if (!value?.trim()) return "";
+
+  const fecha = new Date(value);
+
+  if (Number.isNaN(fecha.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat("es-AR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(fecha);
 };

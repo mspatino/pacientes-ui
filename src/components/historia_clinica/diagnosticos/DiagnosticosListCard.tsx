@@ -1,20 +1,18 @@
-import { CButton } from "@coreui/react";
-import { BsPlusLg, BsTrashFill } from "react-icons/bs";
+import { BsPlusLg } from "react-icons/bs";
 import { GiBrain } from "react-icons/gi";
 import type { DiagnosticoDTO } from "../../../api/pacientes";
 import SectionCard from "../shared/SectionCard";
 import {
-  getCie10Label,
+  formatFechaHora,
   getDiagnosticoSummary,
-  isDiagnosticoPrincipal,
-  sipacBlue,
+  getDiagnosticoTipoBadgeStyle,
+  getDiagnosticoTipoLabel,
 } from "./diagnosticoUtils";
 
 interface DiagnosticosListCardProps {
   diagnosticos: DiagnosticoDTO[];
   onOpen: (index: number) => void;
   onAdd: () => void;
-  onRemove: (index: number) => void;
   readOnly?: boolean;
 }
 
@@ -22,21 +20,20 @@ export default function DiagnosticosListCard({
   diagnosticos,
   onOpen,
   onAdd,
-  onRemove,
   readOnly = false,
 }: DiagnosticosListCardProps) {
   const headerAction = readOnly ? null : (
-    <CButton
+    <button
       type="button"
-      color="primary"
-      size="sm"
-      className="d-inline-flex align-items-center gap-2"
+      className="sipac-toolbar-btn d-inline-flex align-items-center gap-2"
       onClick={onAdd}
     >
-      <BsPlusLg />
+      <BsPlusLg size={14}/>
       Agregar
-    </CButton>
+    </button>
   );
+
+
 
   return (
     <SectionCard
@@ -48,89 +45,158 @@ export default function DiagnosticosListCard({
       }
       headerAction={headerAction}
     >
-        {diagnosticos.length === 0 ? (
-          <div className="small text-muted">
-            Todavía no hay diagnósticos cargados para esta historia clínica.
-          </div>
-        ) : (
-          <div className="d-flex flex-column gap-2 mb-3">
-            {diagnosticos.map((diagnostico, index) => {
-              const cie10Label = getCie10Label(diagnostico.cie10);
-              const isPrincipal = isDiagnosticoPrincipal(diagnostico);
-              const estado = diagnostico.fechaFin ? "Finalizado" : "Activo";
+      {diagnosticos.length === 0 ? (
+        <div className="small text-muted">
+          Todavía no hay diagnósticos cargados para esta historia clínica.
+        </div>
+      ) : (
+        <div className="d-flex flex-column gap-2 mb-3">
+          {diagnosticos.map((diagnostico, index) => {
 
-              return (
-                <div
-                  key={index}
-                  className="sipac-diagnostico-item"
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => onOpen(index)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ") {
-                      event.preventDefault();
-                      onOpen(index);
-                    }
-                  }}
-                >
-                  <div className="d-flex justify-content-between align-items-start gap-3">
-                    <div className="min-w-0">
-                      <div className="d-flex align-items-center gap-2 flex-wrap mb-1">
-                        {isPrincipal ? (
-                          <span
-                            className="badge rounded-pill"
-                            style={{
-                              backgroundColor: "#E8F1FB",
-                              color: sipacBlue,
-                              border: `1px solid ${sipacBlue}33`,
-                            }}
-                          >
-                            Principal
-                          </span>
-                        ) : null}
+              const ultimaEvolucion =
+  diagnostico.evoluciones?.[
+    diagnostico.evoluciones.length - 1
+  ];
 
-                        <span className="sipac-diagnostico-status">{estado}</span>
-                      </div>
+            return (
+              <div
+                key={index}
+                className="sipac-diagnostico-item"
+                role="button"
+                tabIndex={0}
+                onClick={() => onOpen(index)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    onOpen(index);
+                  }
+                }}
+              >
+                <div className="d-flex flex-column gap-1">
 
-                      <div className="fw-semibold text-truncate">
-                        {getDiagnosticoSummary(diagnostico)}
-                      </div>
+                  {/* HEADER */}
+                  {/* <div className="d-flex align-items-center gap-2 flex-wrap small text-muted">
 
-                      <div className="small text-muted text-truncate">
-                        {cie10Label || "Sin CIE-10 asociado"}
-                        {diagnostico.fechaFin ? ` · Hasta ${diagnostico.fechaFin}` : ""}
-                      </div>
+                    <span
+                      className="badge rounded-pill"
+                      style={getDiagnosticoTipoBadgeStyle(diagnostico.tipo)}
+                    >
+                      {getDiagnosticoTipoLabel(diagnostico.tipo)}
+                    </span>
 
-                      {diagnostico.evolucion?.trim() ? (
-                        <div className="small text-muted sipac-diagnostico-preview">
-                          {diagnostico.evolucion.trim()}
-                        </div>
-                      ) : null}
-                    </div>
+                    {diagnostico.fechaInicio ? (
+                      <span>
+                        <span
+                          className="badge rounded-pill me-1"
+                          style={{
+                            backgroundColor: "#F6F8F6",
+                            color: "#6C8A6D",
+                            border: "1px solid #DCE6DC",
+                          }}
+                        >
+                          Inicio
+                        </span>
 
-                    {!readOnly ? (
-                      <CButton
-                        type="button"
-                        size="sm"
-                        color="danger"
-                        variant="outline"
-                        className="flex-shrink-0"
-                        aria-label="Eliminar diagnóstico"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onRemove(index);
-                        }}
-                        onKeyDown={(e) => e.stopPropagation()}
-                      >
-                        <BsTrashFill />
-                      </CButton>
+                        {formatFechaHora(diagnostico.fechaInicio)}
+                      </span>
                     ) : null}
+
+                    {diagnostico.fechaFin ? (
+                      <span>
+                        <span
+                          className="badge rounded-pill me-1"
+                          style={{
+                            backgroundColor: "#FAF8F5",
+                            color: "#9A7B5F",
+                            border: "1px solid #E8DDD2",
+                          }}
+                        >
+                          Alta
+                        </span>
+
+                        {formatFechaHora(diagnostico.fechaFin)}
+                      </span>
+                    ) : null}
+                  </div> */}
+                  <div className="d-flex justify-content-between align-items-start gap-2">
+
+  {/* TIPO */}
+  <span
+    className="badge rounded-pill"
+    style={getDiagnosticoTipoBadgeStyle(diagnostico.tipo)}
+  >
+    {getDiagnosticoTipoLabel(diagnostico.tipo)}
+  </span>
+
+  {/* FECHAS */}
+  <div className="d-flex align-items-center gap-2 flex-wrap small text-body-secondary ms-auto">
+
+    {diagnostico.fechaInicio ? (
+      <span>
+        <span
+          className="badge rounded-pill me-1"
+          style={{
+            backgroundColor: "#F6F8F6",
+            color: "#6C8A6D",
+            border: "1px solid #DCE6DC",
+          }}
+        >
+          Inicio
+        </span>
+
+        {formatFechaHora(diagnostico.fechaInicio)}
+      </span>
+    ) : null}
+
+    {diagnostico.fechaFin ? (
+      <span>
+        <span
+          className="badge rounded-pill me-1"
+          style={{
+            backgroundColor: "#FAF8F5",
+            color: "#9A7B5F",
+            border: "1px solid #E8DDD2",
+          }}
+        >
+          Alta
+        </span>
+
+        {formatFechaHora(diagnostico.fechaFin)}
+      </span>
+    ) : null}
+  </div>
+</div>
+
+                  {/* DESCRIPCION */}
+                  <div className="fw-semibold fs-6">
+                    {getDiagnosticoSummary(diagnostico)}
                   </div>
+
+                  {/* TRATAMIENTO */}
+                  {diagnostico.tratamiento?.trim() ? (
+                    <div className="small text-body-secondary">
+                      Tratamiento: {diagnostico.tratamiento.trim()}
+                    </div>
+                  ) : null}
+
+                  {/* EVOLUCION */}
+                  {/* {diagnostico.evolucion?.trim() ? (
+                    <div className="small fst-italic text-muted">
+                      {diagnostico.evolucion.trim()}
+                    </div>
+                  ) : null} */}
+                  {/* ULTIMA EVOLUCION */}
+{ultimaEvolucion?.nota?.trim() ? (
+  <div className="small fst-italic text-muted">
+    {ultimaEvolucion.nota.trim()}
+  </div>
+) : null}
                 </div>
-              );
-            })}
-          </div>
-        )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </SectionCard>
   );
 }

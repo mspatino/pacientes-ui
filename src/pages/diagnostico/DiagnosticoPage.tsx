@@ -8,7 +8,7 @@ import {
   CRow,
   CCol,
 } from "@coreui/react";
-import DiagnosticoAutocompleteFields from "../../components/diagnostico/DiagnosticoAutocompleteFields";
+import DiagnosticoAutocompleteFields from "../../components/historia_clinica/diagnosticos/DiagnosticoAutocompleteFields";
 import type { Cie10DTO } from "../../api/diagnosticos";
 
 export default function DiagnosticoPage() {

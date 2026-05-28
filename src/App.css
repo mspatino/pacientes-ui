@@ -649,6 +649,37 @@ textarea {
   box-shadow: 0 2px 6px rgba(47, 111, 179, 0.15);
 }
 
+.hc-evo-card {
+  display: flex;
+  gap: 0.75rem;
+  position: relative;
+}
+
+.hc-evo-line {
+  width: 2px;
+  background: #dbe4f0;
+  border-radius: 999px;
+}
+
+.hc-evo-content {
+  flex: 1;
+  background: #f8fbff;
+  border: 1px solid #e2ebf5;
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+}
+
+.hc-evo-date {
+  font-size: 0.78rem;
+  color: #6b7280;
+  margin-bottom: 0.3rem;
+}
+
+.hc-evo-note {
+  color: #1f2937;
+  white-space: pre-wrap;
+}
+
 .sipac-toolbar-btn:active {
   transform: translateY(0);
 }
@@ -822,23 +853,14 @@ textarea {
 }
 
 .sipac-diagnostico-item {
-  border: 1px solid #dee7f2;
+  padding: 0.9rem 1rem;
   border-radius: 12px;
-  padding: 1rem;
-  cursor: pointer;
-  background: #ffffff;
-  transition:
-    border-color 0.15s ease,
-    background-color 0.15s ease,
-    box-shadow 0.15s ease,
-    transform 0.12s ease;
+  border: 1px solid #E9ECEF;
+  transition: all 0.15s ease;
 }
 
 .sipac-diagnostico-item:hover {
-  border-color: #2f6fb3;
-  background: #f8fbff;
-  box-shadow: 0 2px 8px rgba(47, 111, 179, 0.12);
-  transform: translateY(-1px);
+  background-color: #FAFBFC;
 }
 
 .sipac-diagnostico-item:focus-visible {
@@ -861,6 +883,45 @@ textarea {
   display: -webkit-box;
   margin-top: 0.35rem;
   overflow: hidden;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  -line-clamp: 2;
+  -box-orient: vertical;
+}
+
+.sipac-toolbar-btn-primary {
+  background-color: #2F6FB3;
+  color: white;
+  border: 1px solid #2F6FB3;
+  border-radius: 10px;
+  padding: 0.45rem 0.9rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.sipac-toolbar-btn-primary:hover {
+  background-color: #285F99;
+  border-color: #285F99;
+}
+
+.sipac-toolbar-btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.sipac-toolbar-btn {
+  border: 1px solid #d0d7de;
+  background-color: #f8f9fa;
+  color: #2f6fb3;
+  border-radius: 8px;
+  min-width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.sipac-toolbar-btn:hover {
+  border-color: #2f6fb3;
+  color: #2f6fb3;
+  background-color: #eef5fc;
 }

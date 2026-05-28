@@ -1,40 +1,18 @@
 import {
   CButton,
-  CCol,
-  CFormCheck,
-  CFormInput,
-  CFormLabel,
-  CFormTextarea,
   CModal,
   CModalBody,
   CModalFooter,
   CModalHeader,
   CModalTitle,
-  CRow,
 } from "@coreui/react";
-import { useEffect, useRef } from "react";
+
+import { GiBrain } from "react-icons/gi";
+
 import type { Cie10DTO, DiagnosticoDTO } from "../../../api/pacientes";
-import DiagnosticoAutocompleteFields from "../../diagnostico/DiagnosticoAutocompleteFields";
-import {
-  autoResizeTextarea,
-  type DiagnosticoModalMode,
-  sipacBlue,
-} from "./diagnosticoUtils";
 
-const formatDateTime = (raw?: string): string => {
-  if (!raw) return "-";
-
-  const date = new Date(raw);
-  if (Number.isNaN(date.getTime())) return raw;
-
-  return new Intl.DateTimeFormat("es-AR", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
-};
+import DiagnosticoForm from "./DiagnosticoForm";
+import type { DiagnosticoModalMode } from "./diagnosticoUtils";
 
 interface DiagnosticoModalProps {
   activeDiagnostico: DiagnosticoDTO | null;
@@ -49,6 +27,7 @@ interface DiagnosticoModalProps {
   ) => void;
   onSave: () => void;
   onRemove: () => void;
+  onDiagnosticoReload?: () => void | Promise<void>;
   readOnly?: boolean;
 }
 
@@ -62,27 +41,35 @@ export default function DiagnosticoModal({
   onDraftChange,
   onSave,
   onRemove,
+  onDiagnosticoReload,
   readOnly = false,
 }: DiagnosticoModalProps) {
-  const evolucionRef = useRef<HTMLTextAreaElement>(null);
-  const tratamientoRef = useRef<HTMLTextAreaElement>(null);
-  const isEditing = !readOnly && (mode === "edit" || mode === "create");
-  const fieldId = editingIndex ?? "nuevo";
 
-  useEffect(() => {
-    if (!isEditing) return;
-
-    [evolucionRef.current, tratamientoRef.current].forEach((element) => {
-      if (element) {
-        autoResizeTextarea(element);
-      }
-    });
-  }, [isEditing, activeDiagnostico?.evolucion, activeDiagnostico?.tratamiento]);
+  const isEditing =
+    !readOnly && (mode === "edit" || mode === "create");
 
   return (
-    <CModal visible={visible && Boolean(activeDiagnostico)} onClose={onClose} size="lg">
-      <CModalHeader>
-        <CModalTitle>
+    <CModal
+      visible={visible && Boolean(activeDiagnostico)}
+      onClose={onClose}
+      size="lg"
+    >
+      <CModalHeader
+  style={{
+    backgroundColor: "#F3F4F7",
+    borderBottom: "1px solid #E5E7EB",
+    paddingTop: "0.9rem",
+    paddingBottom: "0.9rem",
+  }}
+>
+        <CModalTitle 
+        className="d-flex align-items-center gap-2"
+        style={{
+          color: "#2F6FB3",
+          fontWeight: 600,
+        }}>
+          <GiBrain size={20} color="#2F6FB3" />
+
           {mode === "create"
             ? "Nuevo diagnóstico"
             : mode === "edit"
@@ -90,153 +77,63 @@ export default function DiagnosticoModal({
               : "Diagnóstico"}
         </CModalTitle>
       </CModalHeader>
+
       <CModalBody>
         {activeDiagnostico ? (
-          <div className="d-flex flex-column gap-3">
-            <div className="d-flex justify-content-end align-items-center gap-2">
-              {activeDiagnostico.principal ? (
-                <span
-                  className="badge rounded-pill"
-                  style={{
-                    backgroundColor: "#E8F1FB",
-                    color: sipacBlue,
-                    border: `1px solid ${sipacBlue}33`,
-                  }}
-                >
-                  Principal
-                </span>
-              ) : null}
-            </div>
-
-            {isEditing ? (
-              <CRow className="g-3">
-                <CCol md={12}>
-                  <CFormCheck
-                    id={`principal-${fieldId}`}
-                    label="Diagnóstico principal"
-                    checked={Boolean(activeDiagnostico.principal)}
-                    onChange={(e) => onDraftChange("principal", e.target.checked)}
-                  />
-                </CCol>
-
-                <CCol md={12}>
-                  <DiagnosticoAutocompleteFields
-                    descripcion={activeDiagnostico.descripcion || ""}
-                    cie10={activeDiagnostico.cie10 || null}
-                    onDescripcionChange={(value) => onDraftChange("descripcion", value)}
-                    onCie10Change={(value) => onDraftChange("cie10", value)}
-                    descripcionLabel="Descripción clínica"
-                    descripcionPlaceholder="Describí el diagnóstico clínico"
-                    descripcionRows={1}
-                    fillDescriptionFromCie10={false}
-                    clearCie10OnDescriptionEdit={false}
-                  />
-                </CCol>
-
-                <CCol md={6}>
-                  <CFormLabel htmlFor={`evolucion-${fieldId}`}>Evolución</CFormLabel>
-                  <CFormTextarea
-                    ref={evolucionRef}
-                    id={`evolucion-${fieldId}`}
-                    rows={1}
-                    style={{ resize: "none", overflow: "hidden" }}
-                    value={activeDiagnostico.evolucion || ""}
-                    onInput={(e) => autoResizeTextarea(e.currentTarget)}
-                    onChange={(e) => onDraftChange("evolucion", e.target.value)}
-                  />
-                </CCol>
-
-                <CCol md={6}>
-                  <CFormLabel htmlFor={`fechaFin-${fieldId}`}>Fecha fin</CFormLabel>
-                  <CFormInput
-                    id={`fechaFin-${fieldId}`}
-                    type="datetime-local"
-                    value={activeDiagnostico.fechaFin || ""}
-                    onChange={(e) => onDraftChange("fechaFin", e.target.value)}
-                  />
-                </CCol>
-
-                <CCol md={6}>
-                  <CFormLabel htmlFor={`tratamiento-${fieldId}`}>Tratamiento</CFormLabel>
-                  <CFormTextarea
-                    ref={tratamientoRef}
-                    id={`tratamiento-${fieldId}`}
-                    rows={1}
-                    style={{ resize: "none", overflow: "hidden" }}
-                    value={activeDiagnostico.tratamiento || ""}
-                    onInput={(e) => autoResizeTextarea(e.currentTarget)}
-                    onChange={(e) => onDraftChange("tratamiento", e.target.value)}
-                  />
-                </CCol>
-              </CRow>
-            ) : (
-              (() => {
-                const cie10Label = [
-                  activeDiagnostico.cie10?.codigo?.trim(),
-                  activeDiagnostico.cie10?.descripcion?.trim(),
-                ]
-                  .filter(Boolean)
-                  .join(" - ");
-                const diagnosticoFields = [
-                  ...(activeDiagnostico.descripcion?.trim()
-                    ? [
-                        {
-                          label: "Descripción clínica",
-                          value: activeDiagnostico.descripcion.trim(),
-                        },
-                      ]
-                    : []),
-                  ...(cie10Label ? [{ label: "CIE-10", value: cie10Label }] : []),
-                  ...(activeDiagnostico.evolucion?.trim()
-                    ? [{ label: "Evolución", value: activeDiagnostico.evolucion.trim() }]
-                    : []),
-                  ...(activeDiagnostico.tratamiento?.trim()
-                    ? [{ label: "Tratamiento", value: activeDiagnostico.tratamiento.trim() }]
-                    : []),
-                  ...(activeDiagnostico.fechaFin?.trim()
-                    ? [{ label: "Fecha fin", value: formatDateTime(activeDiagnostico.fechaFin) }]
-                    : []),
-                ];
-
-                return diagnosticoFields.length > 0 ? (
-                  <div className="d-flex flex-column gap-3">
-                    {diagnosticoFields.map((field) => (
-                      <div key={field.label} className="border rounded p-3 bg-light-subtle">
-                        <div className="small text-muted">{field.label}</div>
-                        <div className="fw-semibold">{field.value}</div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="small text-muted">
-                    No hay datos del diagnóstico para mostrar.
-                  </div>
-                );
-              })()
-            )}
-          </div>
+          <DiagnosticoForm
+            diagnostico={activeDiagnostico}
+            editingIndex={editingIndex}
+            isEditing={isEditing}
+            onDraftChange={onDraftChange}
+            reloadDiagnostico={onDiagnosticoReload}
+          />
         ) : null}
       </CModalBody>
+
       <CModalFooter className="d-flex justify-content-between">
-        <div className="d-flex gap-2">
+
+        <div>
           {!readOnly && mode === "edit" ? (
-            <CButton type="button" color="danger" variant="outline" onClick={onRemove}>
+            <CButton
+              type="button"
+              color="danger"
+              variant="outline"
+              onClick={onRemove}
+            >
               Eliminar diagnóstico
             </CButton>
           ) : null}
         </div>
+
         <div className="d-flex gap-2">
+
           {!readOnly && mode === "view" ? (
-            <CButton type="button" color="primary" variant="outline" onClick={onStartEdit}>
+            <CButton
+              type="button"
+              color="primary"
+              variant="outline"
+              onClick={onStartEdit}
+            >
               Editar
             </CButton>
           ) : null}
+
           {isEditing ? (
-            <CButton type="button" color="primary" onClick={onSave}>
+            <CButton
+              type="button"
+              color="primary"
+              onClick={onSave}
+            >
               Guardar
             </CButton>
           ) : null}
-          <CButton type="button" color="secondary" variant="outline" onClick={onClose}>
+
+          <CButton
+            type="button"
+            color="secondary"
+            variant="outline"
+            onClick={onClose}
+          >
             Cerrar
           </CButton>
         </div>

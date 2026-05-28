@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   CButton,
   CFormInput,
@@ -7,7 +7,7 @@ import {
   CListGroup,
   CListGroupItem,
 } from "@coreui/react";
-import { autocompleteDiagnosticos, type Cie10DTO } from "../../api/diagnosticos";
+import { autocompleteDiagnosticos, type Cie10DTO } from "../../../api/diagnosticos";
 
 interface DiagnosticoAutocompleteFieldsProps {
   descripcion: string;
@@ -21,6 +21,7 @@ interface DiagnosticoAutocompleteFieldsProps {
   searchPlaceholder?: string;
   fillDescriptionFromCie10?: boolean;
   clearCie10OnDescriptionEdit?: boolean;
+  afterSearch?: ReactNode;
 }
 
 const PAGE_SIZE = 10;
@@ -38,10 +39,11 @@ export default function DiagnosticoAutocompleteFields({
   descripcionLabel = "Diagnóstico",
   descripcionPlaceholder = "Describe el diagnóstico aquí",
   descripcionRows = 3,
-  searchLabel = "Buscar sugerencias en CIE-10 (opcional)",
-  searchPlaceholder = "Ej: ansiedad, F32...",
+  searchLabel = "Buscar CIE-10",
+  searchPlaceholder = "Ej: F32, ansiedad",
   fillDescriptionFromCie10 = true,
   clearCie10OnDescriptionEdit = true,
+  afterSearch,
 }: DiagnosticoAutocompleteFieldsProps) {
   const [busqueda, setBusqueda] = useState("");
   const [resultados, setResultados] = useState<Cie10DTO[]>([]);
@@ -179,7 +181,7 @@ export default function DiagnosticoAutocompleteFields({
   return (
     <>
       <div>
-        <CFormLabel>{descripcionLabel}</CFormLabel>
+        <CFormLabel className="sipac-label">{descripcionLabel}</CFormLabel>
         <CFormTextarea
           ref={textareaRef}
           value={descripcion}
@@ -188,13 +190,15 @@ export default function DiagnosticoAutocompleteFields({
           placeholder={descripcionPlaceholder}
           rows={descripcionRows}
           style={{ resize: "none", overflow: "hidden" }}
+          className="sipac-input"
         />
       </div>
 
       <div>
-        <CFormLabel className="mb-2">{searchLabel}</CFormLabel>
+        <CFormLabel className="mb-2 sipac-label">{searchLabel}</CFormLabel>
         <div className="d-flex gap-2 align-items-start">
           <CFormInput
+            className="sipac-input"
             ref={inputRef}
             placeholder={searchPlaceholder}
             value={busqueda}
@@ -208,20 +212,20 @@ export default function DiagnosticoAutocompleteFields({
             }}
           />
           {cie10?.codigo ? (
-            <CButton size="sm" color="danger" variant="outline" onClick={quitarCie10}>
-              Quitar
-            </CButton>
+   <CButton
+    type="button"
+    size="sm"
+    className="sipac-toolbar-btn px-3"
+    onClick={quitarCie10}
+    title="Quitar CIE-10"
+  >
+    X
+  </CButton>
           ) : null}
         </div>
-        {/* {cie10?.codigo ? (
-          <div className="small text-muted mt-2">
-            CIE-10 seleccionado:{" "}
-            <span className="fw-semibold text-body">
-              {[cie10.codigo, cie10.descripcion].filter(Boolean).join(" - ")}
-            </span>
-          </div>
-        ) : null} */}
       </div>
+
+      {afterSearch ? <div>{afterSearch}</div> : null}
 
       {resultados.length > 0 ? (
         <div onScroll={handleScroll} style={{ maxHeight: 300, overflowY: "auto" }}>

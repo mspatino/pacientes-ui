@@ -34,8 +34,8 @@ export default function HistoriaClinicaContainer({
     openDiagnosticoModal,
     pageTitle,
     pacienteNombre,
+    reloadHistoriaClinica,
     removeActiveDiagnostico,
-    removeDiagnostico,
     saveDiagnosticoDraft,
     saving,
     setForm,
@@ -94,7 +94,6 @@ export default function HistoriaClinicaContainer({
                   diagnosticos={form.diagnosticos}
                   onOpen={openDiagnosticoModal}
                   onAdd={addDiagnostico}
-                  onRemove={removeDiagnostico}
                   readOnly={readOnlyDiagnosticos}
                 />
               </div>
@@ -131,6 +130,7 @@ export default function HistoriaClinicaContainer({
         onDraftChange={handleDiagnosticoDraftChange}
         onSave={saveDiagnosticoDraft}
         onRemove={removeActiveDiagnostico}
+        onDiagnosticoReload={reloadHistoriaClinica}
         readOnly={readOnlyDiagnosticos}
       />
     </div>

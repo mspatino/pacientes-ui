@@ -21,7 +21,7 @@ import {
   BsSearch,
 } from "react-icons/bs";
 import { GiBrain } from "react-icons/gi";
-import { getHistoriaClinicaByPacienteId, getPacienteById, type PacienteResponseDTO } from "../../api/pacientes";
+import { getHistoriaClinicaByPacienteId, getPacienteById, type DiagnosticoDTO, type PacienteResponseDTO } from "../../api/pacientes";
 import {
   getDiagnosticoFechaFin,
   getDiagnosticoText,
@@ -44,9 +44,9 @@ const formatDateTime = (raw?: string | null): string => {
   }).format(date);
 };
 
-const getDiagnosticoFields = (diagnostico: Record<string, unknown>) => {
+const getDiagnosticoFields = (diagnostico: DiagnosticoDTO) => {
   const descripcion = getDiagnosticoText(diagnostico, "descripcion");
-  const evolucion = getDiagnosticoText(diagnostico, "evolucion");
+  const evolucion = getDiagnosticoText(diagnostico);
   const tratamiento = getDiagnosticoText(diagnostico, "tratamiento");
   const fecha = typeof diagnostico.fecha === "string" ? formatDateTime(diagnostico.fecha) : "";
   const fechaFinRaw = getDiagnosticoFechaFin(diagnostico);
@@ -82,7 +82,8 @@ export default function DiagnosticosPacientePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [pacienteNombre, setPacienteNombre] = useState("Paciente");
-  const [diagnosticos, setDiagnosticos] = useState<Record<string, unknown>[]>([]);
+  //const [diagnosticos, setDiagnosticos] = useState<Record<string, unknown>[]>([]);
+  const [diagnosticos, setDiagnosticos] = useState<DiagnosticoDTO[]>([]);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "principal" | "active" | "closed">("all");
   const [currentPage, setCurrentPage] = useState(1);
