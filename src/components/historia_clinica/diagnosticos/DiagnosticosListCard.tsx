@@ -7,6 +7,7 @@ import {
   getDiagnosticoSummary,
   getDiagnosticoTipoBadgeStyle,
   getDiagnosticoTipoLabel,
+  getDiagnosticoUltimaEvolucion,
 } from "./diagnosticoUtils";
 
 interface DiagnosticosListCardProps {
@@ -28,7 +29,7 @@ export default function DiagnosticosListCard({
       className="sipac-toolbar-btn d-inline-flex align-items-center gap-2"
       onClick={onAdd}
     >
-      <BsPlusLg size={14}/>
+      <BsPlusLg size={14} />
       Agregar
     </button>
   );
@@ -51,12 +52,10 @@ export default function DiagnosticosListCard({
         </div>
       ) : (
         <div className="d-flex flex-column gap-2 mb-3">
-          {diagnosticos.map((diagnostico, index) => {
+        
 
-              const ultimaEvolucion =
-  diagnostico.evoluciones?.[
-    diagnostico.evoluciones.length - 1
-  ];
+          {diagnosticos.map((diagnostico, index) => {
+            const ultimaEvolucion = getDiagnosticoUltimaEvolucion(diagnostico);
 
             return (
               <div
@@ -75,8 +74,10 @@ export default function DiagnosticosListCard({
                 <div className="d-flex flex-column gap-1">
 
                   {/* HEADER */}
-                  {/* <div className="d-flex align-items-center gap-2 flex-wrap small text-muted">
+          
+                  <div className="d-flex justify-content-between align-items-start gap-2">
 
+                    {/* TIPO */}
                     <span
                       className="badge rounded-pill"
                       style={getDiagnosticoTipoBadgeStyle(diagnostico.tipo)}
@@ -84,88 +85,44 @@ export default function DiagnosticosListCard({
                       {getDiagnosticoTipoLabel(diagnostico.tipo)}
                     </span>
 
-                    {diagnostico.fechaInicio ? (
-                      <span>
-                        <span
-                          className="badge rounded-pill me-1"
-                          style={{
-                            backgroundColor: "#F6F8F6",
-                            color: "#6C8A6D",
-                            border: "1px solid #DCE6DC",
-                          }}
-                        >
-                          Inicio
+                    {/* FECHAS */}
+                    <div className="d-flex align-items-center gap-2 flex-wrap small text-body-secondary ms-auto">
+
+                      {diagnostico.fechaInicio ? (
+                        <span>
+                          <span
+                            className="badge rounded-pill me-1"
+                            style={{
+                              backgroundColor: "#F6F8F6",
+                              color: "#6C8A6D",
+                              border: "1px solid #DCE6DC",
+                            }}
+                          >
+                            Inicio
+                          </span>
+
+                          {formatFechaHora(diagnostico.fechaInicio)}
                         </span>
+                      ) : null}
 
-                        {formatFechaHora(diagnostico.fechaInicio)}
-                      </span>
-                    ) : null}
+                      {diagnostico.fechaFin ? (
+                        <span>
+                          <span
+                            className="badge rounded-pill me-1"
+                            style={{
+                              backgroundColor: "#FAF8F5",
+                              color: "#9A7B5F",
+                              border: "1px solid #E8DDD2",
+                            }}
+                          >
+                            Alta
+                          </span>
 
-                    {diagnostico.fechaFin ? (
-                      <span>
-                        <span
-                          className="badge rounded-pill me-1"
-                          style={{
-                            backgroundColor: "#FAF8F5",
-                            color: "#9A7B5F",
-                            border: "1px solid #E8DDD2",
-                          }}
-                        >
-                          Alta
+                          {formatFechaHora(diagnostico.fechaFin)}
                         </span>
-
-                        {formatFechaHora(diagnostico.fechaFin)}
-                      </span>
-                    ) : null}
-                  </div> */}
-                  <div className="d-flex justify-content-between align-items-start gap-2">
-
-  {/* TIPO */}
-  <span
-    className="badge rounded-pill"
-    style={getDiagnosticoTipoBadgeStyle(diagnostico.tipo)}
-  >
-    {getDiagnosticoTipoLabel(diagnostico.tipo)}
-  </span>
-
-  {/* FECHAS */}
-  <div className="d-flex align-items-center gap-2 flex-wrap small text-body-secondary ms-auto">
-
-    {diagnostico.fechaInicio ? (
-      <span>
-        <span
-          className="badge rounded-pill me-1"
-          style={{
-            backgroundColor: "#F6F8F6",
-            color: "#6C8A6D",
-            border: "1px solid #DCE6DC",
-          }}
-        >
-          Inicio
-        </span>
-
-        {formatFechaHora(diagnostico.fechaInicio)}
-      </span>
-    ) : null}
-
-    {diagnostico.fechaFin ? (
-      <span>
-        <span
-          className="badge rounded-pill me-1"
-          style={{
-            backgroundColor: "#FAF8F5",
-            color: "#9A7B5F",
-            border: "1px solid #E8DDD2",
-          }}
-        >
-          Alta
-        </span>
-
-        {formatFechaHora(diagnostico.fechaFin)}
-      </span>
-    ) : null}
-  </div>
-</div>
+                      ) : null}
+                    </div>
+                  </div>
 
                   {/* DESCRIPCION */}
                   <div className="fw-semibold fs-6">
@@ -186,11 +143,11 @@ export default function DiagnosticosListCard({
                     </div>
                   ) : null} */}
                   {/* ULTIMA EVOLUCION */}
-{ultimaEvolucion?.nota?.trim() ? (
-  <div className="small fst-italic text-muted">
-    {ultimaEvolucion.nota.trim()}
-  </div>
-) : null}
+                  {ultimaEvolucion?.nota?.trim() ? (
+                    <div className="small fst-italic text-muted">
+                      {ultimaEvolucion.nota.trim()}
+                    </div>
+                  ) : null}
                 </div>
               </div>
             );

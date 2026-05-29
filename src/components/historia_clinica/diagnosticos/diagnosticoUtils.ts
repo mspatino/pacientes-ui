@@ -1,4 +1,7 @@
-import type { DiagnosticoDTO } from "../../../api/pacientes";
+import type {
+  DiagnosticoDTO,
+  EvolucionDiagnosticoDTO,
+} from "../../../api/pacientes";
 import type { TipoDiagnostico } from "../../../api/pacientes";
 
 export const sipacBlue = "#2F6FB3";
@@ -139,6 +142,29 @@ const getNormalizedTipo = (tipo: unknown) => {
   return "";
 };
 
+const parseFechaHoraTime = (value?: string | null) => {
+  const trimmed = value?.trim();
+  if (!trimmed) return Number.NaN;
+
+  const isoTime = new Date(trimmed).getTime();
+  if (!Number.isNaN(isoTime)) return isoTime;
+
+  const localMatch = trimmed.match(
+    /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:,?\s+(\d{1,2}):(\d{2}))?/,
+  );
+
+  if (!localMatch) return Number.NaN;
+
+  const [, day, month, year, hour = "0", minute = "0"] = localMatch;
+  return new Date(
+    Number(year),
+    Number(month) - 1,
+    Number(day),
+    Number(hour),
+    Number(minute),
+  ).getTime();
+};
+
 export const getDiagnosticoFechaFin = (
   diagnostico: DiagnosticoDTO,
 ) => {
@@ -188,12 +214,27 @@ export const getLatestEvolucionDiagnostico = (
     (item): item is Record<string, unknown> => Boolean(item) && typeof item === "object",
   );
 
-  return evoluciones[evoluciones.length - 1] ?? null;
+  return evoluciones
+    .map((evolucion, index) => ({
+      evolucion,
+      index,
+      time:
+        typeof evolucion.fecha === "string"
+          ? parseFechaHoraTime(evolucion.fecha)
+          : Number.NaN,
+    }))
+    .sort((a, b) => {
+      const aTime = Number.isNaN(a.time) ? Number.NEGATIVE_INFINITY : a.time;
+      const bTime = Number.isNaN(b.time) ? Number.NEGATIVE_INFINITY : b.time;
+
+      if (aTime !== bTime) return bTime - aTime;
+      return b.index - a.index;
+    })[0]?.evolucion ?? null;
 };
 
 export const getDiagnosticoText = (
   diagnostico: DiagnosticoDTO,
-  field: "descripcion" | "tratamiento",
+  field: "descripcion" | "tratamiento" | "evolucion",
 ) => {
 
   const value = diagnostico[field];
@@ -205,16 +246,25 @@ export const getDiagnosticoText = (
 
 export const getDiagnosticoUltimaEvolucion = (
   diagnostico: DiagnosticoDTO,
-): string => {
+): EvolucionDiagnosticoDTO | null => {
 
-  const ultimaEvolucion = [...(diagnostico.evoluciones ?? [])]
-    .sort(
-      (a, b) =>
-        new Date(b.fecha ?? "").getTime() -
-        new Date(a.fecha ?? "").getTime(),
-    )[0];
+  const ultimaEvolucion = (diagnostico.evoluciones ?? [])
+    .map((evolucion, index) => ({
+      evolucion,
+      index,
+      time: evolucion.fecha
+        ? parseFechaHoraTime(evolucion.fecha)
+        : Number.NaN,
+    }))
+    .sort((a, b) => {
+      const aTime = Number.isNaN(a.time) ? Number.NEGATIVE_INFINITY : a.time;
+      const bTime = Number.isNaN(b.time) ? Number.NEGATIVE_INFINITY : b.time;
 
-  return ultimaEvolucion?.nota?.trim() ?? "";
+      if (aTime !== bTime) return bTime - aTime;
+      return b.index - a.index;
+    })[0]?.evolucion;
+
+  return ultimaEvolucion ?? null;
 };
 
 // export const getDiagnosticoText = (

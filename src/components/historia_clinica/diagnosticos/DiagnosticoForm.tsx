@@ -108,44 +108,6 @@ export default function DiagnosticoForm({
     await reloadDiagnostico?.();
 };
 
-    // const handleSaveEvolucion = async (nota: string) => {
-    //     const diagnosticoId = diagnostico.id;
-    //     if (!diagnosticoId) return;
-
-    //     const response = await crearEvolucionDiagnostico(
-    //         diagnosticoId,
-    //         nota,
-    //     );
-    //     if (response.data && typeof response.data === "object") {
-    //         setCreatedEvoluciones((prev) => ({
-    //             ...prev,
-    //             [diagnosticoId]: [
-    //                 ...(prev[diagnosticoId] ?? []),
-    //                 response.data as EvolucionDiagnosticoDTO,
-    //             ],
-    //         }));
-    //     }
-    //     setModalVisible(false);
-    //     await reloadDiagnostico?.();
-    // };
-
-    // const backendEvoluciones = diagnostico.evoluciones ?? [];
-    // const backendEvolucionIds = new Set(
-    //     backendEvoluciones
-    //         .map((evolucion) => evolucion.id)
-    //         .filter((id): id is number => typeof id === "number"),
-    // );
-    // const evoluciones = [
-    //     ...backendEvoluciones,
-    //     ...(diagnostico.id
-    //         ? (createdEvoluciones[diagnostico.id] ?? []).filter(
-    //             (evolucion) =>
-    //                 typeof evolucion.id !== "number" ||
-    //                 !backendEvolucionIds.has(evolucion.id),
-    //         )
-    //         : []),
-    // ];
-
     const evolucionesSection = (
         <>
             {diagnostico.id ? (
@@ -198,7 +160,7 @@ export default function DiagnosticoForm({
                         clearCie10OnDescriptionEdit={false}
                         afterSearch={
                             <DiagnosticoTipoSelect
-                                className="mt-3"
+                                className="col-md-4 mt-3"
                                 value={normalizeTipoDiagnostico(diagnostico.tipo)}
                                 onChange={handleTipoChange}
                             />
@@ -206,7 +168,7 @@ export default function DiagnosticoForm({
                     />
                 </CCol>
 
-                <CCol md={6}>
+                <CCol md={12}>
                     <CFormLabel className="sipac-label">Tratamiento</CFormLabel>
 
                     <CFormTextarea
@@ -226,7 +188,7 @@ export default function DiagnosticoForm({
                         }
                     />
                 </CCol>
-
+                {diagnostico.id ? (        
                 <CCol md={6}>
                     <CFormLabel className="sipac-label">Fecha fin</CFormLabel>
 
@@ -239,6 +201,7 @@ export default function DiagnosticoForm({
                         }
                     />
                 </CCol>
+                ) : null}
 
                 <CCol md={12}>
                     {evolucionesSection}

@@ -57,8 +57,10 @@ export interface EvolucionDiagnosticoDTO {
 export interface DiagnosticoDTO {
   id?: number;
   descripcion?: string;
+  evolucion?: string;
   tratamiento?: string;
   cie10?: Cie10DTO;
+  principal?: boolean;
   tipo?: TipoDiagnostico;
   evoluciones?: EvolucionDiagnosticoDTO[];
   fechaInicio?: string;
