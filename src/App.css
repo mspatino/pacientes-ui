@@ -852,9 +852,15 @@ textarea {
   border-top: 1px solid #E4ECF5;
 }
 
-.sipac-diagnostico-item {
+/* .sipac-diagnostico-item {
   padding: 0.9rem 1rem;
   border-radius: 12px;
+  border: 1px solid #E9ECEF;
+  transition: all 0.15s ease;
+} */
+ .sipac-diagnostico-item {
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
   border: 1px solid #E9ECEF;
   transition: all 0.15s ease;
 }
@@ -924,4 +930,173 @@ textarea {
   border-color: #2f6fb3;
   color: #2f6fb3;
   background-color: #eef5fc;
+}
+
+.sipac-diagnostico-compact {
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+}
+
+.sipac-diagnostico-compact .badge {
+  font-size: 0.68rem;
+}
+
+.sipac-diagnostico-compact .fw-semibold {
+  font-size: 0.92rem;
+  line-height: 1.15;
+}
+
+.sipac-evoluciones-mini {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.sipac-evoluciones-header {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #607085;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  margin-bottom: .45rem;
+}
+
+.sipac-seguimiento-mini {
+  margin-top: .75rem;
+  padding-top: .75rem;
+  border-top: 1px solid #eef3f8;
+}
+
+.sipac-seguimiento-mini-compact {
+  margin-top: .45rem;
+  padding-top: .5rem;
+}
+
+.sipac-seguimiento-header {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  margin-bottom: .65rem;
+}
+
+.sipac-seguimiento-mini-compact .sipac-seguimiento-header {
+  gap: .35rem;
+  margin-bottom: .4rem;
+}
+
+.sipac-seguimiento-mini-compact .sipac-section-icon {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.sipac-seguimiento-title {
+  font-size: .82rem;
+  font-weight: 600;
+  color: #1e4f85;
+}
+
+.sipac-seguimiento-mini-compact .sipac-seguimiento-title {
+  font-size: .72rem;
+}
+
+.sipac-seguimiento-list {
+  display: flex;
+  flex-direction: column;
+  gap: .45rem;
+}
+
+.sipac-seguimiento-mini-compact .sipac-seguimiento-list {
+  gap: .3rem;
+}
+
+.sipac-seguimiento-item {
+  border-left: 2px solid #dbe4f0;
+  padding-left: .65rem;
+}
+
+.sipac-seguimiento-mini-compact .sipac-seguimiento-item {
+  border-left-width: 2px;
+  padding-left: .5rem;
+}
+
+.sipac-seguimiento-row {
+  display: flex;
+  align-items: baseline;
+  gap: .5rem;
+  min-width: 0;
+}
+
+.sipac-seguimiento-fecha {
+  font-size: .72rem;
+  color: #6b7280;
+  margin-bottom: 2px;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.sipac-seguimiento-mini-compact .sipac-seguimiento-fecha {
+  font-size: .66rem;
+  min-width: 7.7rem;
+  margin-bottom: 0;
+}
+
+.sipac-seguimiento-nota {
+  font-size: .84rem;
+  color: #1f2937;
+  line-height: 1.25;
+  min-width: 0;
+
+  display: -webkit-box;
+  line-clamp: 2;
+  box-orient: vertical;
+  overflow: hidden;
+}
+
+.sipac-seguimiento-mini-compact .sipac-seguimiento-nota {
+  font-size: .76rem;
+  line-height: 1.2;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+}
+
+.sipac-seguimiento-nota-full {
+  display: block;
+  white-space: pre-wrap;
+  overflow: visible;
+  line-clamp: unset;
+  -webkit-line-clamp: unset;
+  -webkit-box-orient: initial;
+}
+
+.sipac-link-evoluciones {
+  margin-left: auto;
+  margin-top: .5rem;
+  border: none;
+  background: transparent;
+  padding: 0;
+
+  color: #1e4f85;
+  font-size: .72rem;
+  font-weight: 600;
+}
+
+.sipac-seguimiento-item {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: .78rem;
+  line-height: 1.25;
+}
+
+.sipac-seguimiento-fecha {
+  flex-shrink: 0;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.sipac-seguimiento-nota {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #495057;
 }
