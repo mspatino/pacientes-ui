@@ -1,4 +1,4 @@
-import { useState , useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   CContainer,
   CRow,
@@ -6,11 +6,9 @@ import {
   CCard,
   CCardBody,
   CForm,
-  CInputGroup,
   CFormInput,
-  CButton,
+  CFormLabel,
   CAlert,
-  CInputGroupText,
 } from "@coreui/react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
@@ -25,26 +23,22 @@ export default function Login() {
   const [error, setError] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
-  console.log("API URL:", import.meta.env.VITE_API_URL);
-
   const navigate = useNavigate();
 
- useEffect(() => {
-  const token = localStorage.getItem("accessToken");
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
 
-  // solo redirigir si realmente estás logueado
-  if (token && token !== "undefined") {
-    navigate("/", { replace: true });
-  }
-});
+    if (token && token !== "undefined") {
+      navigate("/", { replace: true });
+    }
+  }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     // setError("");
 
-      //  limpiar tokens previos
-  localStorage.removeItem("accessToken");
-  localStorage.removeItem("refreshToken");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
 
     try {
 
@@ -61,100 +55,97 @@ export default function Login() {
 
       navigate("/");
     }
-    //  catch {
-    //   setError("Usuario o contraseña incorrectos");
-    // }
-catch (err: unknown) {
-  console.log("ERROR LOGIN:", err);
+    catch (err: unknown) {
+      console.log("ERROR LOGIN:", err);
 
-  if (axios.isAxiosError(err)) {
-    const status = err.response?.status;
+      if (axios.isAxiosError(err)) {
+        const status = err.response?.status;
 
-   if (status === 401) {
-      setError("Usuario o contraseña incorrectos");
-    } else {
-      setError(
-        err.response?.data?.message ||
-        err.response?.data?.error ||
-        "Error del servidor"
-      );
+        if (status === 401) {
+          setError("Usuario o contraseña incorrectos");
+        } else {
+          setError(
+            err.response?.data?.message ||
+            err.response?.data?.error ||
+            "Error del servidor"
+          );
+        }
+      } else {
+        setError("Error inesperado");
+      }
     }
-  } else {
-    setError("Error inesperado");
-  }
-}
-    
   };
-  
- 
+
   return (
-    <div className="min-vh-100 d-flex align-items-center justify-content-center">
+    <div className="sipac-login-page min-vh-100 d-flex align-items-center justify-content-center">
       <CContainer>
         <CRow className="justify-content-center">
-          <CCol md={4}>
-            <CCard>
+          <CCol sm={10} md={6} lg={4} xl={3}>
+            <CCard className="sipac-login-card border-0">
               <CCardBody>
                 <CForm onSubmit={handleLogin} autoComplete="off">
-                  
-                    <div className="mb-4 d-flex align-items-center">
-                      <img
-                        src="/logo.png"
-                        alt="SIPAC"
-                        style={{ width: 70, marginRight: 10 }}
-                      />
+                  <div className="sipac-login-brand">
+                    <img
+                      src="/logo.png"
+                      alt="SIPAC"
+                      className="sipac-login-logo"
+                    />
 
-                      <div>
-                        <h3 className="mb-0">SIPAC</h3>
-                        <small className="text-muted">
-                          Sistema Integral de Pacientes
-                        </small>
+                    <div>
+                      <h1 className="sipac-login-title">SIPAC</h1>
+                      <div className="sipac-login-subtitle">
+                        Sistema Integral de Pacientes
                       </div>
                     </div>
+                  </div>
 
                   {error && (
-                      <CAlert color="primary" className="sipac-alert">
-                        {error}
-                      </CAlert>
-                    )}
+                    <CAlert color="primary" className="sipac-alert">
+                      {error}
+                    </CAlert>
+                  )}
 
-                  <CInputGroup className="mb-3">
-                    {/* <CInputGroupText>👤</CInputGroupText> */}
+                  <div className="sipac-field-block mb-3">
+                    <CFormLabel className="sipac-label">Usuario</CFormLabel>
                     <CFormInput
+                      className="sipac-input"
                       placeholder="Usuario"
                       value={username}
                       autoComplete="off"
                       onChange={(e) => setUsername(e.target.value)}
                     />
-                  </CInputGroup>
+                  </div>
 
-                  <CInputGroup className="mb-3">
-                    {/* <CInputGroupText>🔒</CInputGroupText> */}
-                    <CFormInput
-                      type={showPassword ? "text" : "password"}
-                      autoComplete="new-password" 
-                      placeholder="Contraseña"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <CInputGroupText 
-                    style={{ cursor: "pointer" }}
-                    onClick={() => setShowPassword(!showPassword)}
-                    >
+                  <div className="sipac-field-block mb-4">
+                    <CFormLabel className="sipac-label">Contraseña</CFormLabel>
+                    <div className="sipac-password-field">
+                      <CFormInput
+                        className="sipac-input sipac-password-input"
+                        type={showPassword ? "text" : "password"}
+                        autoComplete="new-password"
+                        placeholder="Contraseña"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                      />
+
+                      <button
+                        type="button"
+                        className="sipac-password-toggle"
+                        onClick={() => setShowPassword(!showPassword)}
+                        aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                      >
                         {showPassword ? <FaEyeSlash /> : <FaEye />}
-                    </CInputGroupText>
-                  </CInputGroup>
+                      </button>
+                    </div>
+                  </div>
 
-                  {/* <CButton type="submit" color="primary" className="w-100">
-                    Ingresar
-                  </CButton> */}
-
-                  <CButton
+                  <button
                     type="submit"
-                    color="primary"
-                    className="w-100"
-                    disabled={!username || !password}>
+                    className="sipac-login-submit w-100"
+                    disabled={!username || !password}
+                  >
                     Ingresar
-                  </CButton>
+                  </button>
 
                 </CForm>
               </CCardBody>

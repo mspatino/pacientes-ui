@@ -16,18 +16,14 @@ export default function EvolucionDiagnosticoCard({
     "";
 
   return (
-    <div className="hc-evo-card">
-      <div className="hc-evo-line" />
+    <div className="sipac-seguimiento-item">
+      <span className="sipac-seguimiento-fecha">
+        {formatFechaHora(evolucion.fecha)}
+      </span>
 
-      <div className="hc-evo-content">
-        <div className="hc-evo-date">
-          {formatFechaHora(evolucion.fecha)}
-        </div>
-
-        <div className="hc-evo-note">
-          {nota}
-        </div>
-      </div>
+      <span className="sipac-seguimiento-nota">
+        {nota}
+      </span>
     </div>
   );
 }

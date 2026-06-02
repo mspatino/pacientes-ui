@@ -14,9 +14,6 @@ import {
   CSpinner,
 } from "@coreui/react";
 import { BsClipboard2Pulse, BsPlusLg } from "react-icons/bs";
-import pdfMake from "pdfmake/build/pdfmake";
-import pdfFonts from "pdfmake/build/vfs_fonts";
-import type { TDocumentDefinitions } from "pdfmake/interfaces";
 import {
   getHistoriaClinicaByPacienteId,
   getPacienteById,
@@ -33,9 +30,8 @@ import {
   getDiagnosticoText,
 } from "../../components/historia_clinica/diagnosticos/diagnosticoUtils";
 import { getEstadoTratamiento } from "../helpers/diagnosticoEstadoUtils";
+import useHistoriaClinicaPdf from "../../hooks/useHistoriaClinicaPdf";
 import "../../styles/paciente.css";
-
-pdfMake.addVirtualFileSystem(pdfFonts);
 
 interface HistoriaLocationState {
   mode?: "create";
@@ -91,9 +87,9 @@ export default function HistoriaClinicaPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [actionError, setActionError] = useState("");
-  const sipacBlue = "#2F6FB3";
-  const sipacSoftBlue = "#E8F1FB";
- // const [activeItems, setActiveItems] = useState([1, 2]);
+ 
+ 
+   //const [activeItems, setActiveItems] = useState<number[]>([1, 2]);
 
 
 
@@ -199,8 +195,6 @@ export default function HistoriaClinicaPage() {
       : []),
   ];
 
-  const hasEstado = typeof historiaData?.activa === "boolean";
-
   const diagnosticos = Array.isArray(historiaData?.diagnosticos)
     ? historiaData.diagnosticos
     : [];
@@ -210,6 +204,11 @@ export default function HistoriaClinicaPage() {
   const diagnosticoPrincipalTyped = diagnosticoPrincipal as DiagnosticoPrincipal | null;
 
   const estadoTratamiento =  getEstadoTratamiento(diagnosticos);
+  const { downloadPdf } = useHistoriaClinicaPdf({
+    historia: historiaData,
+    pacienteNombre,
+    estadoTratamiento,
+  });
 
   const diagnosticoFields: Array<{ label: string; value: string }> = (() => {
     if (!diagnosticoPrincipal) return [];
@@ -270,188 +269,11 @@ export default function HistoriaClinicaPage() {
     ];
   })();
 
-  const handleDownloadPdf = () => {
-    const buildInfoTable = (
-      title: string,
-      items: Array<{ label: string; value: string }>,
-    ) => ({
-      stack: [
-        { text: title, style: "sectionTitle" },
-        items.length > 0
-          ? {
-              table: {
-                widths: ["34%", "66%"],
-                body: items.map((item) => [
-                  { text: item.label, style: "fieldLabel" },
-                  { text: item.value, style: "fieldValue" },
-                ]),
-              },
-              layout: {
-                hLineColor: () => "#D6E4F4",
-                vLineColor: () => "#D6E4F4",
-                paddingLeft: () => 10,
-                paddingRight: () => 10,
-                paddingTop: () => 8,
-                paddingBottom: () => 8,
-              },
-            }
-          : {
-              text: "No hay datos para mostrar.",
-              style: "emptyText",
-            },
-      ],
-    });
-
-    const historiaFields = [
-      ...(historiaData?.fechaAlta
-        ? [
-            {
-              label: "Fecha de alta",
-              value: formatDateTime(historiaData.fechaAlta),
-            },
-          ]
-        : []),
-      ...(hasEstado
-        ? [
-            {
-              label: "Estado",
-              value: historiaData?.activa ? "Activa" : "Inactiva",
-            },
-          ]
-        : []),
-      ...fields.filter((field) => field.label !== "Fecha de alta"),
-    ];
-
-    const diagnosticoFields = (() => {
-      if (!diagnosticoPrincipal) return [];
-
-      const item = diagnosticoPrincipal as Record<string, unknown>;
-      const descripcionTexto = getDiagnosticoText(item, "descripcion") || null;
-      const evolucion = getDiagnosticoText(item, "evolucion") || null;
-      const tratamiento = getDiagnosticoText(item, "tratamiento") || null;
-      const fecha =
-        typeof item.fecha === "string" ? formatDateTime(item.fecha) : null;
-      const fechaFin = getDiagnosticoFechaFin(item)
-        ? formatDateTime(getDiagnosticoFechaFin(item))
-        : null;
-      const cie10 =
-        item.cie10 && typeof item.cie10 === "object"
-          ? (item.cie10 as Record<string, unknown>)
-          : null;
-      const cie10Codigo =
-        cie10 && typeof cie10.codigo === "string" && cie10.codigo.trim()
-          ? cie10.codigo
-          : null;
-      const cie10Descripcion =
-        cie10 &&
-        typeof cie10.descripcion === "string" &&
-        cie10.descripcion.trim()
-          ? cie10.descripcion
-          : null;
-      const cie10Label = [cie10Codigo, cie10Descripcion]
-        .filter(Boolean)
-        .join(" - ");
-
-      return [
-        ...(descripcionTexto
-          ? [{ label: "Descripción clínica", value: descripcionTexto }]
-          : []),
-        ...(cie10Label ? [{ label: "CIE-10", value: cie10Label }] : []),
-        ...(fecha ? [{ label: "Fecha", value: fecha }] : []),
-        ...(fechaFin ? [{ label: "Fecha fin", value: fechaFin }] : []),
-        ...(evolucion ? [{ label: "Evolución", value: evolucion }] : []),
-        ...(tratamiento ? [{ label: "Tratamiento", value: tratamiento }] : []),
-      ];
-    })();
-
-    const docDefinition: TDocumentDefinitions = {
-      pageSize: "A4",
-      pageMargins: [32, 36, 32, 36],
-      content: [
-        {
-          table: {
-            widths: [52, "*"],
-            body: [
-              [
-                {
-                  text: "HC",
-                  alignment: "center",
-                  color: sipacBlue,
-                  bold: true,
-                  fillColor: sipacSoftBlue,
-                  margin: [0, 10, 0, 10],
-                },
-                {
-                  stack: [
-                    { text: "Historia clínica", style: "eyebrow" },
-                    { text: pacienteNombre, style: "header" },
-                  ],
-                  border: [false, false, false, false],
-                },
-              ],
-            ],
-          },
-          layout: {
-            hLineWidth: () => 0,
-            vLineWidth: () => 0,
-            paddingLeft: () => 0,
-            paddingRight: () => 0,
-            paddingTop: () => 0,
-            paddingBottom: () => 0,
-          },
-          margin: [0, 0, 0, 18],
-        } as never,
-        buildInfoTable("Datos clínicos generales", historiaFields),
-        { text: "", margin: [0, 8, 0, 0] },
-        buildInfoTable("Diagnóstico principal", diagnosticoFields),
-      ],
-      styles: {
-        eyebrow: {
-          fontSize: 10,
-          color: "#6C7A89",
-          margin: [0, 0, 0, 2],
-        },
-        header: {
-          fontSize: 20,
-          bold: true,
-          color: "#16324F",
-        },
-        sectionTitle: {
-          fontSize: 12,
-          bold: true,
-          color: sipacBlue,
-          margin: [0, 0, 0, 8],
-        },
-        fieldLabel: {
-          fontSize: 10,
-          color: "#6C7A89",
-        },
-        fieldValue: {
-          fontSize: 11,
-          bold: true,
-          color: "#1F2D3D",
-        },
-        emptyText: {
-          fontSize: 10,
-          color: "#6C7A89",
-          italics: true,
-        },
-      },
-      defaultStyle: {
-        fontSize: 10,
-      },
-    };
-
-    pdfMake
-      .createPdf(docDefinition)
-      .download(`Historia-clinica-${pacienteNombre.replace(/\s+/g, "-")}.pdf`);
-  };
-
   return (
     <div className="p-3 paciente-page-container">
       <HistoriaClinicaHeader
         pacienteNombre={pacienteNombre}
-        onDownloadPdf={handleDownloadPdf}
+        onDownloadPdf={downloadPdf}
         onDelete={() => {
           setActionError("");
           setShowDeleteModal(true);
@@ -513,11 +335,12 @@ export default function HistoriaClinicaPage() {
         </CAlert>
       ) : historia && !notFound ? (
         <div className="d-flex flex-column gap-3">
-          <CAccordion activeItemKey={1} className="paciente-accordion w-100">
+          <CAccordion
+            activeItemKey={1}
+            className="paciente-accordion w-100"
+          >
             <HistoriaClinicaGeneralCard
               fields={fields}
-              // hasEstado={hasEstado}
-              // activa={historia.activa}
             />
           </CAccordion>
 

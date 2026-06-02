@@ -3,12 +3,9 @@ import {
   CCardBody,
   CCollapse,
   CCol,
-  CDropdown,
-  CDropdownItem,
-  CDropdownMenu,
-  CDropdownToggle,
   CFormInput,
   CFormLabel,
+  CFormSelect,
   CRow,
 } from "@coreui/react";
 
@@ -31,33 +28,21 @@ export default function PacientesFiltersCollapse({
 }: PacientesFiltersCollapseProps) {
   return (
     <CCollapse visible={showFilters}>
-      <CCard
-        className="border-0 shadow-sm"
-        style={{
-          background: "#F8FBFF",
-          borderRadius: "14px",
-        }}
-      >
-        <CCardBody className="py-3 px-3">
-          <CRow className="g-3 align-items-end">
+      <CCard className="sipac-filters-card border-0">
+        <CCardBody className="py-2 px-2">
+          <CRow className="g-2 align-items-end">
             <CCol xs={12} md={7}>
               <div className="d-flex flex-column">
                 <CFormLabel
                   htmlFor="search-paciente"
-                  className="small fw-semibold mb-1"
-                  style={{ color: "#4B6178" }}
+                  className="sipac-label"
                 >
                   Búsqueda rápida
                 </CFormLabel>
 
                 <CFormInput
                   id="search-paciente"
-                  size="sm"
-                  className="py-2 border-0 shadow-sm"
-                  style={{
-                    background: "#ffffff",
-                    borderRadius: "10px",
-                  }}
+                  className="sipac-input"
                   placeholder="Apellido, nombre o DNI..."
                   value={searchTerm}
                   onChange={(e) => onSearchTermChange(e.target.value)}
@@ -69,51 +54,32 @@ export default function PacientesFiltersCollapse({
               <div className="d-flex flex-column">
                 <CFormLabel
                   htmlFor="sexo-dropdown"
-                  className="small fw-semibold mb-1"
-                  style={{ color: "#4B6178" }}
+                  className="sipac-label"
                 >
                   Sexo
                 </CFormLabel>
 
-                <CDropdown className="d-inline-block">
-                  <CDropdownToggle
+                <CFormSelect
                     id="sexo-dropdown"
-                    color="light"
-                    size="sm"
-                    className="text-start d-flex align-items-center py-2 border-0 shadow-sm"
-                    style={{
-                      minWidth: "170px",
-                      borderRadius: "10px",
-                      background: "#ffffff",
-                    }}
+                    className="sipac-select sipac-filter-select"
+                    value={sexoFilter}
+                    onChange={(event) =>
+                      onSexoFilterChange(event.target.value as SexoFilter)
+                    }
                   >
-                    {sexoFilter || "Todos"}
-                  </CDropdownToggle>
-
-                  <CDropdownMenu style={{ minWidth: "170px" }}>
-                    <CDropdownItem onClick={() => onSexoFilterChange("")}>
+                    <option value="">
                       Todos
-                    </CDropdownItem>
-
-                    <CDropdownItem
-                      onClick={() => onSexoFilterChange("Masculino")}
-                    >
+                    </option>
+                    <option value="Masculino">
                       Masculino
-                    </CDropdownItem>
-
-                    <CDropdownItem
-                      onClick={() => onSexoFilterChange("Femenino")}
-                    >
+                    </option>
+                    <option value="Femenino">
                       Femenino
-                    </CDropdownItem>
-
-                    <CDropdownItem
-                      onClick={() => onSexoFilterChange("Otro")}
-                    >
+                    </option>
+                    <option value="Otro">
                       Otro
-                    </CDropdownItem>
-                  </CDropdownMenu>
-                </CDropdown>
+                    </option>
+                </CFormSelect>
               </div>
             </CCol>
           </CRow>

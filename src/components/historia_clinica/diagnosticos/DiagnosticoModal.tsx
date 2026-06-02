@@ -1,5 +1,4 @@
 import {
-  CButton,
   CModal,
   CModalBody,
   CModalFooter,
@@ -20,13 +19,11 @@ interface DiagnosticoModalProps {
   mode: DiagnosticoModalMode;
   visible: boolean;
   onClose: () => void;
-  onStartEdit: () => void;
   onDraftChange: (
     field: keyof DiagnosticoDTO,
     value: string | boolean | Cie10DTO | null,
   ) => void;
   onSave: () => void;
-  onRemove: () => void;
   onDiagnosticoReload?: () => void | Promise<void>;
   readOnly?: boolean;
 }
@@ -37,10 +34,8 @@ export default function DiagnosticoModal({
   mode,
   visible,
   onClose,
-  onStartEdit,
   onDraftChange,
   onSave,
-  onRemove,
   onDiagnosticoReload,
   readOnly = false,
 }: DiagnosticoModalProps) {
@@ -90,53 +85,25 @@ export default function DiagnosticoModal({
         ) : null}
       </CModalBody>
 
-      <CModalFooter className="d-flex justify-content-between">
-
-        <div>
-          {!readOnly && mode === "edit" ? (
-            <CButton
-              type="button"
-              color="danger"
-              variant="outline"
-              onClick={onRemove}
-            >
-              Eliminar diagnóstico
-            </CButton>
-          ) : null}
-        </div>
-
-        <div className="d-flex gap-2">
-
-          {!readOnly && mode === "view" ? (
-            <CButton
-              type="button"
-              color="primary"
-              variant="outline"
-              onClick={onStartEdit}
-            >
-              Editar
-            </CButton>
-          ) : null}
+      <CModalFooter className="sipac-form-footer border-top">
 
           {isEditing ? (
-            <CButton
+            <button
               type="button"
-              color="primary"
+              className="sipac-toolbar-btn"
               onClick={onSave}
             >
               Guardar
-            </CButton>
+            </button>
           ) : null}
 
-          <CButton
+          <button
             type="button"
-            color="secondary"
-            variant="outline"
+            className="sipac-toolbar-btn"
             onClick={onClose}
           >
-            Cerrar
-          </CButton>
-        </div>
+            {isEditing ? "Cancelar" : "Cerrar"}
+          </button>
       </CModalFooter>
     </CModal>
   );

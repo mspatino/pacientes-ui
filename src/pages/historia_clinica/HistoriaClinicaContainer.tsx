@@ -1,4 +1,11 @@
-import { CAlert, CCard, CCardBody, CForm, CSpinner } from "@coreui/react";
+import {
+  CAccordion,
+  CAlert,
+  CCard,
+  CCardBody,
+  CForm,
+  CSpinner,
+} from "@coreui/react";
 import { BsClipboard2Pulse } from "react-icons/bs";
 import DatosClinicosGeneralesCard from "../../components/historia_clinica/general/DatosClinicosGeneralesCard";
 import DiagnosticoModal from "../../components/historia_clinica/diagnosticos/DiagnosticoModal";
@@ -24,6 +31,7 @@ export default function HistoriaClinicaContainer({
     addDiagnostico,
     closeDiagnosticoModal,
     diagnosticoModalVisible,
+    editDiagnostico,
     editingIndex,
     error,
     form,
@@ -35,11 +43,10 @@ export default function HistoriaClinicaContainer({
     pageTitle,
     pacienteNombre,
     reloadHistoriaClinica,
-    removeActiveDiagnostico,
+    removeDiagnosticoFromList,
     saveDiagnosticoDraft,
     saving,
     setForm,
-    startDiagnosticoEdit,
     submitError,
   } = useHistoriaClinicaEditor({
     patientIdParam: patientId,
@@ -87,16 +94,22 @@ export default function HistoriaClinicaContainer({
             ) : null}
 
             <CForm id="historia-clinica-form" onSubmit={handleSubmit}>
-              <div className="d-flex flex-column gap-3">
+              <CAccordion
+                activeItemKey={1}
+                alwaysOpen
+                className="paciente-accordion w-100"
+              >
                 <DatosClinicosGeneralesCard form={form} setForm={setForm} />
 
                 <DiagnosticosListCard
                   diagnosticos={form.diagnosticos}
                   onOpen={openDiagnosticoModal}
                   onAdd={addDiagnostico}
+                  onEdit={editDiagnostico}
+                  onRemove={removeDiagnosticoFromList}
                   readOnly={readOnlyDiagnosticos}
                 />
-              </div>
+              </CAccordion>
 
               <div className="sipac-form-footer">
                 <button
@@ -126,10 +139,8 @@ export default function HistoriaClinicaContainer({
         mode={modalMode}
         visible={diagnosticoModalVisible}
         onClose={closeDiagnosticoModal}
-        onStartEdit={startDiagnosticoEdit}
         onDraftChange={handleDiagnosticoDraftChange}
         onSave={saveDiagnosticoDraft}
-        onRemove={removeActiveDiagnostico}
         onDiagnosticoReload={reloadHistoriaClinica}
         readOnly={readOnlyDiagnosticos}
       />

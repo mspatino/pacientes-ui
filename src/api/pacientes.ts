@@ -178,6 +178,28 @@ export const createPaciente = async (
   return res.data;
 };
 
+export const crearDiagnosticoEnHistoria = async (
+  historiaId: number,
+  payload: DiagnosticoDTO,
+): Promise<DiagnosticoDTO> => {
+  const res = await api.post(`/diagnosticos/historia/${historiaId}`, payload);
+  return res.data;
+};
+
+export const actualizarDiagnostico = async (
+  diagnosticoId: number,
+  payload: DiagnosticoDTO,
+): Promise<DiagnosticoDTO> => {
+  const res = await api.put(`/diagnosticos/${diagnosticoId}`, payload);
+  return res.data;
+};
+
+export const eliminarDiagnostico = async (
+  diagnosticoId: number,
+): Promise<void> => {
+  await api.delete(`/diagnosticos/${diagnosticoId}`);
+};
+
 export async function crearEvolucionDiagnostico(
   diagnosticoId: number,
   nota: string,

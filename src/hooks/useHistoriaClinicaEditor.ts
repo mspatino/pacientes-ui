@@ -8,7 +8,10 @@ import type {
   TipoDiagnostico,
 } from "../api/pacientes";
 import {
+  actualizarDiagnostico,
   createHistoriaClinica,
+  crearDiagnosticoEnHistoria,
+  eliminarDiagnostico,
   getHistoriaClinicaByPacienteId,
   getPacienteById,
   updateHistoriaClinica,
@@ -53,6 +56,70 @@ const normalizeLocalDateTime = (value?: string) => {
   return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(trimmed) ? `${trimmed}:00` : trimmed;
 };
 
+const parseOptionalNumber = (value: unknown) => {
+  if (typeof value === "number") return value;
+  if (typeof value === "string" && value.trim()) {
+    const parsed = Number(value);
+    return Number.isNaN(parsed) ? undefined : parsed;
+  }
+  return undefined;
+};
+
+const buildDiagnosticoFromRecord = (
+  diagnostico: Record<string, unknown>,
+): DiagnosticoDTO => {
+  const tipo = isDiagnosticoPrincipal(diagnostico)
+    ? "PRINCIPAL"
+    : normalizeTipoDiagnostico(diagnostico.tipo);
+
+  return {
+    id: parseOptionalNumber(diagnostico.id),
+    descripcion:
+      getDiagnosticoText(diagnostico, "descripcion"),
+    evolucion: "",
+    tratamiento:
+      getDiagnosticoText(diagnostico, "tratamiento"),
+    cie10:
+      diagnostico.cie10 && typeof diagnostico.cie10 === "object"
+        ? (diagnostico.cie10 as Cie10DTO)
+        : undefined,
+    principal: tipo === "PRINCIPAL",
+    tipo,
+    evoluciones: Array.isArray(diagnostico.evoluciones)
+      ? diagnostico.evoluciones
+          .filter(
+            (evolucion): evolucion is Record<string, unknown> =>
+              Boolean(evolucion) && typeof evolucion === "object",
+          )
+          .map((evolucion) => ({
+            id: parseOptionalNumber(evolucion.id),
+            fecha:
+              typeof evolucion.fecha === "string"
+                ? evolucion.fecha
+                : undefined,
+            nota:
+              typeof evolucion.nota === "string"
+                ? evolucion.nota
+                : undefined,
+            evolucion:
+              typeof evolucion.evolucion === "string"
+                ? evolucion.evolucion
+                : undefined,
+            tratamiento:
+              typeof evolucion.tratamiento === "string"
+                ? evolucion.tratamiento
+                : undefined,
+            descripcion:
+              typeof evolucion.descripcion === "string"
+                ? evolucion.descripcion
+                : undefined,
+          }))
+      : [],
+    fechaInicio: getDiagnosticoFechaInicio(diagnostico),
+    fechaFin: getDiagnosticoFechaFin(diagnostico),
+  };
+};
+
 const buildFormFromHistoriaClinica = (data: HistoriaClinicaDTO): HistoriaClinicaPayload => ({
   motivoConsulta: data.motivoConsulta || "",
   activa: typeof data.activa === "boolean" ? data.activa : true,
@@ -63,65 +130,7 @@ const buildFormFromHistoriaClinica = (data: HistoriaClinicaDTO): HistoriaClinica
   diagnosticos: Array.isArray(data.diagnosticos)
     ? data.diagnosticos.map((item) => {
         const diagnostico = item as Record<string, unknown>;
-        const tipo = isDiagnosticoPrincipal(diagnostico)
-          ? "PRINCIPAL"
-          : normalizeTipoDiagnostico(diagnostico.tipo);
-        return {
-          id:
-            typeof diagnostico.id === "number"
-              ? diagnostico.id
-              : typeof diagnostico.id === "string" && diagnostico.id.trim()
-                ? Number(diagnostico.id)
-                : undefined,
-          descripcion:
-            getDiagnosticoText(diagnostico, "descripcion"),
-          evolucion: "",
-          tratamiento:
-            getDiagnosticoText(diagnostico, "tratamiento"),
-          cie10:
-            diagnostico.cie10 && typeof diagnostico.cie10 === "object"
-              ? (diagnostico.cie10 as Cie10DTO)
-              : undefined,
-          principal: tipo === "PRINCIPAL",
-          tipo,
-          evoluciones: Array.isArray(diagnostico.evoluciones)
-            ? diagnostico.evoluciones
-                .filter(
-                  (evolucion): evolucion is Record<string, unknown> =>
-                    Boolean(evolucion) && typeof evolucion === "object",
-                )
-                .map((evolucion) => ({
-                  id:
-                    typeof evolucion.id === "number"
-                      ? evolucion.id
-                      : typeof evolucion.id === "string" && evolucion.id.trim()
-                        ? Number(evolucion.id)
-                        : undefined,
-                  fecha:
-                    typeof evolucion.fecha === "string"
-                      ? evolucion.fecha
-                      : undefined,
-                  nota:
-                    typeof evolucion.nota === "string"
-                      ? evolucion.nota
-                      : undefined,
-                  evolucion:
-                    typeof evolucion.evolucion === "string"
-                      ? evolucion.evolucion
-                      : undefined,
-                  tratamiento:
-                    typeof evolucion.tratamiento === "string"
-                      ? evolucion.tratamiento
-                      : undefined,
-                  descripcion:
-                    typeof evolucion.descripcion === "string"
-                      ? evolucion.descripcion
-                      : undefined,
-                }))
-            : [],
-          fechaInicio: getDiagnosticoFechaInicio(diagnostico),
-          fechaFin: getDiagnosticoFechaFin(diagnostico),
-        };
+        return buildDiagnosticoFromRecord(diagnostico);
       })
     : [],
 });
@@ -137,6 +146,7 @@ export default function useHistoriaClinicaEditor({
   const [submitError, setSubmitError] = useState("");
   const [pacienteNombre, setPacienteNombre] = useState("Paciente");
   const [exists, setExists] = useState(false);
+  const [historiaClinicaId, setHistoriaClinicaId] = useState<number | null>(null);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [diagnosticoModalVisible, setDiagnosticoModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState<DiagnosticoModalMode>("view");
@@ -161,7 +171,14 @@ export default function useHistoriaClinicaEditor({
     if (!pacienteId) return;
 
     const data: HistoriaClinicaDTO = await getHistoriaClinicaByPacienteId(pacienteId);
+    const firstDiagnostico = Array.isArray(data.diagnosticos)
+      ? data.diagnosticos[0] as Record<string, unknown> | undefined
+      : undefined;
+    const nextHistoriaId =
+      parseOptionalNumber(data.id) ??
+      parseOptionalNumber(firstDiagnostico?.historiaClinicaId);
     setExists(true);
+    setHistoriaClinicaId(nextHistoriaId ?? null);
     setForm(buildFormFromHistoriaClinica(data));
   }, [pacienteId]);
 
@@ -185,12 +202,20 @@ export default function useHistoriaClinicaEditor({
 
       try {
         const data: HistoriaClinicaDTO = await getHistoriaClinicaByPacienteId(pacienteId);
+        const firstDiagnostico = Array.isArray(data.diagnosticos)
+          ? data.diagnosticos[0] as Record<string, unknown> | undefined
+          : undefined;
+        const nextHistoriaId =
+          parseOptionalNumber(data.id) ??
+          parseOptionalNumber(firstDiagnostico?.historiaClinicaId);
         setExists(true);
+        setHistoriaClinicaId(nextHistoriaId ?? null);
         setForm(buildFormFromHistoriaClinica(data));
         setEditingIndex(null);
       } catch (historiaError) {
         if (mode === "create") {
           setExists(false);
+          setHistoriaClinicaId(null);
           setEditingIndex(null);
         } else {
           console.warn(
@@ -198,6 +223,7 @@ export default function useHistoriaClinicaEditor({
             historiaError,
           );
           setExists(false);
+          setHistoriaClinicaId(null);
           setEditingIndex(null);
         }
       } finally {
@@ -221,6 +247,13 @@ export default function useHistoriaClinicaEditor({
     setDiagnosticoModalVisible(true);
   };
 
+  const editDiagnostico = (index: number) => {
+    setEditingIndex(index);
+    setDiagnosticoDraft({ ...(form.diagnosticos[index] ?? createEmptyDiagnostico()) });
+    setModalMode("edit");
+    setDiagnosticoModalVisible(true);
+  };
+
   const closeDiagnosticoModal = () => {
     setDiagnosticoModalVisible(false);
     setModalMode("view");
@@ -228,21 +261,17 @@ export default function useHistoriaClinicaEditor({
     setEditingIndex(null);
   };
 
-  const startDiagnosticoEdit = () => {
-    setDiagnosticoDraft({ ...(selectedDiagnostico ?? createEmptyDiagnostico()) });
-    setModalMode(editingIndex === null ? "create" : "edit");
-  };
-
   const handleDiagnosticoDraftChange = (
     field: keyof DiagnosticoDTO,
     value: string | boolean | Cie10DTO | null,
   ) => {
     const tipo = field === "tipo" ? normalizeTipoDiagnostico(value) : undefined;
+    const isPrincipalField = field === "principal";
 
     setDiagnosticoDraft((prev) => ({
       ...(prev ?? createEmptyDiagnostico()),
       [field]: tipo ?? value,
-      ...(field === "principal"
+      ...(isPrincipalField
         ? {
             tipo: value ? "PRINCIPAL" : "SECUNDARIO",
             fechaFin: value === true ? "" : prev?.fechaFin,
@@ -262,10 +291,18 @@ export default function useHistoriaClinicaEditor({
   ): DiagnosticoDTO[] =>
     diagnosticos.map((diag, index) => {
       const isPrincipal = principalIndex !== null && index === principalIndex;
+      const tipo = normalizeTipoDiagnostico(diag.tipo);
+      const nextTipo =
+        isPrincipal
+          ? "PRINCIPAL"
+          : tipo === "PRINCIPAL"
+            ? "SECUNDARIO"
+            : tipo;
+
       return {
         ...diag,
         principal: isPrincipal,
-        tipo: (isPrincipal ? "PRINCIPAL" : "SECUNDARIO") as TipoDiagnostico,
+        tipo: nextTipo as TipoDiagnostico,
       };
     });
 
@@ -308,30 +345,42 @@ export default function useHistoriaClinicaEditor({
     };
   };
 
+  const buildDiagnosticoPayload = (diag: DiagnosticoDTO): DiagnosticoDTO => {
+    const tipo = normalizeTipoDiagnostico(diag.tipo);
+    const fechaInicio = normalizeLocalDateTime(diag.fechaInicio);
+    const fechaFin = normalizeLocalDateTime(diag.fechaFin);
+    const cie10Descripcion = diag.cie10?.descripcion?.trim() || "";
+    const descripcion = diag.descripcion?.trim() || cie10Descripcion;
+
+    return {
+      id: typeof diag.id === "number" ? diag.id : undefined,
+      descripcion,
+      tratamiento: diag.tratamiento?.trim() || "",
+      cie10:
+        diag.cie10?.codigo || diag.cie10?.descripcion
+          ? {
+              codigo: diag.cie10?.codigo?.trim() || "",
+              descripcion: diag.cie10?.descripcion?.trim() || "",
+            }
+          : undefined,
+      principal: tipo === "PRINCIPAL",
+      tipo,
+      fechaInicio: fechaInicio || undefined,
+      fechaFin: fechaFin || undefined,
+    };
+  };
+
   const buildPayloadFromForm = (currentForm: HistoriaClinicaPayload): HistoriaClinicaPayload => {
     const diagnosticos = currentForm.diagnosticos
       .map((diag) => {
-        const tipo = normalizeTipoDiagnostico(diag.tipo);
-        const fechaInicio = normalizeLocalDateTime(diag.fechaInicio);
-        const fechaFin = normalizeLocalDateTime(diag.fechaFin);
-
+        const payload = buildDiagnosticoPayload(diag);
         const diagnosticoPayload: DiagnosticoPayloadCompat = {
-          id: typeof diag.id === "number" ? diag.id : undefined,
-          descripcion: diag.descripcion?.trim() || "",
-          tratamiento: diag.tratamiento?.trim() || "",
-          cie10:
-            diag.cie10?.codigo || diag.cie10?.descripcion
-              ? {
-                  codigo: diag.cie10?.codigo?.trim() || "",
-                  descripcion: diag.cie10?.descripcion?.trim() || "",
-                }
-              : undefined,
-          principal: tipo === "PRINCIPAL",
-          tipo,
-          fechaInicio: fechaInicio || undefined,
-          fecha_inicio: fechaInicio || undefined,
-          fechaFin: fechaFin || undefined,
-          fecha_fin: fechaFin || undefined,
+          ...payload,
+          descripcion: payload.descripcion?.trim() || "",
+          tratamiento: payload.tratamiento?.trim() || "",
+          principal: payload.tipo === "PRINCIPAL",
+          fecha_inicio: payload.fechaInicio,
+          fecha_fin: payload.fechaFin,
         };
 
         return diagnosticoPayload;
@@ -381,8 +430,9 @@ export default function useHistoriaClinicaEditor({
       if (exists) {
         await updateHistoriaClinica(pacienteId, payload);
       } else {
-        await createHistoriaClinica(pacienteId, payload);
+        const created = await createHistoriaClinica(pacienteId, payload);
         setExists(true);
+        setHistoriaClinicaId(parseOptionalNumber(created.id) ?? null);
       }
 
       if (options?.redirectOnSuccess) {
@@ -401,12 +451,51 @@ export default function useHistoriaClinicaEditor({
     if (!diagnosticoDraft) return;
 
     const nextForm = applyDiagnosticoDraftToForm(form, diagnosticoDraft);
-    setForm(nextForm);
+
+    if (!exists) {
+      setForm(nextForm);
+    }
 
     if (exists) {
+      if (!historiaClinicaId) {
+        setSubmitError("No se pudo identificar la historia clínica para guardar el diagnóstico.");
+        return;
+      }
+
       try {
-        await persistHistoriaClinica(nextForm, { redirectOnSuccess: false });
-      } catch {
+        const draftPayload = buildDiagnosticoPayload(diagnosticoDraft);
+        let savedDiagnostico: DiagnosticoDTO;
+
+        if (typeof diagnosticoDraft.id === "number") {
+          savedDiagnostico = await actualizarDiagnostico(diagnosticoDraft.id, draftPayload);
+        } else {
+          savedDiagnostico = await crearDiagnosticoEnHistoria(historiaClinicaId, draftPayload);
+        }
+
+        const normalizedSaved = buildDiagnosticoFromRecord(
+          savedDiagnostico as Record<string, unknown>,
+        );
+
+        setForm((prev) => ({
+          ...prev,
+          diagnosticos: typeof diagnosticoDraft.id === "number"
+            ? prev.diagnosticos.map((diag) =>
+                diag.id === diagnosticoDraft.id ? normalizedSaved : diag,
+              )
+            : [
+                ...prev.diagnosticos.filter((diag) => typeof diag.id === "number"),
+                normalizedSaved,
+              ],
+        }));
+
+        closeDiagnosticoModal();
+        void reloadHistoriaClinica().catch((reloadError) => {
+          console.error("No se pudo recargar la historia clínica", reloadError);
+        });
+        return;
+      } catch (diagnosticoError) {
+        console.error("No se pudo guardar el diagnóstico", diagnosticoError);
+        setSubmitError("No se pudo guardar el diagnóstico. Intente nuevamente.");
         return;
       }
     }
@@ -453,13 +542,22 @@ export default function useHistoriaClinicaEditor({
     }
   };
 
-  const removeActiveDiagnostico = () => {
-    if (editingIndex === null) {
-      closeDiagnosticoModal();
+  const removeDiagnosticoFromList = async (index: number) => {
+    const diagnostico = form.diagnosticos[index];
+
+    if (exists && typeof diagnostico?.id === "number") {
+      try {
+        await eliminarDiagnostico(diagnostico.id);
+        removeDiagnostico(index);
+        await reloadHistoriaClinica();
+      } catch (deleteError) {
+        console.error("No se pudo eliminar el diagnóstico", deleteError);
+        setSubmitError("No se pudo eliminar el diagnóstico. Intente nuevamente.");
+      }
       return;
     }
 
-    removeDiagnostico(editingIndex);
+    removeDiagnostico(index);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -476,6 +574,7 @@ export default function useHistoriaClinicaEditor({
     diagnosticoModalVisible,
     editingIndex,
     error,
+    editDiagnostico,
     exists,
     form,
     handleDiagnosticoDraftChange,
@@ -493,9 +592,8 @@ export default function useHistoriaClinicaEditor({
     setDiagnosticoDraft,
     setForm,
     setModalMode,
-    startDiagnosticoEdit,
     reloadHistoriaClinica,
-    removeActiveDiagnostico,
+    removeDiagnosticoFromList,
     submitError,
   };
 }

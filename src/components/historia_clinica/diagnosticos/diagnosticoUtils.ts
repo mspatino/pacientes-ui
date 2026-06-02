@@ -19,9 +19,9 @@ export const createEmptyDiagnostico = (): DiagnosticoDTO => ({
 });
 
 export const isDiagnosticoPrincipal = (
-  diagnostico?: Pick<DiagnosticoDTO, "tipo"> | null,
+  diagnostico?: Pick<DiagnosticoDTO, "tipo"> | Record<string, unknown> | null,
 ) => {
-  return diagnostico?.tipo === "PRINCIPAL";
+  return normalizeTipoDiagnostico(diagnostico?.tipo) === "PRINCIPAL";
 };
 
 
@@ -166,21 +166,31 @@ const parseFechaHoraTime = (value?: string | null) => {
 };
 
 export const getDiagnosticoFechaFin = (
-  diagnostico: DiagnosticoDTO,
+  diagnostico: DiagnosticoDTO | Record<string, unknown>,
 ) => {
+  const diagnosticoRecord = diagnostico as Record<string, unknown>;
+  const fechaFin =
+    typeof diagnosticoRecord.fechaFin === "string"
+      ? diagnosticoRecord.fechaFin.trim()
+      : typeof diagnosticoRecord.fecha_fin === "string"
+        ? diagnosticoRecord.fecha_fin.trim()
+        : "";
 
-  return typeof diagnostico.fechaFin === "string"
-    ? diagnostico.fechaFin.trim()
-    : "";
+  return fechaFin;
 };
 
 export const getDiagnosticoFechaInicio = (
-  diagnostico: DiagnosticoDTO,
+  diagnostico: DiagnosticoDTO | Record<string, unknown>,
 ) => {
+  const diagnosticoRecord = diagnostico as Record<string, unknown>;
+  const fechaInicio =
+    typeof diagnosticoRecord.fechaInicio === "string"
+      ? diagnosticoRecord.fechaInicio.trim()
+      : typeof diagnosticoRecord.fecha_inicio === "string"
+        ? diagnosticoRecord.fecha_inicio.trim()
+        : "";
 
-  return typeof diagnostico.fechaInicio === "string"
-    ? diagnostico.fechaInicio.trim()
-    : "";
+  return fechaInicio;
 };
 
 export const isDiagnosticoActivo = (diagnostico: DiagnosticoDTO) =>
@@ -233,7 +243,7 @@ export const getLatestEvolucionDiagnostico = (
 };
 
 export const getDiagnosticoText = (
-  diagnostico: DiagnosticoDTO,
+  diagnostico: DiagnosticoDTO | Record<string, unknown>,
   field: "descripcion" | "tratamiento" | "evolucion",
 ) => {
 
@@ -287,7 +297,11 @@ export const getDiagnosticoUltimaEvolucion = (
 export const getDiagnosticoSummary = (
   diagnostico: DiagnosticoDTO,
 ): string => {
-  return diagnostico.descripcion?.trim() || "Sin diagnóstico";
+  return (
+    diagnostico.descripcion?.trim() ||
+    getCie10Label(diagnostico.cie10).trim() ||
+    "Sin diagnóstico"
+  );
 };
 
 export const formatFechaHora = (value?: string | null) => {

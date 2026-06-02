@@ -23,12 +23,6 @@ import {
 import DiagnosticoHeader from "../../components/historia_clinica/diagnosticos/DiagnosticoHeader";
 import DiagnosticoFilters from "../../components/historia_clinica/diagnosticos/DiagnosticoFilters";
 
-
-
-
-
-
-
 const getDiagnosticoFields = (diagnostico: DiagnosticoDTO) => {
   const descripcion = getDiagnosticoText(diagnostico, "descripcion");
 
@@ -44,18 +38,30 @@ const getDiagnosticoFields = (diagnostico: DiagnosticoDTO) => {
   );
 
   const cie10 = diagnostico.cie10;
+  const cie10Codigo =
+    cie10 && typeof cie10.codigo === "string" ? cie10.codigo.trim() : "";
+  const cie10Descripcion =
+    cie10 && typeof cie10.descripcion === "string"
+      ? cie10.descripcion.trim()
+      : "";
   const cie10Label = [
-    cie10 && typeof cie10.codigo === "string" ? cie10.codigo : "",
-    cie10 && typeof cie10.descripcion === "string" ? cie10.descripcion : "",
+    cie10Codigo,
+    cie10Descripcion,
   ]
     .filter(Boolean)
     .join(" - ");
+  const diagnosticoTitulo = cie10Codigo
+    ? [cie10Codigo, cie10Descripcion || descripcion].filter(Boolean).join(" ")
+    : descripcion;
 
   return {
     descripcion,
+    diagnosticoTitulo,
     tratamiento,
     fecha,
     fechaFin,
+    cie10Codigo,
+    cie10Descripcion,
     cie10Label,
     evoluciones: diagnostico.evoluciones ?? [],
   };
@@ -246,7 +252,12 @@ export default function DiagnosticosPacientePage() {
         ) : (
           <div className="d-flex flex-column gap-3">
             {paginatedDiagnosticos.map((diagnostico, index) => {
-              const { descripcion, tratamiento, fecha, fechaFin, cie10Label } =
+              const {
+                diagnosticoTitulo,
+                tratamiento,
+                fecha,
+                fechaFin,
+              } =
                 getDiagnosticoFields(diagnostico);
               const diagnosticoKey = pageStartIndex + index;
               const expanded =
@@ -256,7 +267,7 @@ export default function DiagnosticosPacientePage() {
               return (
                 <div key={`diagnostico-${diagnosticoKey}`}
                   className="sipac-diagnostico-item sipac-diagnostico-compact">
-                  <div className="d-flex flex-column gap-1">
+                  <div className="d-flex flex-column gap-0">
 
                     <div className="d-flex justify-content-between align-items-start gap-2 flex-wrap">
 
@@ -279,7 +290,7 @@ export default function DiagnosticosPacientePage() {
                       )}
 
                       {/* FECHAS */}
-                      <div className="d-flex align-items-center gap-2 flex-wrap small text-body-secondary">
+                      <div className="sipac-diagnostico-fechas d-flex align-items-center gap-2 flex-wrap text-body-secondary">
 
                         {fecha ? (
                           <span>
@@ -320,25 +331,9 @@ export default function DiagnosticosPacientePage() {
                     </div>
 
                     {/* DESCRIPCION */}
-                    {descripcion ? (
-                      <div className="fw-semibold"
-                        style={{
-                          fontSize: "0.92rem",
-                          lineHeight: "1.15",
-                        }}>
-                        {descripcion}
-                      </div>
-                    ) : null}
-
-                    {cie10Label ? (
-                      <div
-                        className="small"
-                        style={{
-                          color: "#6c757d",
-                          fontSize: "0.82rem",
-                        }}
-                      >
-                        {cie10Label}
+                    {diagnosticoTitulo ? (
+                      <div className="sipac-diagnostico-title">
+                        {diagnosticoTitulo}
                       </div>
                     ) : null}
 
@@ -352,52 +347,6 @@ export default function DiagnosticosPacientePage() {
                     ) : null}
 
                     {/* EVOLUCION */}
-                    {/* {evolucion ? (
-                      <div className="small fst-italic text-muted">
-                        {evolucion}
-                      </div>
-                    ) : null} */}
-                    {/* {diagnostico.evoluciones?.length ? (
-<div className="sipac-seguimiento-mini">
-
-  <div className="sipac-seguimiento-header">
-    <span className="sipac-section-icon">
-      <BsClockHistory size={12} />
-    </span>
-
-    <span className="sipac-seguimiento-title">
-      Seguimiento clínico
-    </span>
-  </div>
-
-  <div className="sipac-seguimiento-list">
-    {diagnostico.evoluciones.slice(0, 3).map((evolucion, idx) => (
-      <div
-        key={evolucion.id ?? idx}
-        className="sipac-seguimiento-item"
-      >
-        <div className="sipac-seguimiento-fecha">
-          {formatFechaHora(evolucion.fecha)}
-        </div>
-
-        <div className="sipac-seguimiento-nota">
-          {evolucion.nota}
-        </div>
-      </div>
-    ))}
-  </div>
-
-  {diagnostico.evoluciones.length > 3 && (
-    <button
-      type="button"
-      className="sipac-link-evoluciones"
-    >
-      Ver todas las evoluciones ({diagnostico.evoluciones.length})
-    </button>
-  )}
-
-</div>
-) : null} */}
                     {diagnostico.evoluciones?.length ? (
                       <div className="sipac-seguimiento-mini">
 

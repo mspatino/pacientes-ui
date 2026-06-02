@@ -27,49 +27,34 @@ export default function AppNavbar() {
     >
       <CContainer fluid className="d-flex justify-content-between align-items-center px-4">
 
-        {/* 🔵 IZQUIERDA */}
-        {/* <CNavbarBrand className="d-flex align-items-center gap-2">
+        <CNavbarBrand className="d-flex align-items-center gap-2">
           <img src="/logo.png" style={{ width: 32 }} />
 
-          <div>
-            <strong>SIPAC</strong>
-            <div style={{ fontSize: 11, color: "#666" }}>
+          <div className="d-flex align-items-center gap-2">
+            <strong style={{ color: "#2F6FB3" }}>SIPAC</strong>
+            <small className="text-muted" style={{ fontSize: "12px" }}>
               v1.0.0
-            </div>
+            </small>
           </div>
-        </CNavbarBrand> */}
-        <CNavbarBrand className="d-flex align-items-center gap-2">
-  <img src="/logo.png" style={{ width: 32 }} />
+        </CNavbarBrand>
 
-  <div className="d-flex align-items-center gap-2">
-    <strong style={{ color: "#2F6FB3" }}>SIPAC</strong>
-    <small className="text-muted" style={{ fontSize: "12px" }}>
-      v1.0.0
-    </small>
-  </div>
-</CNavbarBrand>
-
-        {/* 🔵 DERECHA (dropdown usuario) */}
         <CDropdown alignment="end">
           <CDropdownToggle
             color="light"
-            className="d-flex align-items-center gap-2 border-0 px-3"
-            style={{
-                padding: "6px 12px",
-                borderRadius: "8px"
-
-
-            }}
+            className="sipac-user-toggle d-flex align-items-center gap-2"
           >
-            <CAvatar color="primary" textColor="white">
+            <CAvatar className="sipac-user-avatar">
               {username[0]?.toUpperCase()}
             </CAvatar>
-            <span className="fw-semibold">{username}</span>
+            <span className="sipac-user-name">{username}</span>
           </CDropdownToggle>
 
-          <CDropdownMenu>
-            <CDropdownItem onClick={logout}  className="d-flex align-items-center gap-2 text-danger">
-               <BsBoxArrowRight style={{ color: "#dc3545" }}/>
+          <CDropdownMenu className="sipac-user-menu">
+            <CDropdownItem
+              onClick={logout}
+              className="sipac-user-menu-item d-flex align-items-center gap-2"
+            >
+              <BsBoxArrowRight />
               Cerrar sesión
             </CDropdownItem>
           </CDropdownMenu>

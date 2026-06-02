@@ -1,10 +1,14 @@
-import { BsPlusLg } from "react-icons/bs";
+import {
+  CAccordionBody,
+  CAccordionHeader,
+  CAccordionItem,
+} from "@coreui/react";
+import { BsPencilSquare, BsPlusLg, BsTrash } from "react-icons/bs";
+import { FiClock } from "react-icons/fi";
 import { GiBrain } from "react-icons/gi";
 import type { DiagnosticoDTO } from "../../../api/pacientes";
-import SectionCard from "../shared/SectionCard";
 import {
   formatFechaHora,
-  getDiagnosticoSummary,
   getDiagnosticoTipoBadgeStyle,
   getDiagnosticoTipoLabel,
   getDiagnosticoUltimaEvolucion,
@@ -14,38 +18,60 @@ interface DiagnosticosListCardProps {
   diagnosticos: DiagnosticoDTO[];
   onOpen: (index: number) => void;
   onAdd: () => void;
+  onEdit: (index: number) => void;
+  onRemove: (index: number) => void | Promise<void>;
   readOnly?: boolean;
 }
+
+const getDiagnosticoTitulo = (diagnostico: DiagnosticoDTO) => {
+  const descripcion = diagnostico.descripcion?.trim() ?? "";
+  const cie10Codigo = diagnostico.cie10?.codigo?.trim() ?? "";
+  const cie10Descripcion = diagnostico.cie10?.descripcion?.trim() ?? "";
+
+  if (cie10Codigo) {
+    return [cie10Codigo, cie10Descripcion || descripcion]
+      .filter(Boolean)
+      .join(" ");
+  }
+
+  return descripcion || "Sin diagnóstico";
+};
 
 export default function DiagnosticosListCard({
   diagnosticos,
   onOpen,
   onAdd,
+  onEdit,
+  onRemove,
   readOnly = false,
 }: DiagnosticosListCardProps) {
-  const headerAction = readOnly ? null : (
-    <button
-      type="button"
-      className="sipac-toolbar-btn d-inline-flex align-items-center gap-2"
-      onClick={onAdd}
-    >
-      <BsPlusLg size={14} />
-      Agregar
-    </button>
-  );
-
-
-
   return (
-    <SectionCard
-      title={
-        <span className="d-inline-flex align-items-center gap-2">
-          <GiBrain />
-          Diagnósticos
+    <CAccordionItem itemKey={2} className="hc-item hc-diagnosticos-section">
+      <CAccordionHeader className="hc-header d-flex align-items-center">
+        <span className="hc-header-row">
+          <span className="hc-title d-flex align-items-center gap-2">
+            <GiBrain />
+            Diagnósticos
+          </span>
+
+          {!readOnly ? (
+            <button
+              type="button"
+              className="hc-action-btn hc-action-btn-sm d-flex align-items-center gap-2"
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                onAdd();
+              }}
+            >
+              <BsPlusLg size={13} />
+              Agregar
+            </button>
+          ) : null}
         </span>
-      }
-      headerAction={headerAction}
-    >
+      </CAccordionHeader>
+
+      <CAccordionBody className="px-2 py-1">
       {diagnosticos.length === 0 ? (
         <div className="small text-muted">
           Todavía no hay diagnósticos cargados para esta historia clínica.
@@ -56,6 +82,7 @@ export default function DiagnosticosListCard({
 
           {diagnosticos.map((diagnostico, index) => {
             const ultimaEvolucion = getDiagnosticoUltimaEvolucion(diagnostico);
+            const diagnosticoTitulo = getDiagnosticoTitulo(diagnostico);
 
             return (
               <div
@@ -86,7 +113,7 @@ export default function DiagnosticosListCard({
                     </span>
 
                     {/* FECHAS */}
-                    <div className="d-flex align-items-center gap-2 flex-wrap small text-body-secondary ms-auto">
+                    <div className="sipac-diagnostico-fechas d-flex align-items-center gap-2 flex-wrap text-body-secondary ms-auto">
 
                       {diagnostico.fechaInicio ? (
                         <span>
@@ -122,11 +149,44 @@ export default function DiagnosticosListCard({
                         </span>
                       ) : null}
                     </div>
+
+                    {!readOnly ? (
+                      <div className="d-flex align-items-center gap-2 flex-wrap">
+                        <button
+                          type="button"
+                          className="hc-action-btn hc-action-btn-sm d-flex align-items-center gap-1"
+                          title="Editar diagnóstico"
+                          onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            onEdit(index);
+                          }}
+                        >
+                          <BsPencilSquare size={13} />
+                          Editar
+                        </button>
+
+                        <button
+                          type="button"
+                          className="hc-action-btn hc-action-btn-sm hc-action-btn-danger d-flex align-items-center gap-1"
+                          title="Eliminar diagnóstico"
+                          onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            if (!window.confirm("¿Eliminar este diagnóstico?")) return;
+                            void onRemove(index);
+                          }}
+                        >
+                          <BsTrash size={13} />
+                          Eliminar
+                        </button>
+                      </div>
+                    ) : null}
                   </div>
 
                   {/* DESCRIPCION */}
-                  <div className="fw-semibold fs-6">
-                    {getDiagnosticoSummary(diagnostico)}
+                  <div className="sipac-diagnostico-title">
+                    {diagnosticoTitulo}
                   </div>
 
                   {/* TRATAMIENTO */}
@@ -136,16 +196,25 @@ export default function DiagnosticosListCard({
                     </div>
                   ) : null}
 
-                  {/* EVOLUCION */}
-                  {/* {diagnostico.evolucion?.trim() ? (
-                    <div className="small fst-italic text-muted">
-                      {diagnostico.evolucion.trim()}
-                    </div>
-                  ) : null} */}
                   {/* ULTIMA EVOLUCION */}
                   {ultimaEvolucion?.nota?.trim() ? (
-                    <div className="small fst-italic text-muted">
-                      {ultimaEvolucion.nota.trim()}
+                    <div className="sipac-seguimiento-mini">
+                      <div className="sipac-seguimiento-header">
+                        <FiClock size={14} />
+                        <span className="sipac-seguimiento-title">
+                          Seguimiento clínico
+                        </span>
+                      </div>
+
+                      <div className="sipac-seguimiento-item">
+                        <span className="sipac-seguimiento-fecha">
+                          {formatFechaHora(ultimaEvolucion.fecha)}
+                        </span>
+
+                        <span className="sipac-seguimiento-nota">
+                          {ultimaEvolucion.nota.trim()}
+                        </span>
+                      </div>
                     </div>
                   ) : null}
                 </div>
@@ -154,6 +223,7 @@ export default function DiagnosticosListCard({
           })}
         </div>
       )}
-    </SectionCard>
+      </CAccordionBody>
+    </CAccordionItem>
   );
 }
