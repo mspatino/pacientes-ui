@@ -428,7 +428,7 @@ export default function PacientesPage() {
 
   return (
     <div className="p-3">
-      <div className="pacientes-card border-0 mb-4">
+      <div className="pacientes-card pacientes-filtros-card border-0 mb-3">
         <div
           className="d-flex align-items-center justify-content-between mb-3"
           role="button"

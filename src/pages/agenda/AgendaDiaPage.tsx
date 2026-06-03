@@ -4,7 +4,7 @@ import {
   CBadge,
   CCard,
   CCardBody,
-  CFormCheck,
+  CFormSwitch,
   CModal,
   CModalBody,
   CModalHeader,
@@ -15,11 +15,13 @@ import {
   CDropdownMenu,
   CDropdownToggle,
 } from "@coreui/react";
-import { BsClock, BsPencilSquare } from "react-icons/bs";
+import { BsClock, BsFillEyeFill, BsPencilSquare } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
 import {
   cambiarEstadoTurno,
   getAgendaByDate,
+  getFeriadosByYear,
+  type AgendaFeriado,
   type AgendaTurno,
   type EstadoTurno,
 } from "../../api/agenda";
@@ -45,6 +47,7 @@ export default function AgendaDiaPage({
   const [updatingTurnoId, setUpdatingTurnoId] = useState<number | null>(null);
   const [mostrarCancelados, setMostrarCancelados] = useState(false);
   const [turnoEnVista, setTurnoEnVista] = useState<AgendaTurno | null>(null);
+  const [feriado, setFeriado] = useState<AgendaFeriado | null>(null);
 
   useEffect(() => {
     const loadAgenda = async () => {
@@ -69,6 +72,24 @@ export default function AgendaDiaPage({
 
     void loadAgenda();
   }, [selectedDate, refreshKey]);
+
+  useEffect(() => {
+    const loadFeriado = async () => {
+      try {
+        const year = Number(selectedDate.slice(0, 4));
+        const feriados = await getFeriadosByYear(year);
+
+        setFeriado(
+          feriados.find((item) => item.fecha === selectedDate) ?? null,
+        );
+      } catch (loadError) {
+        console.warn("No se pudo cargar feriado del día", loadError);
+        setFeriado(null);
+      }
+    };
+
+    void loadFeriado();
+  }, [selectedDate]);
 
   const hourSlots = useMemo(() => getHourSlots(8, 20), []);
   const visibleTurnos = useMemo(() => {
@@ -139,10 +160,11 @@ export default function AgendaDiaPage({
         >
           {/* IZQUIERDA */}
           <div
-            className="d-flex align-items-end gap-2 text-capitalize"
+            className="agenda-dia-header-left text-capitalize"
             style={{ color: "#1F2937" }}
           >
             <div
+              className="agenda-dia-number"
               style={{
                 fontSize: "clamp(1.8rem, 4vw, 3rem)",
                 fontWeight: 700,
@@ -153,53 +175,31 @@ export default function AgendaDiaPage({
             </div>
 
             <div
+              className="agenda-dia-weekday"
               style={{
                 fontSize: "clamp(0.8rem, 1.8vw, 1.2rem)",
                 fontWeight: 600,
-                paddingBottom: "0.2rem",
                 color: "#475569",
               }}
             >
               {formatWeekdayName(selectedDate)}
             </div>
-          </div>
 
-          {/* DERECHA */}
-          {/* <div className="d-flex align-items-center gap-3">
-            <CFormCheck
+            {feriado ? (
+              <span
+                className="sipac-feriado-badge"
+                title={feriado.nombre}
+              >
+                Feriado: {feriado.nombre}
+              </span>
+            ) : null}
+          </div>
+          <div className="sipac-check-chip d-flex align-items-center">
+            <CFormSwitch
+              className="sipac-check"
               label="Ver todos"
               checked={mostrarCancelados}
               onChange={(e) => setMostrarCancelados(e.target.checked)}
-              style={{
-                fontSize: "0.85rem",
-                color: "#64748B",
-                marginBottom: 0,
-                whiteSpace: "nowrap",
-              }}
-            />
-          </div> */}
-          <div
-            className="d-flex align-items-center"
-            style={{
-              padding: "0.32rem 0.75rem",
-              borderRadius: 12,
-              background: "linear-gradient(135deg, #F7FBFF 0%, #EDF5FD 100%)",
-              border: "1px solid #D8E6F5",
-              boxShadow: "0 2px 8px rgba(47,111,179,0.06)",
-            }}
-          >
-            <CFormCheck
-              label="Ver todos"
-              checked={mostrarCancelados}
-              onChange={(e) => setMostrarCancelados(e.target.checked)}
-              style={{
-                marginBottom: 0,
-                fontSize: "0.8rem",
-                fontWeight: 600,
-                color: "#2F4F6F",
-                whiteSpace: "nowrap",
-                userSelect: "none",
-              }}
             />
           </div>
         </div>
@@ -243,120 +243,108 @@ export default function AgendaDiaPage({
                     />
                   ) : (
                     <div className="d-flex flex-column">
-                      {slotTurnos.map((turno) => (
-                        <div
-                          key={turno.id}
-                          className="d-flex justify-content-between align-items-center px-1 py-1"
-                          style={{
-                            borderBottom: "1px solid #F1F5F9",
-                            opacity: turno.estado === "CANCELADO" ? 0.55 : 1,
-                          }}
-                        >
-                          <div className="d-flex flex-column">
-                            <div className="d-flex align-items-center gap-2 flex-wrap">
-                              {/* <span className="fw-semibold">
+                      {slotTurnos.map((turno) => {
+                        const availableActions = getAvailableActions(turno.estado);
+                        const hasAvailableActions = availableActions.length > 0;
+
+                        return (
+                          <div
+                            key={turno.id}
+                            className="d-flex justify-content-between align-items-center px-1 py-1"
+                            style={{
+                              borderBottom: "1px solid #F1F5F9",
+                              opacity: turno.estado === "CANCELADO" ? 0.55 : 1,
+                            }}
+                          >
+                            <div className="d-flex flex-column">
+                              <div className="d-flex align-items-center gap-2 flex-wrap">
+                                {/* <span className="fw-semibold">
                                 {formatHour(turno.fechaHora)}
                               </span> */}
-                              <span
-                                className="fw-semibold"
-                                style={{
-                                  textDecoration:
-                                    turno.estado === "CANCELADO"
-                                      ? "line-through"
-                                      : "none",
-                                }}
-                              >
-                                {turno.pacienteNombre}
-                              </span>
-                              <CBadge
-                                color={estadoColor(turno.estado)}
-                                style={{
-                                  fontSize: "0.62rem",
-                                  padding: "0.25rem 0.4rem",
-                                }}
-                              >
-                                {turno.estado}
-                              </CBadge>
-                            </div>
-                            {turno.notas?.trim() ? (
-                              <div className="small text-muted">
-                                {turno.notas}
+                                <span
+                                  className="fw-semibold"
+                                  style={{
+                                    textDecoration:
+                                      turno.estado === "CANCELADO"
+                                        ? "line-through"
+                                        : "none",
+                                  }}
+                                >
+                                  {turno.pacienteNombre}
+                                </span>
+                                <CBadge
+                                  color={estadoColor(turno.estado)}
+                                  style={{
+                                    fontSize: "0.62rem",
+                                    padding: "0.25rem 0.4rem",
+                                  }}
+                                >
+                                  {turno.estado}
+                                </CBadge>
                               </div>
-                            ) : null}
-                          </div>
+                              {turno.notas?.trim() ? (
+                                <div className="small text-muted">
+                                  {turno.notas}
+                                </div>
+                              ) : null}
+                            </div>
 
-                          <div className="d-flex align-items-center gap-1 ms-auto">
-                            {/* VER */}
-                            <button
-                              type="button"
-                              className="btn btn-sm btn-light d-flex align-items-center justify-content-center"
-                              onClick={() => setTurnoEnVista(turno)}
-                              title="Ver turno"
-                              style={{
-                                width: 24,
-                                height: 24,
-                                padding: 0,
-                              }}
-                            >
-                              👁
-                            </button>
-
-                            {/* EDITAR */}
-                            <button
-                              type="button"
-                              className="btn btn-sm btn-light d-flex align-items-center justify-content-center"
-                              onClick={() => {
-                                navigate(
-                                  `/agenda/nuevo?fecha=${encodeURIComponent(selectedDate)}&view=day&turnoId=${turno.id}`,
-                                );
-                              }}
-                              title="Editar turno"
-                              style={{
-                                width: 24,
-                                height: 24,
-                                padding: 0,
-                              }}
-                            >
-                              <BsPencilSquare size={11} />
-                            </button>
-
-                            {/* MENU ESTADOS */}
-                            <CDropdown alignment="end">
-                              <CDropdownToggle
-                                color="light"
-                                size="sm"
-                                style={{
-                                  width: 24,
-                                  height: 24,
-                                  padding: 0,
-                                  border: "1px solid #DEE2E6",
-                                }}
+                            <div className="d-flex align-items-center gap-1 ms-auto">
+                              {/* VER */}
+                              <button
+                                type="button"
+                                className="sipac-icon-btn"
+                                onClick={() => setTurnoEnVista(turno)}
+                                title="Ver turno"
                               >
-                                ⋮
-                              </CDropdownToggle>
+                                <BsFillEyeFill size={11} />
+                              </button>
 
-                              <CDropdownMenu>
-                                {getAvailableActions(turno.estado).map(
-                                  (action) => (
+                              {/* EDITAR */}
+                              <button
+                                type="button"
+                                className="sipac-icon-btn"
+                                onClick={() => {
+                                  navigate(
+                                    `/agenda/nuevo?fecha=${encodeURIComponent(selectedDate)}&view=day&turnoId=${turno.id}`,
+                                  );
+                                }}
+                                title="Editar turno"
+                              >
+                                <BsPencilSquare size={11} />
+                              </button>
+
+                              {/* MENU ESTADOS */}
+
+                              <CDropdown alignment="end">
+                                <CDropdownToggle
+                                  color="light"
+                                  className="sipac-icon-btn sipac-state-toggle"
+                                  disabled={!hasAvailableActions}
+                                  title={
+                                    hasAvailableActions
+                                      ? "Cambiar estado"
+                                      : "Sin cambios de estado disponibles"
+                                  }
+                                />
+
+                                <CDropdownMenu className="sipac-state-menu">
+                                  {availableActions.map((action) => (
                                     <CDropdownItem
                                       key={action.nextState}
-                                      onClick={() =>
-                                        void changeEstado(
-                                          turno.id,
-                                          action.nextState,
-                                        )
-                                      }
+                                      className="sipac-state-item"
+                                      onClick={() => void changeEstado(turno.id, action.nextState)}
                                       disabled={updatingTurnoId === turno.id}
                                     >
                                       {action.label}
                                     </CDropdownItem>
-                                  ),
-                                )}
-                              </CDropdownMenu>
-                            </CDropdown>
+                                  ))}
+                                </CDropdownMenu>
+                              </CDropdown>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>

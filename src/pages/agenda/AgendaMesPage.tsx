@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { CAlert, CCard, CCardBody, CSpinner } from "@coreui/react";
 import { useNavigate } from "react-router-dom";
-import { getAgendaByMonth, type AgendaTurno } from "../../api/agenda";
+import {
+  getAgendaByMonth,
+  getFeriadosByYear,
+  type AgendaFeriado,
+  type AgendaTurno,
+} from "../../api/agenda";
 
 import {
   getMonthCalendarDays,
@@ -16,6 +21,9 @@ export default function AgendaMesPage({
   refreshKey,
 }: AgendaViewProps) {
   const [turnosByDay, setTurnosByDay] = useState<Record<string, AgendaTurno[]>>(
+    {},
+  );
+  const [feriadosByDay, setFeriadosByDay] = useState<Record<string, AgendaFeriado>>(
     {},
   );
 
@@ -81,6 +89,28 @@ export default function AgendaMesPage({
     void loadMonth();
   }, [monthDates, refreshKey, selectedDate]);
 
+  useEffect(() => {
+    const loadFeriados = async () => {
+      try {
+        const year = Number(selectedDate.slice(0, 4));
+        const feriados = await getFeriadosByYear(year);
+
+        setFeriadosByDay(
+          Object.fromEntries(
+            feriados
+              .filter((feriado) => feriado.fecha)
+              .map((feriado) => [feriado.fecha, feriado]),
+          ),
+        );
+      } catch (loadError) {
+        console.warn("No se pudieron cargar los feriados", loadError);
+        setFeriadosByDay({});
+      }
+    };
+
+    void loadFeriados();
+  }, [selectedDate]);
+
   if (error) {
     return (
       <CAlert color="danger" className="mb-0">
@@ -134,35 +164,41 @@ export default function AgendaMesPage({
           {/* CELDAS */}
           {monthDays.map((day) => {
             const turnos = turnosByDay[day.date] ?? [];
+            const feriado = feriadosByDay[day.date];
 
             const date = parseLocalDate(day.date);
 
             const isToday = day.date === todayKey;
+            const baseBackground = feriado
+              ? "#FFF8E8"
+              : day.inCurrentMonth
+                ? "#FFFFFF"
+                : "#F8FAFC";
 
             return (
               <div
                 key={day.date}
                 onClick={() => navigate(`/agenda?view=day&fecha=${day.date}`)}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = day.inCurrentMonth
-                    ? "#F8FBFF"
-                    : "#F1F5F9";
+                  e.currentTarget.style.backgroundColor = feriado
+                    ? "#FFF3D6"
+                    : day.inCurrentMonth
+                      ? "#F8FBFF"
+                      : "#F1F5F9";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = day.inCurrentMonth
-                    ? "#FFFFFF"
-                    : "#F8FAFC";
+                  e.currentTarget.style.backgroundColor = baseBackground;
                 }}
                 style={{
                   height: 120,
 
-                  borderRight: "1px solid #E5E7EB",
+                  borderRight: feriado ? "1px solid #F1D7A1" : "1px solid #E5E7EB",
 
-                  borderBottom: "1px solid #E5E7EB",
+                  borderBottom: feriado ? "1px solid #F1D7A1" : "1px solid #E5E7EB",
 
                   padding: 4,
 
-                  backgroundColor: day.inCurrentMonth ? "#FFFFFF" : "#F8FAFC",
+                  backgroundColor: baseBackground,
 
                   opacity: day.inCurrentMonth ? 1 : 0.5,
 
@@ -185,7 +221,7 @@ export default function AgendaMesPage({
 
                       backgroundColor: isToday ? "#2F6FB3" : "transparent",
 
-                      color: isToday ? "#FFFFFF" : "#111827",
+                      color: isToday ? "#FFFFFF" : feriado ? "#8A5A00" : "#111827",
 
                       fontSize: "0.78rem",
                       fontWeight: 600,
@@ -194,6 +230,25 @@ export default function AgendaMesPage({
                     {date.getDate()}
                   </div>
                 </div>
+
+                {feriado ? (
+                  <div
+                    className="text-truncate"
+                    title={feriado.nombre}
+                    style={{
+                      marginBottom: 3,
+                      padding: "1px 5px",
+                      borderRadius: 999,
+                      backgroundColor: "#FFE8AE",
+                      color: "#7A4E00",
+                      fontSize: "0.62rem",
+                      fontWeight: 700,
+                      lineHeight: 1.25,
+                    }}
+                  >
+                    Feriado
+                  </div>
+                ) : null}
 
                 {/* TURNOS */}
                 <div

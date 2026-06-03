@@ -11,6 +11,8 @@ import {
 
 import {
   getAgendaByWeek,
+  getFeriadosByYear,
+  type AgendaFeriado,
   type AgendaTurno,
 } from "../../api/agenda";
 
@@ -31,6 +33,9 @@ export default function AgendaSemanaPage({
   const [turnosByDay, setTurnosByDay] = useState<
     Record<string, AgendaTurno[]>
   >({});
+  const [feriadosByDay, setFeriadosByDay] = useState<Record<string, AgendaFeriado>>(
+    {},
+  );
 
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -95,6 +100,30 @@ export default function AgendaSemanaPage({
     void loadWeek();
   }, [selectedDate, weekdays, refreshKey]);
 
+  useEffect(() => {
+    const loadFeriados = async () => {
+      try {
+        const years = Array.from(
+          new Set(weekdays.map((date) => Number(date.slice(0, 4)))),
+        );
+        const feriados = (await Promise.all(years.map(getFeriadosByYear))).flat();
+
+        setFeriadosByDay(
+          Object.fromEntries(
+            feriados
+              .filter((feriado) => feriado.fecha)
+              .map((feriado) => [feriado.fecha, feriado]),
+          ),
+        );
+      } catch (loadError) {
+        console.warn("No se pudieron cargar los feriados", loadError);
+        setFeriadosByDay({});
+      }
+    };
+
+    void loadFeriados();
+  }, [weekdays]);
+
   if (error) {
     return (
       <CAlert color="danger" className="mb-0">
@@ -116,22 +145,47 @@ export default function AgendaSemanaPage({
     <CRow className="g-2">
       {weekdays.map((date) => {
         const turnos = turnosByDay[date] ?? [];
+        const feriado = feriadosByDay[date];
 
         return (
           <CCol key={date} xl={4} md={6}>
-            <CCard className="border-0 shadow-sm h-100">
+            <CCard
+              className="border-0 shadow-sm h-100"
+              style={{
+                backgroundColor: feriado ? "#FFF8E8" : "#FFFFFF",
+                border: feriado ? "1px solid #F1D7A1" : undefined,
+              }}
+            >
               <CCardBody className="p-2">
 
                 {/* HEADER */}
                 <div className="d-flex justify-content-between align-items-center mb-2">
-                  <div
-                    className="fw-semibold text-capitalize"
-                    style={{
-                      fontSize: "0.9rem",
-                      color: "#1E293B",
-                    }}
-                  >
-                    {formatShortDayLabel(date)}
+                  <div>
+                    <div
+                      className="fw-semibold text-capitalize"
+                      style={{
+                        fontSize: "0.9rem",
+                        color: feriado ? "#7A4E00" : "#1E293B",
+                      }}
+                    >
+                      {formatShortDayLabel(date)}
+                    </div>
+
+                    {feriado ? (
+                      <div
+                        className="text-truncate"
+                        title={feriado.nombre}
+                        style={{
+                          maxWidth: 190,
+                          color: "#8A5A00",
+                          fontSize: "0.66rem",
+                          fontWeight: 700,
+                          lineHeight: 1.15,
+                        }}
+                      >
+                        Feriado: {feriado.nombre}
+                      </div>
+                    ) : null}
                   </div>
                      <div className="d-flex align-items-center gap-1">
                           <button

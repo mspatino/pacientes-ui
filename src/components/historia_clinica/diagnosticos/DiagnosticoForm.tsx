@@ -135,14 +135,22 @@ export default function DiagnosticoForm({
                 </span>
 
                 {isEditing && diagnostico.id ? (
+                    // <CButton
+                    //     type="button"
+                    //     className="sipac-toolbar-btn sipac-evolucion-add-btn"
+                    //     onClick={() => setModalVisible(true)}
+                    // >
+                    //     <BsPlusLg size={11} />
+                    //     Evolución
+                    // </CButton>
                     <CButton
                         type="button"
-                        className="sipac-toolbar-btn sipac-evolucion-add-btn"
+                        className="hc-action-btn hc-action-btn-sm d-flex align-items-center gap-1"
                         onClick={() => setModalVisible(true)}
-                    >
-                        <BsPlusLg size={11} />
+                        >
+                        <BsPlusLg size={13} />
                         Evolución
-                    </CButton>
+                        </CButton>
                 ) : null}
             </div>
 

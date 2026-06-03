@@ -80,7 +80,7 @@ export default function Login() {
     <div className="sipac-login-page min-vh-100 d-flex align-items-center justify-content-center">
       <CContainer>
         <CRow className="justify-content-center">
-          <CCol sm={10} md={6} lg={4} xl={3}>
+          <CCol sm={10} md={7} lg={5} xl={4}>
             <CCard className="sipac-login-card border-0">
               <CCardBody>
                 <CForm onSubmit={handleLogin} autoComplete="off">

@@ -781,6 +781,137 @@ textarea {
   font-weight: 600;
 }
 
+.sipac-check-chip {
+  padding: 0.26rem 0.65rem;
+  border: 1px solid #D8E6F5;
+  border-radius: 999px;
+  background: #F6F9FE;
+  box-shadow: 0 2px 8px rgba(47, 111, 179, 0.06);
+}
+
+.agenda-dia-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.agenda-dia-weekday {
+  line-height: 1;
+}
+
+.sipac-check {
+  margin-bottom: 0;
+  color: #1E4F85;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.sipac-check .form-check-input {
+  border-color: #B8D3EE;
+}
+
+.sipac-check.form-switch {
+  display: flex;
+  align-items: center;
+  gap: 0.42rem;
+  min-height: auto;
+  padding-left: 0;
+}
+
+.sipac-check.form-switch .form-check-input {
+  width: 2.15rem;
+  height: 1.1rem;
+  margin-left: 0;
+  margin-top: 0;
+}
+
+.sipac-check .form-check-input:checked {
+  border-color: #2F6FB3;
+  background-color: #2F6FB3;
+}
+
+.sipac-check .form-check-input:focus {
+  border-color: #2F6FB3;
+  box-shadow: 0 0 0 0.18rem rgba(47, 111, 179, 0.12);
+}
+
+.sipac-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid #D7E6FB;
+  border-radius: 7px;
+  background: #F6F9FE;
+  color: #2F6FB3;
+  font-size: 0.74rem;
+  line-height: 1;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.sipac-icon-btn:hover,
+.sipac-icon-btn:focus {
+  border-color: #2F6FB3;
+  background: #E8F1FB;
+  color: #1E4F85;
+}
+
+.sipac-icon-btn:disabled {
+  border-color: #E5E7EB;
+  background: #F8FAFC;
+  color: #94A3B8;
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+.sipac-state-toggle::after {
+  display: none;
+}
+
+.sipac-state-menu {
+  border: 1px solid #E4ECF5;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(15, 35, 55, 0.12);
+}
+
+.sipac-state-item {
+  color: #1E4F85;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.sipac-state-item:hover,
+.sipac-state-item:focus {
+  background: #E8F1FB;
+  color: #1E4F85;
+}
+
+.sipac-feriado-badge {
+  display: inline-flex;
+  align-items: center;
+  max-width: min(720px, 100%);
+  padding: 0.18rem 0.55rem;
+  border: 1px solid #F1D7A1;
+  border-radius: 999px;
+  background: #FFF3D6;
+  color: #7A4E00;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-transform: none;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+
 .sipac-action-btn {
   display: inline-flex;
   align-items: center;
@@ -1324,26 +1455,62 @@ textarea {
   margin-bottom: .45rem;
 }
 
-.sipac-evolucion-add-btn {
-  margin-left: auto;
-  min-width: auto;
-  height: auto;
-  padding: .22rem .55rem;
-  border: 1px solid #D6E4F4;
-  border-radius: 999px;
-  background: #E8F1FB;
-  color: #2F6FB3;
-  font-size: .72rem;
-  font-weight: 700;
-  line-height: 1;
-  gap: .28rem;
-  box-shadow: none;
+.sipac-filters-compact {
+  padding-top: 0.25rem;
 }
 
-.sipac-evolucion-add-btn:hover {
-  border-color: #2F6FB3;
-  background: #D9EAFE;
-  color: #255D96;
-  transform: none;
-  box-shadow: none;
+.pacientes-filtros-card {
+  padding: 0.65rem 1rem;
+}
+
+.sipac-state-toggle {
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 8px !important;
+  border: 1px solid #dbeafe !important;
+  background: #f8fbff !important;
+  color: #2f6fb3 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+.sipac-state-toggle::after {
+  margin-left: 0 !important;
+  vertical-align: middle;
+  border-top-color: #2f6fb3;
+}
+
+.sipac-state-toggle:hover,
+.sipac-state-toggle:focus,
+.sipac-state-toggle.show {
+  background: #eaf3ff !important;
+  border-color: #2f6fb3 !important;
+  color: #2f6fb3 !important;
+}
+
+.sipac-state-menu {
+  min-width: 170px;
+  padding: 0.35rem;
+  border: 1px solid #dbeafe;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.14);
+}
+
+.sipac-state-item {
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #334155;
+  padding: 0.45rem 0.65rem;
+}
+
+.sipac-state-item:hover,
+.sipac-state-item:focus {
+  background: #eaf3ff;
+  color: #2f6fb3;
+}
+
+.sipac-state-item:disabled {
+  opacity: 0.55;
 }

@@ -25,6 +25,25 @@ export interface AgendaTurnoPayload {
   notas?: string;
 }
 
+export interface AgendaFeriado {
+  id?: number;
+  fecha: string;
+  nombre: string;
+  tipo?: string;
+}
+
+const mapFeriado = (item: Record<string, unknown>): AgendaFeriado => ({
+  id:
+    typeof item.id === "number"
+      ? item.id
+      : typeof item.id === "string"
+        ? Number(item.id)
+        : undefined,
+  fecha: typeof item.fecha === "string" ? item.fecha.slice(0, 10) : "",
+  nombre: typeof item.nombre === "string" ? item.nombre : "Feriado",
+  tipo: typeof item.tipo === "string" ? item.tipo : undefined,
+});
+
 const mapTurno = (item: Record<string, unknown>): AgendaTurno => {
   const paciente =
     item.paciente && typeof item.paciente === "object"
@@ -176,6 +195,12 @@ export const getAgendaByMonth = async (date: string): Promise<AgendaTurno[]> => 
     (data) => (Array.isArray(data) ? data.map((item) => mapTurno(item as Record<string, unknown>)) : []),
   );
 };
+
+export const getFeriadosByYear = async (year: number): Promise<AgendaFeriado[]> =>
+  getByCandidates(
+    [`/turnos/feriados/${year}`],
+    (data) => (Array.isArray(data) ? data.map((item) => mapFeriado(item as Record<string, unknown>)) : []),
+  );
 
 export const createTurno = async (payload: AgendaTurnoPayload): Promise<AgendaTurno> =>
   sendByCandidates(
