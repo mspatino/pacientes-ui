@@ -31,7 +31,7 @@ export default function DatosClinicosForm({
           />
         </CCol>
       </CCol>
-      <CCol md={2} className="d-flex align-items-center pt-4">
+      <CCol md={2} className="d-flex align-items-center justify-content-center">
         <CFormSwitch
           id="historiaActiva"
           label={form.activa ? "Activa" : "Inactiva"}

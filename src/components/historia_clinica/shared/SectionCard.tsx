@@ -14,17 +14,27 @@ export default function SectionCard({
 }: SectionCardProps) {
   return (
     <CCard className="sipac-form-card">
-      <CCardHeader>
+      <CCardHeader className="sipac-section-header">
+
         {headerAction ? (
           <div className="d-flex justify-content-between align-items-center gap-2">
-            <span>{title}</span>
+            <div className="sipac-section-title">
+              {title}
+            </div>
+
             {headerAction}
           </div>
         ) : (
-          title
+          <div className="sipac-section-title">
+            {title}
+          </div>
         )}
+
       </CCardHeader>
-      <CCardBody>{children}</CCardBody>
+
+      <CCardBody>
+        {children}
+      </CCardBody>
     </CCard>
   );
 }
