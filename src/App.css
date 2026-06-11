@@ -1268,6 +1268,50 @@ textarea {
   padding: .12rem .36rem;
 }
 
+.diagnosticos-paciente-item {
+  background: #F8FBFE;
+  border-color: #DDEAF7;
+  box-shadow: 0 1px 3px rgba(47, 111, 179, .05);
+}
+
+.diagnosticos-paciente-item:hover {
+  background: #F3F8FD;
+  border-color: #CFE0F2;
+}
+
+.diagnosticos-paciente-title {
+  margin-top: .18rem;
+}
+
+.diagnosticos-paciente-seguimiento .sipac-seguimiento-header {
+  margin-bottom: .28rem;
+}
+
+.diagnosticos-paciente-seguimiento .sipac-seguimiento-item {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: .38rem;
+}
+
+.diagnosticos-paciente-seguimiento .sipac-seguimiento-fecha {
+  color: #374151;
+  font-size: .69rem;
+  font-weight: 600;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.diagnosticos-paciente-seguimiento .sipac-seguimiento-nota {
+  color: #4B5563;
+  font-size: .75rem;
+  line-height: 1.25;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+}
+
 .sipac-diagnostico-meta {
   display: flex;
   align-items: center;
@@ -1447,12 +1491,147 @@ textarea {
   font-size: .74rem;
 }
 
+.sipac-seguimiento-historia-list .sipac-seguimiento-item {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: .38rem;
+}
+
+.sipac-seguimiento-historia-list .sipac-seguimiento-fecha {
+  min-width: 0;
+  line-height: 1.25;
+  color: #374151;
+  font-weight: 600;
+}
+
+.sipac-seguimiento-historia-list .sipac-seguimiento-nota {
+  min-width: 0;
+  white-space: normal;
+  line-height: 1.25;
+}
+
 .sipac-seguimiento-editor {
   padding-top: .35rem;
 }
 
 .sipac-seguimiento-editor .sipac-seguimiento-header {
   margin-bottom: .45rem;
+}
+
+.sipac-seguimiento-editor .sipac-seguimiento-item {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: .38rem;
+}
+
+.sipac-seguimiento-editor .sipac-seguimiento-fecha {
+  min-width: 0;
+  line-height: 1.25;
+  color: #374151;
+  font-weight: 600;
+}
+
+.sipac-seguimiento-editor .sipac-seguimiento-nota {
+  min-width: 0;
+  white-space: normal;
+  line-height: 1.25;
+}
+
+.sipac-confirm-body {
+  color: #374151;
+  font-size: .84rem;
+  padding: .85rem 1rem;
+}
+
+.sipac-confirm-modal {
+  z-index: 1085;
+}
+
+.sipac-confirm-modal .modal-dialog {
+  margin: 1rem auto;
+}
+
+.sipac-confirm-modal .modal-content {
+  border: 1px solid #D7E6FB;
+  border-radius: 8px;
+  box-shadow: 0 18px 48px rgba(15, 35, 55, .22);
+}
+
+.sipac-evolucion-modal {
+  z-index: 1085;
+}
+
+.sipac-evolucion-modal .modal-dialog {
+  margin: 1rem auto;
+}
+
+.sipac-evolucion-modal .modal-content {
+  border: 1px solid #D7E6FB;
+  border-radius: 8px;
+  box-shadow: 0 18px 48px rgba(15, 35, 55, .22);
+}
+
+.sipac-evolucion-body {
+  padding: .9rem 1rem;
+}
+
+.sipac-confirm-footer {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  gap: .45rem;
+  padding: .65rem 1rem;
+  margin: 0;
+}
+
+.sipac-confirm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 5.5rem;
+  height: 30px;
+  padding: 0 .7rem;
+  border: 1px solid #D7E6FB;
+  border-radius: 7px;
+  background: #F6F9FE;
+  color: #2F6FB3;
+  font-size: .78rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.sipac-confirm-btn:hover:not(:disabled) {
+  background: #E8F1FB;
+  border-color: #BFD7F2;
+}
+
+.sipac-confirm-btn-danger {
+  border-color: #F1CFCF;
+  background: #FFF7F7;
+  color: #A84747;
+}
+
+.sipac-confirm-btn-danger:hover:not(:disabled) {
+  background: #FCECEC;
+  border-color: #E9B9B9;
+}
+
+.sipac-confirm-btn-primary {
+  border-color: #BFD7F2;
+  background: #E8F1FB;
+  color: #2F6FB3;
+}
+
+.sipac-confirm-btn-primary:hover:not(:disabled) {
+  background: #D9EAFE;
+  border-color: #9FC4EA;
+}
+
+.sipac-confirm-btn:disabled {
+  cursor: not-allowed;
+  opacity: .65;
 }
 
 .sipac-filters-compact {

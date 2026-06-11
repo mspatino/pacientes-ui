@@ -4,17 +4,26 @@ import {
     CFormInput,
     CFormLabel,
     CFormTextarea,
+    CModal,
+    CModalBody,
+    CModalFooter,
+    CModalHeader,
+    CModalTitle,
     CRow,
 } from "@coreui/react";
 
 import { useEffect, useRef, useState } from "react";
-import { BsClockHistory, BsPlusLg } from "react-icons/bs";
+import { BsClockHistory, BsDashLg, BsPlusLg } from "react-icons/bs";
 
 import type {
     Cie10DTO,
     DiagnosticoDTO,
+    EvolucionDiagnosticoDTO,
 } from "../../../api/pacientes";
-import { crearEvolucionDiagnostico } from "../../../api/pacientes";
+import {
+    crearEvolucionDiagnostico,
+    eliminarEvolucionDiagnostico,
+} from "../../../api/pacientes";
 
 import DiagnosticoAutocompleteFields from "./DiagnosticoAutocompleteFields";
 import EvolucionDiagnosticoCard from "./EvolucionDiagnosticoCard";
@@ -37,7 +46,7 @@ interface Props {
     isEditing: boolean;
     onDraftChange: (
         field: keyof DiagnosticoDTO,
-        value: string | boolean | Cie10DTO | null,
+        value: string | boolean | Cie10DTO | EvolucionDiagnosticoDTO[] | null,
     ) => void;
     reloadDiagnostico?: () => void | Promise<void>;
 }
@@ -51,6 +60,8 @@ export default function DiagnosticoForm({
 
     const tratamientoRef = useRef<HTMLTextAreaElement>(null);
     const [modalVisible, setModalVisible] = useState(false);
+    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+    const [deletingEvolucion, setDeletingEvolucion] = useState(false);
     // const [createdEvoluciones, setCreatedEvoluciones] = useState<
     //     Record<number, EvolucionDiagnosticoDTO[]>
     // >({});
@@ -58,6 +69,7 @@ export default function DiagnosticoForm({
     const tipoEditadoManualRef = useRef(false);
 
     const evoluciones = diagnostico.evoluciones ?? [];
+    const ultimaEvolucion = evoluciones[0];
     const descripcion = diagnostico.descripcion?.trim() ?? "";
     const cie10Codigo = diagnostico.cie10?.codigo?.trim() ?? "";
     const cie10Descripcion = diagnostico.cie10?.descripcion?.trim() ?? "";
@@ -111,15 +123,39 @@ export default function DiagnosticoForm({
 
     if (!diagnosticoId) return;
 
-    await crearEvolucionDiagnostico(
+    const evolucionCreada = await crearEvolucionDiagnostico(
         diagnosticoId,
         nota,
     );
+
+    onDraftChange("evoluciones", [
+        evolucionCreada,
+        ...evoluciones,
+    ]);
 
     setModalVisible(false);
 
     await reloadDiagnostico?.();
 };
+
+    const handleDeleteUltimaEvolucion = async () => {
+        const diagnosticoId = diagnostico.id;
+        const evolucionId = ultimaEvolucion?.id;
+
+        if (!diagnosticoId || !evolucionId) return;
+
+        setDeletingEvolucion(true);
+        try {
+            await eliminarEvolucionDiagnostico(diagnosticoId, evolucionId);
+
+            onDraftChange("evoluciones", evoluciones.slice(1));
+            setDeleteModalVisible(false);
+
+            await reloadDiagnostico?.();
+        } finally {
+            setDeletingEvolucion(false);
+        }
+    };
 
     const showEvolucionesSection = evoluciones.length > 0 || (isEditing && diagnostico.id);
 
@@ -143,14 +179,26 @@ export default function DiagnosticoForm({
                     //     <BsPlusLg size={11} />
                     //     Evolución
                     // </CButton>
-                    <CButton
-                        type="button"
-                        className="hc-action-btn hc-action-btn-sm d-flex align-items-center gap-1"
-                        onClick={() => setModalVisible(true)}
-                        >
-                        <BsPlusLg size={13} />
-                        Evolución
-                        </CButton>
+                    <div className="d-flex align-items-center gap-2 flex-wrap ms-auto">
+                        <CButton
+                            type="button"
+                            className="hc-action-btn hc-action-btn-sm d-flex align-items-center gap-1"
+                            onClick={() => setModalVisible(true)}
+                            >
+                            <BsPlusLg size={13} />
+                            Evolución
+                            </CButton>
+
+                        <CButton
+                            type="button"
+                            className="hc-action-btn hc-action-btn-sm hc-action-btn-danger d-flex align-items-center gap-1"
+                            disabled={!ultimaEvolucion?.id}
+                            onClick={() => setDeleteModalVisible(true)}
+                            >
+                            <BsDashLg size={13} />
+                            Evolución
+                            </CButton>
+                    </div>
                 ) : null}
             </div>
 
@@ -172,6 +220,60 @@ export default function DiagnosticoForm({
                     onSave={handleSaveEvolucion}
                 />
             ) : null}
+
+            <CModal
+                visible={deleteModalVisible}
+                onClose={() => {
+                    if (!deletingEvolucion) {
+                        setDeleteModalVisible(false);
+                    }
+                }}
+                alignment="center"
+                className="sipac-confirm-modal"
+                size="sm"
+            >
+                <CModalHeader
+                    style={{
+                        backgroundColor: "#F3F4F7",
+                        borderBottom: "1px solid #E5E7EB",
+                    }}
+                >
+                    <CModalTitle
+                        style={{
+                            color: "#2F6FB3",
+                            fontWeight: 600,
+                        }}
+                    >
+                        Eliminar evolución
+                    </CModalTitle>
+                </CModalHeader>
+
+                <CModalBody className="sipac-confirm-body">
+                    <p className="mb-0">
+                        ¿Eliminar la última evolución?
+                    </p>
+                </CModalBody>
+
+                <CModalFooter className="sipac-confirm-footer border-top">
+                    <button
+                        type="button"
+                        className="sipac-confirm-btn sipac-confirm-btn-danger"
+                        onClick={handleDeleteUltimaEvolucion}
+                        disabled={deletingEvolucion}
+                    >
+                        {deletingEvolucion ? "Eliminando..." : "Confirmar"}
+                    </button>
+
+                    <button
+                        type="button"
+                        className="sipac-confirm-btn"
+                        onClick={() => setDeleteModalVisible(false)}
+                        disabled={deletingEvolucion}
+                    >
+                        Cancelar
+                    </button>
+                </CModalFooter>
+            </CModal>
         </div>
     ) : null;
 

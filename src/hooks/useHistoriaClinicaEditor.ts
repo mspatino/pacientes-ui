@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type {
   Cie10DTO,
   DiagnosticoDTO,
+  EvolucionDiagnosticoDTO,
   HistoriaClinicaDTO,
   HistoriaClinicaPayload,
   PacienteResponseDTO,
@@ -263,7 +264,7 @@ export default function useHistoriaClinicaEditor({
 
   const handleDiagnosticoDraftChange = (
     field: keyof DiagnosticoDTO,
-    value: string | boolean | Cie10DTO | null,
+    value: string | boolean | Cie10DTO | EvolucionDiagnosticoDTO[] | null,
   ) => {
     const tipo = field === "tipo" ? normalizeTipoDiagnostico(value) : undefined;
     const isPrincipalField = field === "principal";
@@ -417,11 +418,6 @@ export default function useHistoriaClinicaEditor({
 
     if (!payload.motivoConsulta.trim()) {
       setSubmitError("El motivo de consulta es obligatorio.");
-      return;
-    }
-
-    if (payload.diagnosticos.length > 0 && !payload.diagnosticos.some((diag) => diag.principal)) {
-      setSubmitError("Actualmente no hay diagnóstico principal activo.");
       return;
     }
 

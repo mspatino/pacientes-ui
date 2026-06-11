@@ -11,7 +11,6 @@ import {
   formatFechaHora,
   getDiagnosticoTipoBadgeStyle,
   getDiagnosticoTipoLabel,
-  getDiagnosticoUltimaEvolucion,
 } from "./diagnosticoUtils";
 
 interface DiagnosticosListCardProps {
@@ -81,7 +80,7 @@ export default function DiagnosticosListCard({
         
 
           {diagnosticos.map((diagnostico, index) => {
-            const ultimaEvolucion = getDiagnosticoUltimaEvolucion(diagnostico);
+            const evoluciones = diagnostico.evoluciones ?? [];
             const diagnosticoTitulo = getDiagnosticoTitulo(diagnostico);
 
             return (
@@ -196,9 +195,9 @@ export default function DiagnosticosListCard({
                     </div>
                   ) : null}
 
-                  {/* ULTIMA EVOLUCION */}
-                  {ultimaEvolucion?.nota?.trim() ? (
-                    <div className="sipac-seguimiento-mini">
+                  {/* EVOLUCIONES */}
+                  {evoluciones.length > 0 ? (
+                    <div className="sipac-seguimiento-mini sipac-seguimiento-historia-list">
                       <div className="sipac-seguimiento-header">
                         <FiClock size={14} />
                         <span className="sipac-seguimiento-title">
@@ -206,15 +205,28 @@ export default function DiagnosticosListCard({
                         </span>
                       </div>
 
-                      <div className="sipac-seguimiento-item">
-                        <span className="sipac-seguimiento-fecha">
-                          {formatFechaHora(ultimaEvolucion.fecha)}
-                        </span>
+                      {evoluciones.map((evolucion, evolucionIndex) => {
+                        const nota =
+                          evolucion.nota?.trim() ||
+                          evolucion.evolucion?.trim() ||
+                          evolucion.descripcion?.trim() ||
+                          "";
 
-                        <span className="sipac-seguimiento-nota">
-                          {ultimaEvolucion.nota.trim()}
-                        </span>
-                      </div>
+                        return nota ? (
+                          <div
+                            key={evolucion.id ?? `${evolucion.fecha ?? "evolucion"}-${evolucionIndex}`}
+                            className="sipac-seguimiento-item"
+                          >
+                            <span className="sipac-seguimiento-fecha">
+                              {formatFechaHora(evolucion.fecha)}
+                            </span>
+
+                            <span className="sipac-seguimiento-nota">
+                              {nota}
+                            </span>
+                          </div>
+                        ) : null;
+                      })}
                     </div>
                   ) : null}
                 </div>

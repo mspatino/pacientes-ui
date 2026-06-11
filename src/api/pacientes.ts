@@ -203,9 +203,17 @@ export const eliminarDiagnostico = async (
 export async function crearEvolucionDiagnostico(
   diagnosticoId: number,
   nota: string,
-) {
-  return api.post(
+): Promise<EvolucionDiagnosticoDTO> {
+  const res = await api.post(
     `/diagnosticos/${diagnosticoId}/evoluciones`,
     { nota },
   );
+  return res.data;
+}
+
+export async function eliminarEvolucionDiagnostico(
+  diagnosticoId: number,
+  evolucionId: number,
+): Promise<void> {
+  await api.delete(`/diagnosticos/${diagnosticoId}/evoluciones/${evolucionId}`);
 }

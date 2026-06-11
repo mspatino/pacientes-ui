@@ -1,5 +1,4 @@
 import {
-  CButton,
   CFormLabel,
   CFormTextarea,
   CModal,
@@ -44,12 +43,29 @@ export default function EvolucionModal({
   };
 
   return (
-    <CModal visible={visible} onClose={handleClose}>
-      <CModalHeader>
-        <CModalTitle>Nueva evolución</CModalTitle>
+    <CModal
+      visible={visible}
+      onClose={handleClose}
+      alignment="center"
+      className="sipac-evolucion-modal"
+    >
+      <CModalHeader
+        style={{
+          backgroundColor: "#F3F4F7",
+          borderBottom: "1px solid #E5E7EB",
+        }}
+      >
+        <CModalTitle
+          style={{
+            color: "#2F6FB3",
+            fontWeight: 600,
+          }}
+        >
+          Nueva evolución
+        </CModalTitle>
       </CModalHeader>
 
-      <CModalBody>
+      <CModalBody className="sipac-evolucion-body">
         <CFormLabel className="sipac-label">Nota</CFormLabel>
         <CFormTextarea
           className="sipac-input"
@@ -59,25 +75,24 @@ export default function EvolucionModal({
         />
       </CModalBody>
 
-      <CModalFooter>
-        <CButton
+      <CModalFooter className="sipac-confirm-footer border-top">
+        <button
           type="button"
-          color="secondary"
-          variant="outline"
+          className="sipac-confirm-btn"
           onClick={handleClose}
           disabled={saving}
         >
           Cancelar
-        </CButton>
+        </button>
 
-        <CButton
+        <button
           type="button"
-          color="primary"
+          className="sipac-confirm-btn sipac-confirm-btn-primary"
           onClick={handleSave}
           disabled={!nota.trim() || saving}
         >
           {saving ? "Guardando..." : "Guardar"}
-        </CButton>
+        </button>
       </CModalFooter>
     </CModal>
   );

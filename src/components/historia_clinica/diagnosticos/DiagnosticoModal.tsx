@@ -8,7 +8,7 @@ import {
 
 import { GiBrain } from "react-icons/gi";
 
-import type { Cie10DTO, DiagnosticoDTO } from "../../../api/pacientes";
+import type { Cie10DTO, DiagnosticoDTO, EvolucionDiagnosticoDTO } from "../../../api/pacientes";
 
 import DiagnosticoForm from "./DiagnosticoForm";
 import type { DiagnosticoModalMode } from "./diagnosticoUtils";
@@ -21,7 +21,7 @@ interface DiagnosticoModalProps {
   onClose: () => void;
   onDraftChange: (
     field: keyof DiagnosticoDTO,
-    value: string | boolean | Cie10DTO | null,
+    value: string | boolean | Cie10DTO | EvolucionDiagnosticoDTO[] | null,
   ) => void;
   onSave: () => void;
   onDiagnosticoReload?: () => void | Promise<void>;

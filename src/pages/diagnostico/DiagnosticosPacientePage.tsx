@@ -19,6 +19,7 @@ import {
   getDiagnosticoFechaFin,
   getDiagnosticoText,
   formatFechaHora,
+  getDiagnosticoTipoBadgeStyle,
 } from "../../components/historia_clinica/diagnosticos/diagnosticoUtils";
 import DiagnosticoHeader from "../../components/historia_clinica/diagnosticos/DiagnosticoHeader";
 import DiagnosticoFilters from "../../components/historia_clinica/diagnosticos/DiagnosticoFilters";
@@ -266,7 +267,7 @@ export default function DiagnosticosPacientePage() {
 
               return (
                 <div key={`diagnostico-${diagnosticoKey}`}
-                  className="sipac-diagnostico-item sipac-diagnostico-compact">
+                  className="sipac-diagnostico-item sipac-diagnostico-compact diagnosticos-paciente-item">
                   <div className="d-flex flex-column gap-0">
 
                     <div className="d-flex justify-content-between align-items-start gap-2 flex-wrap">
@@ -275,13 +276,7 @@ export default function DiagnosticosPacientePage() {
                       {diagnostico.tipo ? (
                         <span
                           className="badge rounded-pill"
-                          style={{
-                            fontSize: "0.68rem",
-                            padding: "0.18rem 0.45rem",
-                            backgroundColor: "#EEF4FF",
-                            color: "#2F6FB3",
-                            border: "1px solid #D7E6FB",
-                          }}
+                          style={getDiagnosticoTipoBadgeStyle(diagnostico.tipo)}
                         >
                           {tipoDiagnosticoLabels[diagnostico.tipo]}
                         </span>
@@ -332,7 +327,7 @@ export default function DiagnosticosPacientePage() {
 
                     {/* DESCRIPCION */}
                     {diagnosticoTitulo ? (
-                      <div className="sipac-diagnostico-title">
+                      <div className="sipac-diagnostico-title diagnosticos-paciente-title">
                         {diagnosticoTitulo}
                       </div>
                     ) : null}
@@ -348,7 +343,7 @@ export default function DiagnosticosPacientePage() {
 
                     {/* EVOLUCION */}
                     {diagnostico.evoluciones?.length ? (
-                      <div className="sipac-seguimiento-mini">
+                      <div className="sipac-seguimiento-mini diagnosticos-paciente-seguimiento">
 
                         <div className="sipac-seguimiento-header">
                           <span className="sipac-section-icon">
