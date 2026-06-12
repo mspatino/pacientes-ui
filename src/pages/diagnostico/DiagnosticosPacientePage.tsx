@@ -17,6 +17,7 @@ import {
 import { getHistoriaClinicaByPacienteId, getPacienteById, type DiagnosticoDTO, type PacienteResponseDTO, type TipoDiagnostico } from "../../api/pacientes";
 import {
   getDiagnosticoFechaFin,
+  getDiagnosticoFechaInicio,
   getDiagnosticoText,
   formatFechaHora,
   getDiagnosticoTipoBadgeStyle,
@@ -67,6 +68,26 @@ const getDiagnosticoFields = (diagnostico: DiagnosticoDTO) => {
     evoluciones: diagnostico.evoluciones ?? [],
   };
 };
+
+const getDiagnosticoFechaOrden = (diagnostico: DiagnosticoDTO) => {
+  const fechaInicio = getDiagnosticoFechaInicio(diagnostico);
+  const time = fechaInicio ? new Date(fechaInicio).getTime() : Number.NaN;
+
+  return Number.isNaN(time) ? Number.NEGATIVE_INFINITY : time;
+};
+
+const ordenarDiagnosticosRecientesPrimero = (
+  diagnosticos: DiagnosticoDTO[],
+) =>
+  [...diagnosticos].sort((a, b) => {
+    const fechaDiff = getDiagnosticoFechaOrden(b) - getDiagnosticoFechaOrden(a);
+
+    if (fechaDiff !== 0) {
+      return fechaDiff;
+    }
+
+    return (b.id ?? 0) - (a.id ?? 0);
+  });
 
 export default function DiagnosticosPacientePage() {
   const PAGE_SIZE = 5;
@@ -128,7 +149,11 @@ export default function DiagnosticosPacientePage() {
         if (fullName) setPacienteNombre(fullName);
 
         setDiagnosticos(
-          Array.isArray(historiaData.diagnosticos) ? historiaData.diagnosticos : [],
+          ordenarDiagnosticosRecientesPrimero(
+            Array.isArray(historiaData.diagnosticos)
+              ? historiaData.diagnosticos
+              : [],
+          ),
         );
       } catch (loadError) {
         console.error("No se pudieron cargar los diagnósticos", loadError);

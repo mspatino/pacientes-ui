@@ -121,6 +121,23 @@ const buildDiagnosticoFromRecord = (
   };
 };
 
+const getDiagnosticoFechaOrden = (diagnostico: DiagnosticoDTO) => {
+  const fechaInicio = getDiagnosticoFechaInicio(diagnostico);
+  const timestamp = fechaInicio ? new Date(fechaInicio).getTime() : Number.NaN;
+
+  return Number.isNaN(timestamp) ? Number.NEGATIVE_INFINITY : timestamp;
+};
+
+const ordenarDiagnosticosRecientesPrimero = (
+  diagnosticos: DiagnosticoDTO[],
+): DiagnosticoDTO[] =>
+  [...diagnosticos].sort((a, b) => {
+    const fechaDiff = getDiagnosticoFechaOrden(b) - getDiagnosticoFechaOrden(a);
+    if (fechaDiff !== 0) return fechaDiff;
+
+    return (b.id ?? 0) - (a.id ?? 0);
+  });
+
 const buildFormFromHistoriaClinica = (data: HistoriaClinicaDTO): HistoriaClinicaPayload => ({
   motivoConsulta: data.motivoConsulta || "",
   activa: typeof data.activa === "boolean" ? data.activa : true,
@@ -129,10 +146,12 @@ const buildFormFromHistoriaClinica = (data: HistoriaClinicaDTO): HistoriaClinica
   tratamientosAnteriores: data.tratamientosAnteriores || "",
   observaciones: data.observaciones || "",
   diagnosticos: Array.isArray(data.diagnosticos)
-    ? data.diagnosticos.map((item) => {
-        const diagnostico = item as Record<string, unknown>;
-        return buildDiagnosticoFromRecord(diagnostico);
-      })
+    ? ordenarDiagnosticosRecientesPrimero(
+        data.diagnosticos.map((item) => {
+          const diagnostico = item as Record<string, unknown>;
+          return buildDiagnosticoFromRecord(diagnostico);
+        }),
+      )
     : [],
 });
 

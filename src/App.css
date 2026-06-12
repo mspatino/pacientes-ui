@@ -459,6 +459,71 @@ textarea {
   max-width: 1400px;
 }
 
+.paciente-page-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.sipac-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #eef1f4;
+}
+
+.sipac-header-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #eef5fd, #dfeeff);
+  color: #2f6fb3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  font-size: 1.1rem;
+  border: 1px solid #d6e4f4;
+}
+
+.sipac-header-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.sipac-header-actions .sipac-toolbar-btn {
+  gap: 0.4rem;
+  height: 34px;
+  min-width: auto;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.sipac-header-actions .sipac-toolbar-btn svg {
+  font-size: 0.9rem;
+}
+
+@media (max-width: 576px) {
+  .sipac-page-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .sipac-header-actions {
+    justify-content: flex-start;
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
 .sipac-phone-input {
   max-width: 200px;
 }
@@ -1240,6 +1305,31 @@ textarea {
   border-color: #2f6fb3;
   color: #2f6fb3;
   background-color: #eef5fc;
+}
+
+.sipac-header-actions .sipac-toolbar-btn-primary {
+  background-color: #2F6FB3;
+  border-color: #2F6FB3;
+  color: #fff;
+}
+
+.sipac-toolbar-btn-primary {
+  background-color: #2F6FB3;
+  border-color: #2F6FB3;
+  color: #fff;
+}
+
+.sipac-header-actions .sipac-toolbar-btn-primary:hover:not(:disabled),
+.sipac-toolbar-btn-primary:hover:not(:disabled) {
+  background-color: #285F99;
+  border-color: #285F99;
+  color: #fff;
+}
+
+.sipac-header-actions .sipac-toolbar-btn:disabled,
+.sipac-toolbar-btn:disabled {
+  cursor: not-allowed;
+  opacity: .7;
 }
 
 .sipac-diagnostico-compact {

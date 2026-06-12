@@ -76,7 +76,7 @@ export default function HistoriaClinicaContainer({
   }
 
   return (
-    <div className="p-3">
+    <div className="p-3 paciente-page-container sipac-form-compact">
       <div className="mx-auto sipac-form-card">
         <PacienteFormHeader
           title={pageTitle}
@@ -114,7 +114,7 @@ export default function HistoriaClinicaContainer({
               <div className="sipac-form-footer">
                 <button
                   type="submit"
-                  className="sipac-toolbar-btn"
+                  className="sipac-toolbar-btn sipac-toolbar-btn-primary"
                   disabled={saving}
                 >
                   {saving ? "Guardando..." : "Guardar"}

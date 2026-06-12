@@ -6,6 +6,7 @@ interface PacienteFormHeaderProps {
   subtitle: string;
   icon: ReactNode;
   onBack: () => void;
+  actions?: ReactNode;
 }
 
 export default function PacienteFormHeader({
@@ -13,6 +14,7 @@ export default function PacienteFormHeader({
   subtitle,
   icon,
   onBack,
+  actions,
 }: PacienteFormHeaderProps) {
   return (
     <div className="sipac-page-header">
@@ -38,15 +40,16 @@ export default function PacienteFormHeader({
 
       {/* RIGHT TOOLBAR */}
       <div className="sipac-header-actions">
-
-        <button
-          type="button"
-          className="sipac-toolbar-btn"
-          onClick={onBack}
-        >
-          <FaArrowLeft />
-          Volver
-        </button>
+        {actions ?? (
+          <button
+            type="button"
+            className="sipac-toolbar-btn"
+            onClick={onBack}
+          >
+            <FaArrowLeft />
+            Volver
+          </button>
+        )}
 
       </div>
 

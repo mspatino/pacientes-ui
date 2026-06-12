@@ -181,6 +181,7 @@ const validateField = (name: EditableField, value: string): string => {
     return "";
   }
   if (name === "telefono") {
+    if (!trimmed) return "El teléfono es obligatorio";
     if (trimmed && !/^[0-9+\-\s]{6,20}$/.test(trimmed))
       return "Teléfono inválido";
     return "";
@@ -594,6 +595,11 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
                           handleChange("telefono", e.target.value)
                         }
                       />
+                      {fieldErrors.telefono && (
+                        <div className="text-danger small mt-1">
+                          {fieldErrors.telefono}
+                        </div>
+                      )}
                     </div>
                     <div className="col-12 col-md-8">
                       <CFormLabel className="sipac-label">Email</CFormLabel>
@@ -682,22 +688,10 @@ export default function PacienteForm({ mode }: PacienteFormProps) {
               </div>
             </div>
 
-            {/* <div className="d-flex gap-2 mt-4">
-            <CButton color="primary" onClick={handleSave} disabled={saving}>
-              {saving ? "Guardando..." : "Guardar"}
-            </CButton>
-            <CButton
-              color="secondary"
-              variant="outline"
-              onClick={() => navigate(-1)}
-            >
-              Cancelar
-            </CButton>
-          </div> */}
             <div className="sipac-form-footer">
               <button
                 type="button"
-                className="sipac-toolbar-btn"
+                className="sipac-toolbar-btn sipac-toolbar-btn-primary"
                 onClick={handleSave}
                 disabled={saving}
               >
