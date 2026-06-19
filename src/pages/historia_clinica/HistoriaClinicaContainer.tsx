@@ -1,13 +1,19 @@
 import {
-  CAccordion,
   CAlert,
-  CCard,
-  CCardBody,
   CForm,
   CSpinner,
 } from "@coreui/react";
-import { BsClipboard2Pulse } from "react-icons/bs";
+import { useState } from "react";
+import {
+  BsBullseye,
+  BsClipboard2Check,
+  BsClipboard2Pulse,
+  BsJournalText,
+  BsPeople,
+} from "react-icons/bs";
+import { GiBrain } from "react-icons/gi";
 import DatosClinicosGeneralesCard from "../../components/historia_clinica/general/DatosClinicosGeneralesCard";
+import EvaluacionesPanel from "../../components/historia_clinica/evaluaciones/EvaluacionesPanel";
 import DiagnosticoModal from "../../components/historia_clinica/diagnosticos/DiagnosticoModal";
 import DiagnosticosListCard from "../../components/historia_clinica/diagnosticos/DiagnosticosListCard";
 import PacienteFormHeader from "../../components/pacientes/PacienteFormHeader";
@@ -20,12 +26,20 @@ interface HistoriaClinicaContainerProps {
   onSaved: (patientId: number) => void;
 }
 
+type HistoriaClinicaTab =
+  | "consulta"
+  | "antecedentes"
+  | "observaciones"
+  | "evaluaciones"
+  | "diagnosticos";
+
 export default function HistoriaClinicaContainer({
   patientId,
   mode,
   onBack,
   onSaved,
 }: HistoriaClinicaContainerProps) {
+  const [activeTab, setActiveTab] = useState<HistoriaClinicaTab>("consulta");
   const {
     activeDiagnostico,
     addDiagnostico,
@@ -35,6 +49,7 @@ export default function HistoriaClinicaContainer({
     editingIndex,
     error,
     form,
+    historiaClinicaId,
     handleDiagnosticoDraftChange,
     handleSubmit,
     loading,
@@ -85,8 +100,76 @@ export default function HistoriaClinicaContainer({
           onBack={onBack}
         />
 
-        <CCard>
-          <CCardBody>
+        <div className="sipac-hc-tabs-card sipac-hc-editor-card">
+          <div
+            className="sipac-hc-tabs sipac-hc-tabs-editor"
+            role="tablist"
+            aria-label="Secciones de historia clínica"
+          >
+            <button
+              type="button"
+              className={`sipac-hc-tab ${activeTab === "consulta" ? "is-active" : ""}`}
+              role="tab"
+              aria-selected={activeTab === "consulta"}
+              aria-controls="historia-tab-consulta"
+              onClick={() => setActiveTab("consulta")}
+            >
+              <BsJournalText size={15} />
+              Consulta inicial
+            </button>
+
+            <button
+              type="button"
+              className={`sipac-hc-tab ${activeTab === "antecedentes" ? "is-active" : ""}`}
+              role="tab"
+              aria-selected={activeTab === "antecedentes"}
+              aria-controls="historia-tab-antecedentes"
+              onClick={() => setActiveTab("antecedentes")}
+            >
+              <BsPeople size={15} />
+              Antecedentes y contexto
+            </button>
+
+            <button
+              type="button"
+              className={`sipac-hc-tab ${activeTab === "observaciones" ? "is-active" : ""}`}
+              role="tab"
+              aria-selected={activeTab === "observaciones"}
+              aria-controls="historia-tab-observaciones"
+              onClick={() => setActiveTab("observaciones")}
+            >
+              <BsBullseye size={15} />
+              Observaciones y objetivos
+            </button>
+
+            <button
+              type="button"
+              className={`sipac-hc-tab ${activeTab === "evaluaciones" ? "is-active" : ""}`}
+              role="tab"
+              aria-selected={activeTab === "evaluaciones"}
+              aria-controls="historia-tab-evaluaciones"
+              onClick={() => setActiveTab("evaluaciones")}
+            >
+              <BsClipboard2Check size={15} />
+              Evaluaciones
+              <span className="sipac-hc-tab-count">{form.evaluaciones.length}</span>
+            </button>
+
+            <button
+              type="button"
+              className={`sipac-hc-tab ${activeTab === "diagnosticos" ? "is-active" : ""}`}
+              role="tab"
+              aria-selected={activeTab === "diagnosticos"}
+              aria-controls="historia-tab-diagnosticos"
+              onClick={() => setActiveTab("diagnosticos")}
+            >
+              <GiBrain size={15} />
+              Diagnósticos
+              <span className="sipac-hc-tab-count">{form.diagnosticos.length}</span>
+            </button>
+          </div>
+
+          <div className="sipac-hc-tab-panel">
             {submitError ? (
               <CAlert color="danger" className="mb-3">
                 {submitError}
@@ -94,13 +177,65 @@ export default function HistoriaClinicaContainer({
             ) : null}
 
             <CForm id="historia-clinica-form" onSubmit={handleSubmit}>
-              <CAccordion
-                activeItemKey={1}
-                alwaysOpen
-                className="paciente-accordion w-100"
+              <div
+                id="historia-tab-consulta"
+                role="tabpanel"
+                hidden={activeTab !== "consulta"}
               >
-                <DatosClinicosGeneralesCard form={form} setForm={setForm} />
+                <DatosClinicosGeneralesCard
+                  form={form}
+                  setForm={setForm}
+                  section="consulta"
+                  variant="panel"
+                />
+              </div>
 
+              <div
+                id="historia-tab-antecedentes"
+                role="tabpanel"
+                hidden={activeTab !== "antecedentes"}
+              >
+                <DatosClinicosGeneralesCard
+                  form={form}
+                  setForm={setForm}
+                  section="antecedentes"
+                  variant="panel"
+                />
+              </div>
+
+              <div
+                id="historia-tab-observaciones"
+                role="tabpanel"
+                hidden={activeTab !== "observaciones"}
+              >
+                <DatosClinicosGeneralesCard
+                  form={form}
+                  setForm={setForm}
+                  section="observaciones"
+                  variant="panel"
+                />
+              </div>
+
+              <div
+                id="historia-tab-evaluaciones"
+                role="tabpanel"
+                hidden={activeTab !== "evaluaciones"}
+              >
+                <EvaluacionesPanel
+                  evaluaciones={form.evaluaciones}
+                  historiaClinicaId={historiaClinicaId}
+                  editable
+                  onChange={(evaluaciones) =>
+                    setForm((prev) => ({ ...prev, evaluaciones }))
+                  }
+                />
+              </div>
+
+              <div
+                id="historia-tab-diagnosticos"
+                role="tabpanel"
+                hidden={activeTab !== "diagnosticos"}
+              >
                 <DiagnosticosListCard
                   diagnosticos={form.diagnosticos}
                   onOpen={openDiagnosticoModal}
@@ -108,8 +243,9 @@ export default function HistoriaClinicaContainer({
                   onEdit={editDiagnostico}
                   onRemove={removeDiagnosticoFromList}
                   readOnly={readOnlyDiagnosticos}
+                  variant="panel"
                 />
-              </CAccordion>
+              </div>
 
               <div className="sipac-form-footer">
                 <button
@@ -129,8 +265,8 @@ export default function HistoriaClinicaContainer({
                 </button>
               </div>
             </CForm>
-          </CCardBody>
-        </CCard>
+          </div>
+        </div>
       </div>
 
       <DiagnosticoModal

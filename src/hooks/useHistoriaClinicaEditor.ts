@@ -140,11 +140,18 @@ const ordenarDiagnosticosRecientesPrimero = (
 
 const buildFormFromHistoriaClinica = (data: HistoriaClinicaDTO): HistoriaClinicaPayload => ({
   motivoConsulta: data.motivoConsulta || "",
+  fechaAlta: data.fechaAlta || "",
+  antecedentesFamiliares: data.antecedentesFamiliares || "",
+  antecedentesPersonales: data.antecedentesPersonales || "",
+  contextoSocial: data.contextoSocial || "",
+  actividadesVidaDiaria: data.actividadesVidaDiaria || "",
+  objetivosTerapeuticos: data.objetivosTerapeuticos || "",
   activa: typeof data.activa === "boolean" ? data.activa : true,
   medicacion: data.medicacion || "",
   consumo: data.consumo || "",
   tratamientosAnteriores: data.tratamientosAnteriores || "",
   observaciones: data.observaciones || "",
+  evaluaciones: Array.isArray(data.evaluaciones) ? data.evaluaciones : [],
   diagnosticos: Array.isArray(data.diagnosticos)
     ? ordenarDiagnosticosRecientesPrimero(
         data.diagnosticos.map((item) => {
@@ -173,11 +180,18 @@ export default function useHistoriaClinicaEditor({
   const [diagnosticoDraft, setDiagnosticoDraft] = useState<DiagnosticoDTO | null>(null);
   const [form, setForm] = useState<HistoriaClinicaPayload>({
     motivoConsulta: "",
+    fechaAlta: new Date().toISOString(),
+    antecedentesFamiliares: "",
+    antecedentesPersonales: "",
+    contextoSocial: "",
+    actividadesVidaDiaria: "",
+    objetivosTerapeuticos: "",
     activa: true,
     medicacion: "",
     consumo: "",
     tratamientosAnteriores: "",
     observaciones: "",
+    evaluaciones: [],
     diagnosticos: [],
   });
 
@@ -418,11 +432,21 @@ export default function useHistoriaClinicaEditor({
 
     return {
       motivoConsulta: currentForm.motivoConsulta.trim(),
+      antecedentesFamiliares: currentForm.antecedentesFamiliares?.trim() || "",
+      antecedentesPersonales: currentForm.antecedentesPersonales?.trim() || "",
+      contextoSocial: currentForm.contextoSocial?.trim() || "",
+      actividadesVidaDiaria: currentForm.actividadesVidaDiaria?.trim() || "",
+      objetivosTerapeuticos: currentForm.objetivosTerapeuticos?.trim() || "",
       activa: currentForm.activa ?? true,
       medicacion: currentForm.medicacion?.trim() || "",
       consumo: currentForm.consumo?.trim() || "",
       tratamientosAnteriores: currentForm.tratamientosAnteriores?.trim() || "",
       observaciones: currentForm.observaciones?.trim() || "",
+      evaluaciones: currentForm.evaluaciones.map((evaluacion) => ({
+        ...evaluacion,
+        resultado: evaluacion.resultado?.trim() || "",
+        respuestas: evaluacion.respuestas?.trim() || "",
+      })),
       diagnosticos: diagnosticos as HistoriaClinicaPayload["diagnosticos"],
     };
   };
@@ -592,6 +616,7 @@ export default function useHistoriaClinicaEditor({
     editDiagnostico,
     exists,
     form,
+    historiaClinicaId,
     handleDiagnosticoDraftChange,
     handleSubmit,
     loading,

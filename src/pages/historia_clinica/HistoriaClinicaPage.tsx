@@ -1,11 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
-  CAccordion,
   CAlert,
   CButton,
-  CCard,
-  CCardBody,
   CModal,
   CModalBody,
   CModalFooter,
@@ -13,7 +10,15 @@ import {
   CModalTitle,
   CSpinner,
 } from "@coreui/react";
-import { BsClipboard2Pulse, BsPlusLg } from "react-icons/bs";
+import {
+  BsBullseye,
+  BsClipboard2Check,
+  BsClipboard2Pulse,
+  BsJournalText,
+  BsPeople,
+  BsPlusLg,
+} from "react-icons/bs";
+import { GiBrain } from "react-icons/gi";
 import {
   getHistoriaClinicaByPacienteId,
   getPacienteById,
@@ -24,6 +29,7 @@ import {
 import HistoriaClinicaHeader from "../../components/historia_clinica/HistoriaClinicaHeader";
 import HistoriaClinicaGeneralCard from "../../components/historia_clinica/HisoriaClinicaGeneralCard";
 import HistoriaClinicaDiagnosticoCard from "../../components/historia_clinica/HistoriaClinicaDiagnosticoCard";
+import EvaluacionesPanel from "../../components/historia_clinica/evaluaciones/EvaluacionesPanel";
 import {
   getDiagnosticoFechaFin,
   getDiagnosticoPrincipal,
@@ -45,6 +51,13 @@ interface EvolucionItem {
 interface DiagnosticoPrincipal {
   evoluciones?: EvolucionItem[];
 }
+
+type HistoriaClinicaTab =
+  | "consulta"
+  | "antecedentes"
+  | "observaciones"
+  | "evaluaciones"
+  | "diagnosticos";
 
 
 
@@ -69,11 +82,6 @@ const valueOrDash = (value?: string | null): string => {
   return trimmed ? trimmed : "-";
 };
 
-const hasText = (value?: string | null): value is string => {
-  if (typeof value !== "string") return false;
-  return value.trim().length > 0;
-};
-
 export default function HistoriaClinicaPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -87,6 +95,7 @@ export default function HistoriaClinicaPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [actionError, setActionError] = useState("");
+  const [activeTab, setActiveTab] = useState<HistoriaClinicaTab>("consulta");
  
  
    //const [activeItems, setActiveItems] = useState<number[]>([1, 2]);
@@ -154,49 +163,62 @@ export default function HistoriaClinicaPage() {
   };
 
   const historiaData = historia;
-  const fields: Array<{ label: string; value: string }> = [
-    ...(historiaData?.fechaAlta
-      ? [
-          {
-            label: "Fecha de alta",
-            value: formatDateTime(historiaData.fechaAlta),
-          },
-        ]
-      : []),
-    ...(hasText(historiaData?.motivoConsulta)
-      ? [
-          {
-            label: "Motivo de consulta",
-            value: valueOrDash(historiaData.motivoConsulta),
-          },
-        ]
-      : []),
-    ...(hasText(historiaData?.observaciones)
-      ? [
-          {
-            label: "Observaciones",
-            value: valueOrDash(historiaData.observaciones),
-          },
-        ]
-      : []),
-    ...(hasText(historiaData?.medicacion)
-      ? [{ label: "Medicación", value: valueOrDash(historiaData.medicacion) }]
-      : []),
-    ...(hasText(historiaData?.consumo)
-      ? [{ label: "Consumo", value: valueOrDash(historiaData.consumo) }]
-      : []),
-    ...(hasText(historiaData?.tratamientosAnteriores)
-      ? [
-          {
-            label: "Tratamientos anteriores",
-            value: valueOrDash(historiaData.tratamientosAnteriores),
-          },
-        ]
-      : []),
+  const consultaFields: Array<{ label: string; value: string }> = [
+    {
+      label: "Fecha de alta",
+      value: historiaData?.fechaAlta
+        ? formatDateTime(historiaData.fechaAlta)
+        : "-",
+    },
+    {
+      label: "Motivo de consulta",
+      value: valueOrDash(historiaData?.motivoConsulta),
+    },
+    {
+      label: "Medicación",
+      value: valueOrDash(historiaData?.medicacion),
+    },
+    {
+      label: "Consumo",
+      value: valueOrDash(historiaData?.consumo),
+    },
+  ];
+
+  const antecedentesFields: Array<{ label: string; value: string }> = [
+    {
+      label: "Antecedentes personales",
+      value: valueOrDash(historiaData?.antecedentesPersonales),
+    },
+    {
+      label: "Antecedentes familiares",
+      value: valueOrDash(historiaData?.antecedentesFamiliares),
+    },
+    {
+      label: "Contexto social",
+      value: valueOrDash(historiaData?.contextoSocial),
+    },
+    {
+      label: "Actividades de vida diaria",
+      value: valueOrDash(historiaData?.actividadesVidaDiaria),
+    },
+  ];
+
+  const observacionesFields: Array<{ label: string; value: string }> = [
+    {
+      label: "Observaciones",
+      value: valueOrDash(historiaData?.observaciones),
+    },
+    {
+      label: "Objetivos terapéuticos",
+      value: valueOrDash(historiaData?.objetivosTerapeuticos),
+    },
   ];
 
   const diagnosticos = Array.isArray(historiaData?.diagnosticos)
     ? historiaData.diagnosticos
+    : [];
+  const evaluaciones = Array.isArray(historiaData?.evaluaciones)
+    ? historiaData.evaluaciones
     : [];
   
   const diagnosticoPrincipal = getDiagnosticoPrincipal(diagnosticos);
@@ -334,33 +356,135 @@ export default function HistoriaClinicaPage() {
           {error}
         </CAlert>
       ) : historia && !notFound ? (
-        <div className="d-flex flex-column gap-3">
-          <CAccordion
-            activeItemKey={1}
-            className="paciente-accordion w-100"
-          >
-            <HistoriaClinicaGeneralCard
-              fields={fields}
-            />
-          </CAccordion>
+        <div className="sipac-hc-tabs-card">
+          <div className="sipac-hc-tabs" role="tablist" aria-label="Secciones de historia clínica">
+            <button
+              type="button"
+              className={`sipac-hc-tab ${activeTab === "consulta" ? "is-active" : ""}`}
+              role="tab"
+              aria-selected={activeTab === "consulta"}
+              aria-controls="historia-lectura-tab-consulta"
+              onClick={() => setActiveTab("consulta")}
+            >
+              <BsJournalText size={15} />
+              Consulta inicial
+            </button>
 
-          <CAccordion activeItemKey={2} className="paciente-accordion w-100">
-            <HistoriaClinicaDiagnosticoCard
-              // diagnosticoPrincipal={diagnosticoPrincipal}
-              diagnosticoFields={diagnosticoFields}
-              diagnosticos={diagnosticos}
-              evoluciones={diagnosticoPrincipalTyped?.evoluciones ?? []}
-              onViewDiagnosticos={() => {
-                if (pacienteId) {
-                  navigate(`/pacientes/${pacienteId}/diagnosticos`);
-                }
-              }}
-            />
-          </CAccordion>
+            <button
+              type="button"
+              className={`sipac-hc-tab ${activeTab === "antecedentes" ? "is-active" : ""}`}
+              role="tab"
+              aria-selected={activeTab === "antecedentes"}
+              aria-controls="historia-lectura-tab-antecedentes"
+              onClick={() => setActiveTab("antecedentes")}
+            >
+              <BsPeople size={15} />
+              Antecedentes y contexto
+            </button>
+
+            <button
+              type="button"
+              className={`sipac-hc-tab ${activeTab === "observaciones" ? "is-active" : ""}`}
+              role="tab"
+              aria-selected={activeTab === "observaciones"}
+              aria-controls="historia-lectura-tab-observaciones"
+              onClick={() => setActiveTab("observaciones")}
+            >
+              <BsBullseye size={15} />
+              Observaciones y objetivos
+            </button>
+
+            <button
+              type="button"
+              className={`sipac-hc-tab ${activeTab === "evaluaciones" ? "is-active" : ""}`}
+              role="tab"
+              aria-selected={activeTab === "evaluaciones"}
+              aria-controls="historia-lectura-tab-evaluaciones"
+              onClick={() => setActiveTab("evaluaciones")}
+            >
+              <BsClipboard2Check size={15} />
+              Evaluaciones
+              <span className="sipac-hc-tab-count">{evaluaciones.length}</span>
+            </button>
+
+            <button
+              type="button"
+              className={`sipac-hc-tab ${activeTab === "diagnosticos" ? "is-active" : ""}`}
+              role="tab"
+              aria-selected={activeTab === "diagnosticos"}
+              aria-controls="historia-lectura-tab-diagnosticos"
+              onClick={() => setActiveTab("diagnosticos")}
+            >
+              <GiBrain size={15} />
+              Diagnósticos
+              <span className="sipac-hc-tab-count">{diagnosticos.length}</span>
+            </button>
+          </div>
+
+          <div className="sipac-hc-tab-panel">
+            <div
+              id="historia-lectura-tab-consulta"
+              role="tabpanel"
+              hidden={activeTab !== "consulta"}
+            >
+              <HistoriaClinicaGeneralCard
+                fields={consultaFields}
+                variant="panel"
+              />
+            </div>
+
+            <div
+              id="historia-lectura-tab-antecedentes"
+              role="tabpanel"
+              hidden={activeTab !== "antecedentes"}
+            >
+              <HistoriaClinicaGeneralCard
+                fields={antecedentesFields}
+                variant="panel"
+              />
+            </div>
+
+            <div
+              id="historia-lectura-tab-observaciones"
+              role="tabpanel"
+              hidden={activeTab !== "observaciones"}
+            >
+              <HistoriaClinicaGeneralCard
+                fields={observacionesFields}
+                variant="panel"
+              />
+            </div>
+
+            <div
+              id="historia-lectura-tab-evaluaciones"
+              role="tabpanel"
+              hidden={activeTab !== "evaluaciones"}
+            >
+              <EvaluacionesPanel evaluaciones={evaluaciones} />
+            </div>
+
+            <div
+              id="historia-lectura-tab-diagnosticos"
+              role="tabpanel"
+              hidden={activeTab !== "diagnosticos"}
+            >
+              <HistoriaClinicaDiagnosticoCard
+                diagnosticoFields={diagnosticoFields}
+                diagnosticos={diagnosticos}
+                evoluciones={diagnosticoPrincipalTyped?.evoluciones ?? []}
+                onViewDiagnosticos={() => {
+                  if (pacienteId) {
+                    navigate(`/pacientes/${pacienteId}/diagnosticos`);
+                  }
+                }}
+                variant="panel"
+              />
+            </div>
+          </div>
         </div>
       ) : (
-        <CCard className="mx-auto sipac-form-card border-0 shadow-sm">
-  <CCardBody className="p-4">
+        <div className="mx-auto sipac-form-card sipac-hc-tabs-card">
+  <div className="p-4">
 
     <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
 
@@ -412,8 +536,8 @@ export default function HistoriaClinicaPage() {
 
     </div>
 
-  </CCardBody>
-</CCard>
+  </div>
+</div>
       )}
 
       <CModal

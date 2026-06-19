@@ -10,12 +10,26 @@ import DatosClinicosForm from "./DatosClinicosForm";
 interface DatosClinicosGeneralesCardProps {
   form: HistoriaClinicaPayload;
   setForm: React.Dispatch<React.SetStateAction<HistoriaClinicaPayload>>;
+  section?: "consulta" | "antecedentes" | "observaciones";
+  variant?: "accordion" | "panel";
 }
 
 export default function DatosClinicosGeneralesCard({
   form,
   setForm,
+  section = "consulta",
+  variant = "accordion",
 }: DatosClinicosGeneralesCardProps) {
+  if (variant === "panel") {
+    return (
+      <section className="sipac-hc-tab-section">
+        <div className="hc-body">
+          <DatosClinicosForm form={form} setForm={setForm} section={section} />
+        </div>
+      </section>
+    );
+  }
+
   return (
     <CAccordionItem itemKey={1} className="hc-item">
       <CAccordionHeader className="hc-header d-flex align-items-center">
@@ -26,7 +40,7 @@ export default function DatosClinicosGeneralesCard({
       </CAccordionHeader>
 
       <CAccordionBody className="hc-body">
-        <DatosClinicosForm form={form} setForm={setForm} />
+        <DatosClinicosForm form={form} setForm={setForm} section={section} />
       </CAccordionBody>
     </CAccordionItem>
   );

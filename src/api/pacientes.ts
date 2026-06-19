@@ -30,12 +30,37 @@ export interface HistoriaClinicaDTO {
   pacienteId?: number;
   fechaAlta?: string;
   motivoConsulta?: string;
+  antecedentesFamiliares?: string;
+  antecedentesPersonales?: string;
+  contextoSocial?: string;
+  actividadesVidaDiaria?: string;
+  objetivosTerapeuticos?: string;
   observaciones?: string;
   medicacion?: string;
   consumo?: string;
   tratamientosAnteriores?: string;
   activa?: boolean;
   diagnosticos?: Array<Record<string, unknown>>;
+  evaluaciones?: EvaluacionDTO[];
+}
+
+export type TipoEvaluacion =
+  | "BECK"
+  | "BAI"
+  | "ASRS"
+  | "VINELAND"
+  | "ADOS"
+  | "OTRO";
+
+export interface EvaluacionDTO {
+  id?: number;
+  historiaClinicaId?: number;
+  pacienteId?: number;
+  tipo: TipoEvaluacion;
+  fecha: string;
+  puntaje?: number | null;
+  resultado?: string;
+  respuestas?: string;
 }
 
 export type TipoDiagnostico =
@@ -75,12 +100,19 @@ export interface Cie10DTO {
 
 export interface HistoriaClinicaPayload {
   motivoConsulta: string;
+  fechaAlta?: string;
+  antecedentesFamiliares?: string;
+  antecedentesPersonales?: string;
+  contextoSocial?: string;
+  actividadesVidaDiaria?: string;
+  objetivosTerapeuticos?: string;
   activa?: boolean | null;
   medicacion?: string;
   consumo?: string;
   tratamientosAnteriores?: string;
   observaciones?: string;
   diagnosticos: DiagnosticoDTO[];
+  evaluaciones: EvaluacionDTO[];
 }
 
 export const getPacientes = async (): Promise<Paciente[]> => {
@@ -198,6 +230,38 @@ export const eliminarDiagnostico = async (
   diagnosticoId: number,
 ): Promise<void> => {
   await api.delete(`/diagnosticos/${diagnosticoId}`);
+};
+
+export const crearEvaluacion = async (
+  historiaClinicaId: number,
+  payload: EvaluacionDTO,
+): Promise<EvaluacionDTO> => {
+  const res = await api.post(
+    `/historias/${historiaClinicaId}/evaluaciones`,
+    payload,
+  );
+  return res.data;
+};
+
+export const actualizarEvaluacion = async (
+  historiaClinicaId: number,
+  evaluacionId: number,
+  payload: EvaluacionDTO,
+): Promise<EvaluacionDTO> => {
+  const res = await api.put(
+    `/historias/${historiaClinicaId}/evaluaciones/${evaluacionId}`,
+    payload,
+  );
+  return res.data;
+};
+
+export const eliminarEvaluacion = async (
+  historiaClinicaId: number,
+  evaluacionId: number,
+): Promise<void> => {
+  await api.delete(
+    `/historias/${historiaClinicaId}/evaluaciones/${evaluacionId}`,
+  );
 };
 
 export async function crearEvolucionDiagnostico(

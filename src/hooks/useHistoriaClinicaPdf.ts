@@ -3,14 +3,15 @@ import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import type { Content, TDocumentDefinitions } from "pdfmake/interfaces";
 import type {
+  EvaluacionDTO,
   EvolucionDiagnosticoDTO,
   HistoriaClinicaDTO,
 } from "../api/pacientes";
 import {
   getDiagnosticoFechaFin,
   getDiagnosticoFechaInicio,
-  getDiagnosticoPrincipal,
   getDiagnosticoText,
+  getDiagnosticoTipoLabel,
 } from "../components/historia_clinica/diagnosticos/diagnosticoUtils";
 import type { EstadoTratamiento } from "../pages/helpers/diagnosticoEstadoUtils";
 
@@ -45,9 +46,6 @@ const valueOrDash = (value?: string | null): string => {
   const trimmed = value.trim();
   return trimmed ? trimmed : "-";
 };
-
-const hasText = (value?: string | null): value is string =>
-  typeof value === "string" && value.trim().length > 0;
 
 const getEstadoClinicoLabel = (estadoTratamiento: EstadoTratamiento) => {
   switch (estadoTratamiento) {
@@ -99,39 +97,185 @@ const buildInfoTable = (
   ],
 });
 
-const buildEvolucionesSection = (
-  evoluciones: EvolucionDiagnosticoDTO[],
-): Content => ({
+const getEvaluacionTipoLabel = (tipo: EvaluacionDTO["tipo"]) => {
+  switch (tipo) {
+    case "BECK":
+      return "Beck (depresión)";
+    case "BAI":
+      return "BAI (ansiedad)";
+    case "ASRS":
+      return "ASRS";
+    case "VINELAND":
+      return "Vineland";
+    case "ADOS":
+      return "ADOS";
+    case "OTRO":
+      return "Otra evaluación";
+  }
+};
+
+const buildEvaluacionesSection = (evaluaciones: EvaluacionDTO[]): Content => ({
   stack: [
-    { text: "Evoluciones del diagnóstico", style: "sectionTitle" },
-    evoluciones.length > 0
+    { text: "Evaluaciones", style: "sectionTitle" },
+    evaluaciones.length > 0
       ? {
           table: {
-            widths: ["28%", "72%"],
-            body: evoluciones.map((evolucion) => [
-              {
-                text: formatDateTime(evolucion.fecha),
-                style: "fieldLabel",
-              },
-              {
-                text: getEvolucionNota(evolucion),
-                style: "fieldValue",
-              },
-            ]),
+            headerRows: 1,
+            widths: ["18%", "19%", "12%", "25%", "26%"],
+            body: [
+              [
+                { text: "Tipo", style: "tableHeader" },
+                { text: "Fecha", style: "tableHeader" },
+                { text: "Puntaje", style: "tableHeader" },
+                { text: "Resultado", style: "tableHeader" },
+                { text: "Respuestas / detalle", style: "tableHeader" },
+              ],
+              ...evaluaciones.map((evaluacion) => [
+                {
+                  text: getEvaluacionTipoLabel(evaluacion.tipo),
+                  style: "fieldValue",
+                },
+                {
+                  text: formatDateTime(evaluacion.fecha),
+                  style: "fieldValue",
+                },
+                {
+                  text:
+                    evaluacion.puntaje === null ||
+                    evaluacion.puntaje === undefined
+                      ? "-"
+                      : String(evaluacion.puntaje),
+                  style: "fieldValue",
+                },
+                {
+                  text: valueOrDash(evaluacion.resultado),
+                  style: "fieldValue",
+                },
+                {
+                  text: valueOrDash(evaluacion.respuestas),
+                  style: "fieldValue",
+                },
+              ]),
+            ],
           },
           layout: {
             hLineColor: () => "#D6E4F4",
             vLineColor: () => "#D6E4F4",
-            paddingLeft: () => 10,
-            paddingRight: () => 10,
-            paddingTop: () => 7,
-            paddingBottom: () => 7,
+            paddingLeft: () => 6,
+            paddingRight: () => 6,
+            paddingTop: () => 6,
+            paddingBottom: () => 6,
           },
         }
       : {
-          text: "No hay evoluciones registradas.",
+          text: "No hay evaluaciones registradas.",
           style: "emptyText",
         },
+  ],
+});
+
+const buildDiagnosticoFields = (
+  diagnostico: Record<string, unknown>,
+): Array<{ label: string; value: string }> => {
+  const cie10 =
+    diagnostico.cie10 && typeof diagnostico.cie10 === "object"
+      ? (diagnostico.cie10 as Record<string, unknown>)
+      : null;
+  const cie10Codigo =
+    cie10 && typeof cie10.codigo === "string" ? cie10.codigo.trim() : "";
+  const cie10Descripcion =
+    cie10 && typeof cie10.descripcion === "string"
+      ? cie10.descripcion.trim()
+      : "";
+
+  return [
+    {
+      label: "Tipo",
+      value: getDiagnosticoTipoLabel(
+        typeof diagnostico.tipo === "string" ? diagnostico.tipo : undefined,
+      ),
+    },
+    {
+      label: "Descripción clínica",
+      value: valueOrDash(getDiagnosticoText(diagnostico, "descripcion")),
+    },
+    {
+      label: "CIE-10",
+      value: [cie10Codigo, cie10Descripcion].filter(Boolean).join(" - ") || "-",
+    },
+    {
+      label: "Fecha inicio",
+      value: formatDateTime(getDiagnosticoFechaInicio(diagnostico)),
+    },
+    {
+      label: "Fecha fin",
+      value: formatDateTime(getDiagnosticoFechaFin(diagnostico)),
+    },
+    {
+      label: "Tratamiento",
+      value: valueOrDash(getDiagnosticoText(diagnostico, "tratamiento")),
+    },
+  ];
+};
+
+const buildDiagnosticosSection = (
+  diagnosticos: Array<Record<string, unknown>>,
+): Content => ({
+  stack: [
+    { text: "Diagnósticos", style: "sectionTitle" },
+    ...(diagnosticos.length > 0
+      ? diagnosticos.flatMap((diagnostico, index) => {
+          const evoluciones = Array.isArray(diagnostico.evoluciones)
+            ? (diagnostico.evoluciones as EvolucionDiagnosticoDTO[])
+            : [];
+
+          return [
+            {
+              text: `Diagnóstico ${index + 1}`,
+              style: "subsectionTitle",
+            } as Content,
+            {
+              table: {
+                widths: ["34%", "66%"],
+                body: buildDiagnosticoFields(diagnostico).map((item) => [
+                  { text: item.label, style: "fieldLabel" },
+                  { text: item.value, style: "fieldValue" },
+                ]),
+              },
+              layout: {
+                hLineColor: () => "#D6E4F4",
+                vLineColor: () => "#D6E4F4",
+                paddingLeft: () => 10,
+                paddingRight: () => 10,
+                paddingTop: () => 7,
+                paddingBottom: () => 7,
+              },
+            } as Content,
+            ...(evoluciones.length > 0
+              ? [
+                  {
+                    stack: [
+                      { text: "Evoluciones", style: "fieldLabel" },
+                      {
+                        ul: evoluciones.map(
+                          (evolucion) =>
+                            `${formatDateTime(evolucion.fecha)} — ${getEvolucionNota(evolucion)}`,
+                        ),
+                        style: "fieldValue",
+                      },
+                    ],
+                    margin: [
+                      8,
+                      6,
+                      0,
+                      index < diagnosticos.length - 1 ? 12 : 0,
+                    ],
+                  } as Content,
+                ]
+              : []),
+          ];
+        })
+      : [{ text: "No hay diagnósticos registrados.", style: "emptyText" }]),
   ],
 });
 
@@ -146,107 +290,66 @@ export default function useHistoriaClinicaPdf({
     const diagnosticos = Array.isArray(historia.diagnosticos)
       ? historia.diagnosticos
       : [];
-    const diagnosticoPrincipal = getDiagnosticoPrincipal(diagnosticos);
+    const evaluaciones = Array.isArray(historia.evaluaciones)
+      ? historia.evaluaciones
+      : [];
 
-    const historiaFields = [
-      ...(historia.fechaAlta
-        ? [
-            {
-              label: "Fecha de alta",
-              value: formatDateTime(historia.fechaAlta),
-            },
-          ]
-        : []),
-      ...(typeof historia.activa === "boolean"
-        ? [
-            {
-              label: "Estado administrativo",
-              value: historia.activa ? "Historia activa" : "Historia archivada",
-            },
-          ]
-        : []),
+    const consultaInicialFields = [
+      {
+        label: "Fecha de alta",
+        value: formatDateTime(historia.fechaAlta),
+      },
+      {
+        label: "Estado administrativo",
+        value: historia.activa ? "Historia activa" : "Historia archivada",
+      },
       {
         label: "Estado clínico",
         value: getEstadoClinicoLabel(estadoTratamiento),
       },
-      ...(hasText(historia.motivoConsulta)
-        ? [
-            {
-              label: "Motivo de consulta",
-              value: valueOrDash(historia.motivoConsulta),
-            },
-          ]
-        : []),
-      ...(hasText(historia.observaciones)
-        ? [
-            {
-              label: "Observaciones",
-              value: valueOrDash(historia.observaciones),
-            },
-          ]
-        : []),
-      ...(hasText(historia.medicacion)
-        ? [{ label: "Medicación", value: valueOrDash(historia.medicacion) }]
-        : []),
-      ...(hasText(historia.consumo)
-        ? [{ label: "Consumo", value: valueOrDash(historia.consumo) }]
-        : []),
-      ...(hasText(historia.tratamientosAnteriores)
-        ? [
-            {
-              label: "Tratamientos anteriores",
-              value: valueOrDash(historia.tratamientosAnteriores),
-            },
-          ]
-        : []),
+      {
+        label: "Motivo de consulta",
+        value: valueOrDash(historia.motivoConsulta),
+      },
+      {
+        label: "Medicación",
+        value: valueOrDash(historia.medicacion),
+      },
+      {
+        label: "Consumo",
+        value: valueOrDash(historia.consumo),
+      },
     ];
 
-    const diagnosticoFields = (() => {
-      if (!diagnosticoPrincipal) return [];
+    const antecedentesFields = [
+      {
+        label: "Antecedentes personales",
+        value: valueOrDash(historia.antecedentesPersonales),
+      },
+      {
+        label: "Antecedentes familiares",
+        value: valueOrDash(historia.antecedentesFamiliares),
+      },
+      {
+        label: "Contexto social",
+        value: valueOrDash(historia.contextoSocial),
+      },
+      {
+        label: "Actividades de vida diaria",
+        value: valueOrDash(historia.actividadesVidaDiaria),
+      },
+    ];
 
-      const item = diagnosticoPrincipal as Record<string, unknown>;
-      const descripcionTexto = getDiagnosticoText(item, "descripcion") || null;
-      const evolucion = getDiagnosticoText(item, "evolucion") || null;
-      const tratamiento = getDiagnosticoText(item, "tratamiento") || null;
-      const fechaInicio = getDiagnosticoFechaInicio(item)
-        ? formatDateTime(getDiagnosticoFechaInicio(item))
-        : null;
-      const fechaFin = getDiagnosticoFechaFin(item)
-        ? formatDateTime(getDiagnosticoFechaFin(item))
-        : null;
-      const cie10 =
-        item.cie10 && typeof item.cie10 === "object"
-          ? (item.cie10 as Record<string, unknown>)
-          : null;
-      const cie10Codigo =
-        cie10 && typeof cie10.codigo === "string" && cie10.codigo.trim()
-          ? cie10.codigo
-          : null;
-      const cie10Descripcion =
-        cie10 &&
-        typeof cie10.descripcion === "string" &&
-        cie10.descripcion.trim()
-          ? cie10.descripcion
-          : null;
-      const cie10Label = [cie10Codigo, cie10Descripcion]
-        .filter(Boolean)
-        .join(" - ");
-
-      return [
-        ...(descripcionTexto
-          ? [{ label: "Descripción clínica", value: descripcionTexto }]
-          : []),
-        ...(cie10Label ? [{ label: "CIE-10", value: cie10Label }] : []),
-        ...(fechaInicio ? [{ label: "Fecha inicio", value: fechaInicio }] : []),
-        ...(fechaFin ? [{ label: "Fecha fin", value: fechaFin }] : []),
-        ...(evolucion ? [{ label: "Evolución", value: evolucion }] : []),
-        ...(tratamiento ? [{ label: "Tratamiento", value: tratamiento }] : []),
-      ];
-    })();
-
-    const evoluciones = (
-      diagnosticoPrincipal?.evoluciones as EvolucionDiagnosticoDTO[] | undefined
-    ) ?? [];
+    const observacionesFields = [
+      {
+        label: "Observaciones",
+        value: valueOrDash(historia.observaciones),
+      },
+      {
+        label: "Objetivos terapéuticos",
+        value: valueOrDash(historia.objetivosTerapeuticos),
+      },
+    ];
 
     const docDefinition: TDocumentDefinitions = {
       pageSize: "A4",
@@ -285,11 +388,15 @@ export default function useHistoriaClinicaPdf({
           },
           margin: [0, 0, 0, 18],
         },
-        buildInfoTable("Datos clínicos generales", historiaFields),
+        buildInfoTable("Consulta inicial", consultaInicialFields),
         { text: "", margin: [0, 8, 0, 0] },
-        buildInfoTable("Diagnóstico principal", diagnosticoFields),
+        buildInfoTable("Antecedentes y contexto", antecedentesFields),
         { text: "", margin: [0, 8, 0, 0] },
-        buildEvolucionesSection(evoluciones),
+        buildInfoTable("Observaciones y objetivos", observacionesFields),
+        { text: "", margin: [0, 8, 0, 0] },
+        buildEvaluacionesSection(evaluaciones),
+        { text: "", margin: [0, 8, 0, 0] },
+        buildDiagnosticosSection(diagnosticos),
       ],
       styles: {
         eyebrow: {
@@ -307,6 +414,18 @@ export default function useHistoriaClinicaPdf({
           bold: true,
           color: sipacBlue,
           margin: [0, 0, 0, 8],
+        },
+        subsectionTitle: {
+          fontSize: 11,
+          bold: true,
+          color: "#16324F",
+          margin: [0, 6, 0, 5],
+        },
+        tableHeader: {
+          fontSize: 9,
+          bold: true,
+          color: sipacBlue,
+          fillColor: sipacSoftBlue,
         },
         fieldLabel: {
           fontSize: 10,

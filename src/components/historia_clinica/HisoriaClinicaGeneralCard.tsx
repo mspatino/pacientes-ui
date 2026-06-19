@@ -13,15 +13,27 @@ interface Field {
 
 interface Props {
   fields: Field[];
+  variant?: "accordion" | "panel";
   // hasEstado: boolean;
   // activa?: boolean;
 }
 
 export default function HistoriaClinicaGeneralCard({
   fields,
+  variant = "accordion",
   // hasEstado,
   // activa,
 }: Props) {
+  if (variant === "panel") {
+    return (
+      <section className="sipac-hc-tab-section">
+        <div className="hc-body">
+          <InfoList fields={fields} />
+        </div>
+      </section>
+    );
+  }
+
   return (
     <CAccordionItem itemKey={1} className="hc-item">
 <CAccordionHeader className="hc-header d-flex align-items-center">

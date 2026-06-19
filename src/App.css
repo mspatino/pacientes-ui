@@ -1,6 +1,8 @@
 :root {
   --sipac-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --sipac-system-font-size: 0.76rem;
   --cui-body-font-family: var(--sipac-font-family);
+  --cui-body-font-size: var(--sipac-system-font-size);
 }
 
 html,
@@ -535,6 +537,203 @@ textarea {
   font-size: 0.92rem;
 }
 
+.sipac-hc-tabs-card {
+  background: #fff;
+  border: 1px solid #e5edf5;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(47, 111, 179, 0.06);
+  overflow: hidden;
+}
+
+.sipac-hc-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.45rem 0.55rem 0;
+  background: #f7fafc;
+  border-bottom: 1px solid #e5edf5;
+  flex-wrap: wrap;
+}
+
+.sipac-hc-tabs-editor {
+  flex-wrap: nowrap;
+  gap: 0.12rem;
+  padding-inline: 0.35rem;
+}
+
+.sipac-hc-tabs-editor .sipac-hc-tab {
+  flex: 1 1 0;
+  min-width: 0;
+  gap: 0.25rem;
+  padding: 0.38rem 0.32rem;
+  font-size: 0.76rem;
+  letter-spacing: -0.01em;
+}
+
+.sipac-hc-tabs-editor .sipac-hc-tab svg {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 auto;
+}
+
+.sipac-hc-tabs-editor .sipac-hc-tab-count {
+  min-width: 1.15rem;
+  height: 1.15rem;
+  padding-inline: 0.25rem;
+  font-size: 0.64rem;
+}
+
+.sipac-form-compact .sipac-hc-editor-card .sipac-hc-tab-panel {
+  font-family: inherit;
+  font-size: 0.76rem;
+}
+
+.sipac-form-compact .sipac-hc-editor-card .form-label,
+.sipac-form-compact .sipac-hc-editor-card .sipac-label {
+  margin-bottom: 0.15rem;
+  color: #526170;
+  font-family: inherit;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.sipac-form-compact .sipac-hc-editor-card .form-control,
+.sipac-form-compact .sipac-hc-editor-card .form-select {
+  min-height: 32px;
+  padding: 0.28rem 0.5rem;
+  font-family: inherit;
+  font-size: 0.76rem;
+  line-height: 1.3;
+}
+
+.sipac-hc-editor-card textarea.form-control,
+.sipac-hc-editor-modal textarea.form-control {
+  min-height: 58px;
+  max-height: 160px;
+  overflow-y: auto !important;
+  resize: vertical !important;
+  scrollbar-width: thin;
+  scrollbar-color: #aebfd0 #f1f5f9;
+}
+
+.sipac-hc-editor-card textarea.form-control::-webkit-scrollbar,
+.sipac-hc-editor-modal textarea.form-control::-webkit-scrollbar {
+  width: 7px;
+}
+
+.sipac-hc-editor-card textarea.form-control::-webkit-scrollbar-track,
+.sipac-hc-editor-modal textarea.form-control::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 6px;
+}
+
+.sipac-hc-editor-card textarea.form-control::-webkit-scrollbar-thumb,
+.sipac-hc-editor-modal textarea.form-control::-webkit-scrollbar-thumb {
+  background: #aebfd0;
+  border-radius: 6px;
+}
+
+.sipac-form-compact .sipac-hc-editor-card .form-check-label,
+.sipac-form-compact .sipac-hc-editor-card .small,
+.sipac-form-compact .sipac-hc-editor-card .text-muted {
+  font-family: inherit;
+  font-size: 0.76rem;
+}
+
+.sipac-form-compact .sipac-hc-editor-card .badge {
+  font-family: inherit;
+  font-size: 0.68rem;
+}
+
+.sipac-form-compact .sipac-hc-editor-card .hc-action-btn,
+.sipac-form-compact .sipac-hc-editor-card .sipac-toolbar-btn {
+  font-family: inherit;
+  font-size: 0.76rem;
+}
+
+.sipac-form-compact .sipac-hc-editor-card .sipac-diagnostico-item {
+  font-family: inherit;
+  font-size: 0.76rem;
+}
+
+.sipac-hc-editor-card .sipac-form-footer {
+  margin-top: 0.75rem;
+  padding-top: 0.6rem;
+}
+
+.sipac-hc-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 34px;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  background: transparent;
+  color: #526170;
+  font-size: 0.86rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.sipac-hc-tab:hover {
+  color: #2f6fb3;
+  background: #eef5fc;
+}
+
+.sipac-hc-tab.is-active {
+  position: relative;
+  bottom: -1px;
+  background: #fff;
+  color: #2f6fb3;
+  border-color: #dbe7f3;
+}
+
+.sipac-hc-tab:focus-visible {
+  outline: 2px solid #2f6fb3;
+  outline-offset: -2px;
+}
+
+.sipac-hc-tab-count {
+  min-width: 1.45rem;
+  height: 1.45rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #e8f1fb;
+  color: #2f6fb3;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.sipac-hc-tab-panel {
+  padding: 0.8rem;
+}
+
+.sipac-hc-tab-section-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 0.15rem 0.55rem;
+}
+
+@media (max-width: 720px) {
+  .sipac-hc-tabs-editor {
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .sipac-hc-tabs-editor .sipac-hc-tab {
+    flex: 0 0 auto;
+    min-width: max-content;
+    padding-inline: 0.55rem;
+  }
+}
+
 @media (max-width: 768px) {
   .sipac-form-card {
     width: 100%;
@@ -543,6 +742,10 @@ textarea {
 
   .sipac-phone-input {
     max-width: 100%;
+  }
+
+  .sipac-hc-tab-panel {
+    padding: 0.65rem;
   }
 }
 
@@ -1782,4 +1985,36 @@ textarea {
 
 .sipac-state-item:disabled {
   opacity: 0.55;
+}
+
+/* Escala tipográfica única para toda la aplicación, incluidos componentes CoreUI. */
+body,
+body * {
+  font-family: var(--sipac-font-family) !important;
+  font-size: var(--sipac-system-font-size) !important;
+}
+
+/* Jerarquía visual para encabezados de pantalla. */
+body h1,
+body .h1,
+body .h2,
+body .h3,
+body .h4,
+body .h5,
+body .sipac-page-header .hc-title {
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  line-height: 1.25;
+}
+
+body h2,
+body h3,
+body .modal-title {
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+}
+
+body .sipac-page-header .text-muted,
+body .sipac-page-header .small {
+  font-size: 0.84rem !important;
 }

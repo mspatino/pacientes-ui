@@ -20,6 +20,7 @@ interface DiagnosticosListCardProps {
   onEdit: (index: number) => void;
   onRemove: (index: number) => void | Promise<void>;
   readOnly?: boolean;
+  variant?: "accordion" | "panel";
 }
 
 const getDiagnosticoTitulo = (diagnostico: DiagnosticoDTO) => {
@@ -43,34 +44,36 @@ export default function DiagnosticosListCard({
   onEdit,
   onRemove,
   readOnly = false,
+  variant = "accordion",
 }: DiagnosticosListCardProps) {
-  return (
-    <CAccordionItem itemKey={2} className="hc-item hc-diagnosticos-section">
-      <CAccordionHeader className="hc-header d-flex align-items-center">
-        <span className="hc-header-row">
-          <span className="hc-title d-flex align-items-center gap-2">
-            <GiBrain />
-            Diagnósticos
-          </span>
-
-          {!readOnly ? (
-            <button
-              type="button"
-              className="hc-action-btn hc-action-btn-sm d-flex align-items-center gap-2"
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                onAdd();
-              }}
-            >
-              <BsPlusLg size={13} />
-              Agregar
-            </button>
-          ) : null}
+  const headerContent = (
+    <span className="hc-header-row">
+      {variant === "accordion" ? (
+        <span className="hc-title d-flex align-items-center gap-2">
+          <GiBrain />
+          Diagnósticos
         </span>
-      </CAccordionHeader>
+      ) : null}
 
-      <CAccordionBody className="px-2 py-1">
+      {!readOnly ? (
+        <button
+          type="button"
+          className="hc-action-btn hc-action-btn-sm d-flex align-items-center gap-2"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            onAdd();
+          }}
+        >
+          <BsPlusLg size={13} />
+          Agregar
+        </button>
+      ) : null}
+    </span>
+  );
+
+  const bodyContent = (
+    <>
       {diagnosticos.length === 0 ? (
         <div className="small text-muted">
           Todavía no hay diagnósticos cargados para esta historia clínica.
@@ -235,6 +238,33 @@ export default function DiagnosticosListCard({
           })}
         </div>
       )}
+    </>
+  );
+
+  if (variant === "panel") {
+    return (
+      <section className="sipac-hc-tab-section">
+        {!readOnly ? (
+          <div className="sipac-hc-tab-section-actions">
+            {headerContent}
+          </div>
+        ) : null}
+
+        <div className="px-2 py-1">
+          {bodyContent}
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <CAccordionItem itemKey={2} className="hc-item hc-diagnosticos-section">
+      <CAccordionHeader className="hc-header d-flex align-items-center">
+        {headerContent}
+      </CAccordionHeader>
+
+      <CAccordionBody className="px-2 py-1">
+        {bodyContent}
       </CAccordionBody>
     </CAccordionItem>
   );
