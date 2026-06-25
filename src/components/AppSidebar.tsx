@@ -5,10 +5,39 @@ import {
   CNavLink,
 } from "@coreui/react";
 import { NavLink } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getCurrentUser } from "../api/auth";
 
 export default function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+
+    if (!token) {
+      setIsAdmin(false);
+      return;
+    }
+
+    let mounted = true;
+
+    getCurrentUser()
+      .then((user) => {
+        if (mounted) {
+          setIsAdmin(user.admin);
+        }
+      })
+      .catch(() => {
+        if (mounted) {
+          setIsAdmin(false);
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <CSidebar
@@ -36,23 +65,20 @@ export default function AppSidebar() {
           </CNavLink>
         </CNavItem>
 
-        <CNavItem>
-          <CNavLink as={NavLink} to="/historia">
-             {!collapsed && "Historia Clinica"}
-          </CNavLink>
-        </CNavItem>
-
-        <CNavItem>
-          <CNavLink as={NavLink} to="/diagnostico">
-             {!collapsed && "Diagnósticos"}
-          </CNavLink>
-        </CNavItem>
 
            <CNavItem>
           <CNavLink as={NavLink} to="/agenda">
              {!collapsed && "Agenda"}
           </CNavLink>
         </CNavItem>
+
+        {isAdmin && (
+          <CNavItem>
+            <CNavLink as={NavLink} to="/configuracion">
+              {!collapsed && "Configuración"}
+            </CNavLink>
+          </CNavItem>
+        )}
 
       </CSidebarNav>
     </CSidebar>

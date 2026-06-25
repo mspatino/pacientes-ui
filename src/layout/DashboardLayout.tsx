@@ -16,7 +16,7 @@ export default function DashboardLayout() {
         <AppSidebar />
 
         {/* CONTENT */}
-        <main className="flex-grow-1 p-3 bg-light overflow-auto">
+        <main className="app-main flex-grow-1 bg-light overflow-auto">
           <Outlet />
         </main>
 

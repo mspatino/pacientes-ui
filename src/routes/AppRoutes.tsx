@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "../pages/Login";
 import PrivateRoute from "./PrivateRoute";
+import AdminRoute from "./AdminRoute";
 // import Home from "../pages/Home";
 import DashboardLayout from "../layout/DashboardLayout";
 import PacientesPage from "../pages/paciente/PacientesPage";
@@ -14,6 +15,7 @@ import DiagnosticosPacientePage from "../pages/diagnostico/DiagnosticosPacienteP
 import DiagnosticoPage from "../pages/diagnostico/DiagnosticoPage";
 import AgendaPage from "../pages/agenda/AgendaPage";
 import NuevoTurnoPage from "../pages/agenda/NuevoTurnoPage";
+import ConfiguracionPage from "../pages/ConfiguracionPage";
 
 export default function AppRoutes() {
   return (
@@ -44,6 +46,10 @@ export default function AppRoutes() {
             <Route path="/diagnostico" element={<DiagnosticoPage />} />
             <Route path="/agenda" element={<AgendaPage />} />
             <Route path="/agenda/nuevo" element={<NuevoTurnoPage />} />
+
+            <Route element={<AdminRoute />}>
+              <Route path="/configuracion" element={<ConfiguracionPage />} />
+            </Route>
 
             <Route path="/historia" element={<HistoriaClinicaPage />} />
 

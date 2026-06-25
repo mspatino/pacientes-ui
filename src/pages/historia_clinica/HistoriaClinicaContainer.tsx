@@ -22,6 +22,7 @@ import useHistoriaClinicaEditor from "../../hooks/useHistoriaClinicaEditor";
 interface HistoriaClinicaContainerProps {
   patientId?: string;
   mode?: "create";
+  initialTab?: HistoriaClinicaTab;
   onBack: () => void;
   onSaved: (patientId: number) => void;
 }
@@ -36,10 +37,11 @@ type HistoriaClinicaTab =
 export default function HistoriaClinicaContainer({
   patientId,
   mode,
+  initialTab = "consulta",
   onBack,
   onSaved,
 }: HistoriaClinicaContainerProps) {
-  const [activeTab, setActiveTab] = useState<HistoriaClinicaTab>("consulta");
+  const [activeTab, setActiveTab] = useState<HistoriaClinicaTab>(initialTab);
   const {
     activeDiagnostico,
     addDiagnostico,

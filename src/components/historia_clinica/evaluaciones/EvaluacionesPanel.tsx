@@ -47,6 +47,38 @@ const tipos: Array<{ value: TipoEvaluacion; label: string }> = [
 const tipoLabel = (tipo: TipoEvaluacion) =>
   tipos.find((item) => item.value === tipo)?.label ?? tipo;
 
+const calcularResultadoEvaluacion = (
+  tipo: TipoEvaluacion,
+  puntaje?: number | null,
+): string => {
+  if (puntaje === null || puntaje === undefined || Number.isNaN(puntaje)) {
+    return "";
+  }
+
+  if (tipo === "BECK") {
+    if (puntaje >= 1 && puntaje <= 10) {
+      return "Estos altibajos se consideran normales";
+    }
+    if (puntaje >= 11 && puntaje <= 16) {
+      return "Alteración leve del estado de ánimo";
+    }
+    if (puntaje >= 17 && puntaje <= 20) {
+      return "Depresión clínica límite";
+    }
+    if (puntaje >= 21 && puntaje <= 30) {
+      return "Depresión moderada";
+    }
+    if (puntaje >= 31 && puntaje <= 40) {
+      return "Depresión grave";
+    }
+    if (puntaje > 40) {
+      return "Depresión extrema";
+    }
+  }
+
+  return "";
+};
+
 const nowForInput = () => {
   const now = new Date();
   now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -106,7 +138,11 @@ export default function EvaluacionesPanel({
 
   const openCreate = () => {
     setEditingIndex(null);
-    setDraft(emptyEvaluacion());
+    const initial = emptyEvaluacion();
+    setDraft({
+      ...initial,
+      resultado: calcularResultadoEvaluacion(initial.tipo, initial.puntaje),
+    });
     setError("");
   };
 
@@ -126,6 +162,30 @@ export default function EvaluacionesPanel({
     setError("");
   };
 
+  const updateTipo = (tipo: TipoEvaluacion) => {
+    setDraft((prev) =>
+      prev
+        ? {
+            ...prev,
+            tipo,
+            resultado: calcularResultadoEvaluacion(tipo, prev.puntaje),
+          }
+        : prev,
+    );
+  };
+
+  const updatePuntaje = (value: string) => {
+    setDraft((prev) => {
+      if (!prev) return prev;
+      const puntaje = value ? Number(value) : null;
+      return {
+        ...prev,
+        puntaje,
+        resultado: calcularResultadoEvaluacion(prev.tipo, puntaje),
+      };
+    });
+  };
+
   const save = async () => {
     if (!draft || !onChange) return;
     if (!draft.tipo || !draft.fecha) {
@@ -140,9 +200,12 @@ export default function EvaluacionesPanel({
         draft.puntaje === null || draft.puntaje === undefined
           ? null
           : Number(draft.puntaje),
-      resultado: draft.resultado?.trim() || "",
       respuestas: draft.respuestas?.trim() || "",
     };
+    payload.resultado =
+      calcularResultadoEvaluacion(payload.tipo, payload.puntaje) ||
+      draft.resultado?.trim() ||
+      "";
 
     setSaving(true);
     setError("");
@@ -198,7 +261,7 @@ export default function EvaluacionesPanel({
         <div className="sipac-hc-tab-section-actions">
           <button
             type="button"
-            className="hc-action-btn hc-action-btn-sm d-flex align-items-center gap-2"
+            className="hc-action-btn hc-action-btn-sm sipac-section-add-btn d-flex align-items-center gap-2"
             onClick={openCreate}
           >
             <BsPlusLg size={13} />
@@ -220,9 +283,9 @@ export default function EvaluacionesPanel({
           {ordered.map(({ evaluacion, index }) => (
             <div
               key={evaluacion.id ?? `${evaluacion.tipo}-${index}`}
-              className="sipac-diagnostico-item"
+              className="sipac-diagnostico-item sipac-diagnostico-compact sipac-evaluacion-item"
             >
-              <div className="d-flex justify-content-between gap-3">
+              <div className="sipac-evaluacion-row">
                 <div className="d-flex flex-column gap-1">
                   <div className="d-flex align-items-center gap-2 flex-wrap">
                     <span className="badge rounded-pill bg-primary-subtle text-primary">
@@ -240,7 +303,7 @@ export default function EvaluacionesPanel({
                   </div>
 
                   {evaluacion.resultado ? (
-                    <div>{evaluacion.resultado}</div>
+                    <div className="sipac-evaluacion-resultado">{evaluacion.resultado}</div>
                   ) : null}
                   {evaluacion.respuestas ? (
                     <div className="small text-muted">
@@ -250,22 +313,26 @@ export default function EvaluacionesPanel({
                 </div>
 
                 {editable ? (
-                  <div className="d-flex align-items-start gap-1">
+                  <div className="sipac-item-actions">
                     <button
                       type="button"
-                      className="hc-action-btn hc-action-btn-sm"
+                      className="hc-action-btn hc-action-btn-sm d-flex align-items-center gap-1"
                       aria-label="Editar evaluación"
+                      title="Editar evaluación"
                       onClick={() => openEdit(index)}
                     >
-                      <BsPencilSquare />
+                      <BsPencilSquare size={13} />
+                      <span className="sipac-action-label">Editar</span>
                     </button>
                     <button
                       type="button"
-                      className="hc-action-btn hc-action-btn-sm hc-action-btn-danger"
+                      className="hc-action-btn hc-action-btn-sm hc-action-btn-danger d-flex align-items-center gap-1"
                       aria-label="Eliminar evaluación"
+                      title="Eliminar evaluación"
                       onClick={() => void remove(index)}
                     >
-                      <BsTrash />
+                      <BsTrash size={13} />
+                      <span className="sipac-action-label">Eliminar</span>
                     </button>
                   </div>
                 ) : null}
@@ -281,29 +348,38 @@ export default function EvaluacionesPanel({
         size="lg"
         className="sipac-hc-editor-modal"
       >
-        <CModalHeader>
-          <CModalTitle className="d-flex align-items-center gap-2">
-            <BsClipboard2Check />
+        <CModalHeader
+          style={{
+            backgroundColor: "#F3F4F7",
+            borderBottom: "1px solid #E5E7EB",
+            paddingTop: "0.9rem",
+            paddingBottom: "0.9rem",
+          }}
+        >
+          <CModalTitle
+            className="d-flex align-items-center gap-2"
+            style={{
+              color: "#2F6FB3",
+              fontWeight: 600,
+            }}
+          >
+            <BsClipboard2Check size={20} color="#2F6FB3" />
             {editingIndex === null ? "Nueva evaluación" : "Editar evaluación"}
           </CModalTitle>
         </CModalHeader>
-        <CModalBody>
+        <CModalBody className="sipac-evaluacion-modal-body">
           {draft ? (
             <CRow className="g-3">
               <CCol md={6}>
-                <CFormLabel htmlFor="evaluacionTipo">Tipo</CFormLabel>
+                <CFormLabel className="sipac-label" htmlFor="evaluacionTipo">
+                  Tipo
+                </CFormLabel>
                 <CFormSelect
                   id="evaluacionTipo"
+                  className="sipac-input"
                   value={draft.tipo}
                   onChange={(event) =>
-                    setDraft((prev) =>
-                      prev
-                        ? {
-                            ...prev,
-                            tipo: event.target.value as TipoEvaluacion,
-                          }
-                        : prev,
-                    )
+                    updateTipo(event.target.value as TipoEvaluacion)
                   }
                 >
                   {tipos.map((tipo) => (
@@ -314,9 +390,12 @@ export default function EvaluacionesPanel({
                 </CFormSelect>
               </CCol>
               <CCol md={6}>
-                <CFormLabel htmlFor="evaluacionFecha">Fecha</CFormLabel>
+                <CFormLabel className="sipac-label" htmlFor="evaluacionFecha">
+                  Fecha
+                </CFormLabel>
                 <CFormInput
                   id="evaluacionFecha"
+                  className="sipac-input"
                   type="datetime-local"
                   value={draft.fecha}
                   onChange={(event) =>
@@ -327,22 +406,16 @@ export default function EvaluacionesPanel({
                 />
               </CCol>
               <CCol md={4}>
-                <CFormLabel htmlFor="evaluacionPuntaje">Puntaje</CFormLabel>
+                <CFormLabel className="sipac-label" htmlFor="evaluacionPuntaje">
+                  Puntaje
+                </CFormLabel>
                 <CFormInput
                   id="evaluacionPuntaje"
+                  className="sipac-input"
                   type="number"
                   value={draft.puntaje ?? ""}
                   onChange={(event) =>
-                    setDraft((prev) =>
-                      prev
-                        ? {
-                            ...prev,
-                            puntaje: event.target.value
-                              ? Number(event.target.value)
-                              : null,
-                          }
-                        : prev,
-                    )
+                    updatePuntaje(event.target.value)
                   }
                 />
               </CCol>
@@ -383,7 +456,7 @@ export default function EvaluacionesPanel({
         <CModalFooter className="sipac-form-footer border-top">
           <button
             type="button"
-            className="sipac-toolbar-btn sipac-toolbar-btn-primary"
+            className="sipac-toolbar-btn"
             onClick={() => void save()}
             disabled={saving}
           >

@@ -336,8 +336,8 @@
 
 .paciente-page-container {
   width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
 }
 
 .sipac-form-footer {
@@ -577,6 +577,8 @@
 }
 
 .sipac-form-card {
+  width: 100%;
+  max-width: none;
   border-radius: 18px;
 }
 

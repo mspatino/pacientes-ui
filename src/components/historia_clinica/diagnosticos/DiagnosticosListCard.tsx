@@ -58,7 +58,7 @@ export default function DiagnosticosListCard({
       {!readOnly ? (
         <button
           type="button"
-          className="hc-action-btn hc-action-btn-sm d-flex align-items-center gap-2"
+          className="hc-action-btn hc-action-btn-sm sipac-section-add-btn d-flex align-items-center gap-2"
           onClick={(event) => {
             event.preventDefault();
             event.stopPropagation();
@@ -100,11 +100,11 @@ export default function DiagnosticosListCard({
                   }
                 }}
               >
-                <div className="d-flex flex-column gap-1">
+                  <div className="d-flex flex-column gap-1">
 
                   {/* HEADER */}
           
-                  <div className="d-flex justify-content-between align-items-start gap-2">
+                  <div className="sipac-item-heading">
 
                     {/* TIPO */}
                     <span
@@ -153,7 +153,7 @@ export default function DiagnosticosListCard({
                     </div>
 
                     {!readOnly ? (
-                      <div className="d-flex align-items-center gap-2 flex-wrap">
+                      <div className="sipac-item-actions">
                         <button
                           type="button"
                           className="hc-action-btn hc-action-btn-sm d-flex align-items-center gap-1"

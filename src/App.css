@@ -11,6 +11,11 @@ body,
   font-family: var(--sipac-font-family);
 }
 
+.app-main {
+  min-width: 0;
+  padding: 0.75rem;
+}
+
 button,
 input,
 select,
@@ -457,14 +462,14 @@ textarea {
 }
 
 .sipac-form-card {
-  width: 82%;
-  max-width: 1400px;
+  width: 100%;
+  max-width: none;
 }
 
 .paciente-page-container {
   width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
 }
 
 .sipac-page-header {
@@ -552,7 +557,24 @@ textarea {
   padding: 0.45rem 0.55rem 0;
   background: #f7fafc;
   border-bottom: 1px solid #e5edf5;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #aebfd0 #f1f5f9;
+}
+
+.sipac-hc-tabs::-webkit-scrollbar {
+  height: 7px;
+}
+
+.sipac-hc-tabs::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.sipac-hc-tabs::-webkit-scrollbar-thumb {
+  background: #aebfd0;
+  border-radius: 999px;
 }
 
 .sipac-hc-tabs-editor {
@@ -665,6 +687,7 @@ textarea {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex: 0 0 auto;
   gap: 0.4rem;
   min-height: 34px;
   padding: 0.4rem 0.8rem;
@@ -676,6 +699,7 @@ textarea {
   font-size: 0.86rem;
   font-weight: 600;
   white-space: nowrap;
+  min-width: max-content;
   transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
@@ -717,16 +741,27 @@ textarea {
 
 .sipac-hc-tab-section-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .45rem;
   padding: 0 0.15rem 0.55rem;
 }
 
-@media (max-width: 720px) {
-  .sipac-hc-tabs-editor {
-    overflow-x: auto;
-    scrollbar-width: thin;
-  }
+.sipac-section-add-btn {
+  min-height: 30px;
+  padding-inline: .72rem;
+  background: #F6F9FE;
+  border-color: #BFD7F2;
+  box-shadow: 0 1px 2px rgba(47, 111, 179, .06);
+}
 
+.sipac-section-add-btn:hover:not(:disabled) {
+  background: #E8F1FB;
+  border-color: #8DBBE8;
+}
+
+@media (max-width: 1100px) {
   .sipac-hc-tabs-editor .sipac-hc-tab {
     flex: 0 0 auto;
     min-width: max-content;
@@ -737,7 +772,7 @@ textarea {
 @media (max-width: 768px) {
   .sipac-form-card {
     width: 100%;
-    max-width: 100%;
+    max-width: none;
   }
 
   .sipac-phone-input {
@@ -746,6 +781,33 @@ textarea {
 
   .sipac-hc-tab-panel {
     padding: 0.65rem;
+  }
+
+  .sipac-item-heading,
+  .sipac-evaluacion-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sipac-item-actions {
+    justify-content: flex-start;
+    padding-top: .15rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .sipac-hc-tab-section-actions {
+    justify-content: flex-start;
+  }
+
+  .sipac-item-actions .hc-action-btn {
+    width: 30px;
+    min-width: 30px;
+    padding-inline: 0;
+  }
+
+  .sipac-action-label {
+    display: none;
   }
 }
 
@@ -1443,6 +1505,33 @@ textarea {
   transition: all 0.15s ease;
 }
 
+.sipac-item-heading,
+.sipac-evaluacion-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: .65rem;
+}
+
+.sipac-item-heading > :first-child,
+.sipac-evaluacion-row > :first-child {
+  min-width: 0;
+}
+
+.sipac-item-actions {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: .35rem;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+}
+
+.sipac-item-actions .hc-action-btn {
+  min-height: 28px;
+  padding-inline: .55rem;
+}
+
 .sipac-diagnostico-item:hover {
   background-color: #FAFBFC;
 }
@@ -1542,6 +1631,51 @@ textarea {
 
 .sipac-diagnostico-compact .badge {
   font-size: 0.68rem;
+}
+
+.sipac-evaluacion-item {
+  border-color: #D7E6FB;
+  background: #FAFCFF;
+}
+
+.sipac-evaluacion-item:hover {
+  background: #F3F8FD;
+  border-color: #CFE0F2;
+}
+
+.sipac-evaluacion-resultado {
+  color: #16324F;
+  font-weight: 600;
+}
+
+.sipac-evaluacion-modal-body {
+  padding: .9rem 1rem;
+  background: #fff;
+}
+
+.sipac-hc-editor-modal .modal-content {
+  border: 1px solid #D7E6FB;
+  border-radius: 8px;
+  box-shadow: 0 18px 48px rgba(15, 35, 55, .22);
+}
+
+.sipac-hc-editor-modal .sipac-label {
+  margin-bottom: .25rem;
+  color: #526170;
+  font-size: .76rem;
+  font-weight: 600;
+}
+
+.sipac-hc-editor-modal .sipac-input {
+  min-height: 32px;
+  padding: .28rem .5rem;
+  font-size: .76rem;
+  line-height: 1.3;
+}
+
+.sipac-hc-editor-modal .sipac-form-footer {
+  padding: .65rem 1rem;
+  margin-top: 0;
 }
 
 .sipac-diagnostico-title {

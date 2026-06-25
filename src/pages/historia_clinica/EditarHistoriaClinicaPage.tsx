@@ -3,6 +3,7 @@ import HistoriaClinicaContainer from "./HistoriaClinicaContainer";
 
 interface HistoriaLocationState {
   mode?: "create";
+  activeTab?: "consulta" | "antecedentes" | "observaciones" | "evaluaciones" | "diagnosticos";
 }
 
 export default function EditarHistoriaClinicaPage() {
@@ -15,9 +16,12 @@ export default function EditarHistoriaClinicaPage() {
     <HistoriaClinicaContainer
       patientId={id}
       mode={state.mode}
+      initialTab={state.activeTab}
       onBack={() => navigate(-1)}
       onSaved={(patientId) =>
-        navigate(`/pacientes/${patientId}/historia-clinica`)
+        navigate(`/pacientes/${patientId}/historia-clinica`, {
+          state: { activeTab: state.activeTab },
+        })
       }
     />
   );

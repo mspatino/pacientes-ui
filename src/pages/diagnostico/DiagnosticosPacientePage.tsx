@@ -228,7 +228,7 @@ export default function DiagnosticosPacientePage() {
 
   if (loading) {
     return (
-      <div className="p-3 d-flex align-items-center gap-2 text-muted">
+      <div className="diagnosticos-paciente-page paciente-page-container d-flex align-items-center gap-2 text-muted">
         <CSpinner size="sm" />
         Cargando diagnósticos...
       </div>
@@ -237,7 +237,7 @@ export default function DiagnosticosPacientePage() {
 
   if (error) {
     return (
-      <div className="p-3">
+      <div className="diagnosticos-paciente-page paciente-page-container">
         <CAlert color="danger" className="mb-0">
           {error}
         </CAlert>
@@ -246,8 +246,7 @@ export default function DiagnosticosPacientePage() {
   }
 
   return (
-    <div className="p-3">
-      <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+    <div className="diagnosticos-paciente-page paciente-page-container">
 
         <DiagnosticoHeader
           pacienteNombre={pacienteNombre}
@@ -485,7 +484,6 @@ export default function DiagnosticosPacientePage() {
             ) : null}
           </div>
         )}
-      </div>
     </div>
   );
 }

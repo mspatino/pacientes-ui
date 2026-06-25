@@ -41,6 +41,7 @@ import "../../styles/paciente.css";
 
 interface HistoriaLocationState {
   mode?: "create";
+  activeTab?: HistoriaClinicaTab;
 }
 
 interface EvolucionItem {
@@ -95,7 +96,9 @@ export default function HistoriaClinicaPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [actionError, setActionError] = useState("");
-  const [activeTab, setActiveTab] = useState<HistoriaClinicaTab>("consulta");
+  const [activeTab, setActiveTab] = useState<HistoriaClinicaTab>(
+    state.activeTab ?? "consulta",
+  );
  
  
    //const [activeItems, setActiveItems] = useState<number[]>([1, 2]);
@@ -303,7 +306,9 @@ export default function HistoriaClinicaPage() {
         onBack={() => navigate(-1)}
         onEdit={() => {
           if (pacienteId) {
-            navigate(`/pacientes/${pacienteId}/historia-clinica/editar`);
+            navigate(`/pacientes/${pacienteId}/historia-clinica/editar`, {
+              state: { activeTab },
+            });
           }
         }}
       />
