@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { getCurrentUser } from "../api/auth";
+import { getCurrentUser, hasAdminRole } from "../api/auth";
 
 export default function AdminRoute() {
   const [allowed, setAllowed] = useState<boolean | null>(null);
@@ -11,7 +11,7 @@ export default function AdminRoute() {
     getCurrentUser()
       .then((user) => {
         if (mounted) {
-          setAllowed(user.admin);
+          setAllowed(hasAdminRole(user));
         }
       })
       .catch(() => {

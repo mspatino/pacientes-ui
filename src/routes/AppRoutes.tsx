@@ -16,6 +16,8 @@ import DiagnosticoPage from "../pages/diagnostico/DiagnosticoPage";
 import AgendaPage from "../pages/agenda/AgendaPage";
 import NuevoTurnoPage from "../pages/agenda/NuevoTurnoPage";
 import ConfiguracionPage from "../pages/ConfiguracionPage";
+import RecuperarContrasenaPage from "../pages/RecuperarContrasenaPage";
+import RestablecerContrasenaPage from "../pages/RestablecerContrasenaPage";
 
 export default function AppRoutes() {
   return (
@@ -24,6 +26,8 @@ export default function AppRoutes() {
 
         {/* publico */}
         <Route path="/login" element={<Login />} />
+        <Route path="/recuperar-contrasena" element={<RecuperarContrasenaPage />} />
+        <Route path="/restablecer-contrasena" element={<RestablecerContrasenaPage />} />
 
          {/* Privadas */}
         <Route element={<PrivateRoute />}>

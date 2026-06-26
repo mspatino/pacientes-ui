@@ -10,7 +10,7 @@ import {
   CFormLabel,
   CAlert,
 } from "@coreui/react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
 import axios from "axios";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
@@ -116,7 +116,7 @@ export default function Login() {
                     />
                   </div>
 
-                  <div className="sipac-field-block mb-4">
+                  <div className="sipac-field-block mb-2">
                     <CFormLabel className="sipac-label">Contraseña</CFormLabel>
                     <div className="sipac-password-field">
                       <CFormInput
@@ -137,6 +137,12 @@ export default function Login() {
                         {showPassword ? <FaEyeSlash /> : <FaEye />}
                       </button>
                     </div>
+                  </div>
+
+                  <div className="sipac-login-forgot">
+                    <Link to="/recuperar-contrasena">
+                      ¿Olvidaste tu contraseña?
+                    </Link>
                   </div>
 
                   <button

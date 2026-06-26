@@ -4,19 +4,19 @@ import {
   CNavItem,
   CNavLink,
 } from "@coreui/react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getCurrentUser } from "../api/auth";
+import { getCurrentUser, hasAdminRole } from "../api/auth";
 
 export default function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const location = useLocation();
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
 
-    if (!token) {
-      setIsAdmin(false);
+    if (!token || token === "undefined") {
       return;
     }
 
@@ -25,7 +25,7 @@ export default function AppSidebar() {
     getCurrentUser()
       .then((user) => {
         if (mounted) {
-          setIsAdmin(user.admin);
+          setIsAdmin(hasAdminRole(user));
         }
       })
       .catch(() => {
@@ -37,7 +37,7 @@ export default function AppSidebar() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [location.pathname]);
 
   return (
     <CSidebar

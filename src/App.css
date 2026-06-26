@@ -1412,6 +1412,60 @@ textarea {
   color: #255D96;
 }
 
+.sipac-login-forgot {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.sipac-login-forgot a {
+  color: #2F6FB3;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.sipac-login-forgot a:hover,
+.sipac-login-forgot a:focus {
+  color: #255D96;
+  text-decoration: underline;
+}
+
+.sipac-login-secondary-action {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.sipac-login-secondary-action a,
+.sipac-reset-dev-link a {
+  color: #2F6FB3;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.sipac-login-secondary-action a:hover,
+.sipac-login-secondary-action a:focus,
+.sipac-reset-dev-link a:hover,
+.sipac-reset-dev-link a:focus {
+  color: #255D96;
+  text-decoration: underline;
+}
+
+.sipac-reset-dev-link {
+  display: grid;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(47, 111, 179, 0.2);
+  border-radius: 8px;
+  background: #F6F9FE;
+  color: #607085;
+  font-size: 0.76rem;
+  word-break: break-all;
+}
+
 .sipac-login-submit {
   border: 1px solid #2F6FB3;
   border-radius: 10px;
