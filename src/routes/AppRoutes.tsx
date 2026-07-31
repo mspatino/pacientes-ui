@@ -18,6 +18,7 @@ import NuevoTurnoPage from "../pages/agenda/NuevoTurnoPage";
 import ConfiguracionPage from "../pages/ConfiguracionPage";
 import RecuperarContrasenaPage from "../pages/RecuperarContrasenaPage";
 import RestablecerContrasenaPage from "../pages/RestablecerContrasenaPage";
+import EstadisticasPage from "../pages/estadisticas/EstadisticasPage";
 
 export default function AppRoutes() {
   return (
@@ -50,6 +51,7 @@ export default function AppRoutes() {
             <Route path="/diagnostico" element={<DiagnosticoPage />} />
             <Route path="/agenda" element={<AgendaPage />} />
             <Route path="/agenda/nuevo" element={<NuevoTurnoPage />} />
+            <Route path="/estadisticas" element={<EstadisticasPage />} />
 
             <Route element={<AdminRoute />}>
               <Route path="/configuracion" element={<ConfiguracionPage />} />

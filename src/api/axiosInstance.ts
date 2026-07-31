@@ -29,7 +29,7 @@ axiosInstance.interceptors.response.use(
     const originalRequest = error.config as CustomAxiosRequestConfig;
 
       // NO interceptar login
-    if (originalRequest.url?.includes("/auth/login")) {
+    if (originalRequest.url?.includes("/api/auth/login")) {
       return Promise.reject(error);
     }
 
@@ -41,7 +41,7 @@ axiosInstance.interceptors.response.use(
         const refreshToken = localStorage.getItem("refreshToken");
 
         const res = await axios.post(
-          `${baseURL}/auth/refresh`,
+          `${baseURL}/api/auth/refresh`,
           { refreshToken }
         );
 

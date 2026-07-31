@@ -176,15 +176,6 @@ const tieneDiagnosticoPrincipal = !!diagnosticoPrincipal;
           <GiBrain />
           Diagnóstico
         </span>
-
-        {/* DERECHA */}
-        {/* {diagnosticoPrincipal && (
-            <div className="ms-auto">
-              <span className="badge rounded-pill px-3 py-2 bg-success-subtle text-success">
-                Principal
-              </span>
-            </div>
-          )} */}
       </CAccordionHeader>
 
       {/* BODY IGUAL ESTRUCTURA QUE GENERAL */}

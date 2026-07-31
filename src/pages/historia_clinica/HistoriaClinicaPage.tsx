@@ -225,8 +225,9 @@ export default function HistoriaClinicaPage() {
     : [];
   
   const diagnosticoPrincipal = getDiagnosticoPrincipal(diagnosticos);
+  const diagnosticoResumen = diagnosticoPrincipal ?? diagnosticos[0] ?? null;
 
-  const diagnosticoPrincipalTyped = diagnosticoPrincipal as DiagnosticoPrincipal | null;
+  const diagnosticoResumenTyped = diagnosticoResumen as DiagnosticoPrincipal | null;
 
   const estadoTratamiento =  getEstadoTratamiento(diagnosticos);
   const { downloadPdf } = useHistoriaClinicaPdf({
@@ -236,9 +237,9 @@ export default function HistoriaClinicaPage() {
   });
 
   const diagnosticoFields: Array<{ label: string; value: string }> = (() => {
-    if (!diagnosticoPrincipal) return [];
+    if (!diagnosticoResumen) return [];
 
-    const item = diagnosticoPrincipal as Record<string, unknown>;
+    const item = diagnosticoResumen as Record<string, unknown>;
 
     const descripcionTexto = getDiagnosticoText(item, "descripcion") || null;
 
@@ -476,7 +477,7 @@ export default function HistoriaClinicaPage() {
               <HistoriaClinicaDiagnosticoCard
                 diagnosticoFields={diagnosticoFields}
                 diagnosticos={diagnosticos}
-                evoluciones={diagnosticoPrincipalTyped?.evoluciones ?? []}
+                evoluciones={diagnosticoResumenTyped?.evoluciones ?? []}
                 onViewDiagnosticos={() => {
                   if (pacienteId) {
                     navigate(`/pacientes/${pacienteId}/diagnosticos`);
