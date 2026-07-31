@@ -1,6 +1,6 @@
 import axios, { type InternalAxiosRequestConfig } from "axios";
 
-const baseURL = (import.meta.env.VITE_API_URL || "http://localhost:8080").replace(/\/+$/, "");
+const baseURL = (import.meta.env.VITE_API_URL || "http://localhost:8080/api").replace(/\/+$/, "");
 
 const axiosInstance = axios.create({
   baseURL,
@@ -29,7 +29,7 @@ axiosInstance.interceptors.response.use(
     const originalRequest = error.config as CustomAxiosRequestConfig;
 
       // NO interceptar login
-    if (originalRequest.url?.includes("/api/auth/login")) {
+    if (originalRequest.url?.includes("/auth/login")) {
       return Promise.reject(error);
     }
 
@@ -41,7 +41,7 @@ axiosInstance.interceptors.response.use(
         const refreshToken = localStorage.getItem("refreshToken");
 
         const res = await axios.post(
-          `${baseURL}/api/auth/refresh`,
+          `${baseURL}/auth/refresh`,
           { refreshToken }
         );
 

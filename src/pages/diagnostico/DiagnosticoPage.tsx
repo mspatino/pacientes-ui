@@ -1,3 +1,4 @@
+import api from "../../api/api";
 import { useState } from "react";
 import {
   CForm,
@@ -10,6 +11,7 @@ import {
 } from "@coreui/react";
 import DiagnosticoAutocompleteFields from "../../components/historia_clinica/diagnosticos/DiagnosticoAutocompleteFields";
 import type { Cie10DTO } from "../../api/diagnosticos";
+
 
 export default function DiagnosticoPage() {
   const [descripcion, setDescripcion] = useState("");
@@ -28,21 +30,27 @@ export default function DiagnosticoPage() {
     };
 
     try {
-      const res = await fetch("/api/diagnosticos", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      // const res = await fetch("/api/diagnosticos", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify(payload),
+      // });
 
-      if (res.ok) {
-        alert("Diagnóstico guardado exitosamente");
-        setDescripcion("");
-        setCie10(null);
-      } else {
-        alert("Error al guardar el diagnóstico");
-      }
+      await api.post("/diagnosticos", payload);
+
+      alert("Diagnóstico guardado exitosamente");
+      setDescripcion("");
+      setCie10(null);
+
+      // if (res.ok) {
+      //   alert("Diagnóstico guardado exitosamente");
+      //   setDescripcion("");
+      //   setCie10(null);
+      // } else {
+      //   alert("Error al guardar el diagnóstico");
+      // }
     } catch (error) {
       console.error("Error guardando diagnóstico", error);
       alert("Error al guardar el diagnóstico");
